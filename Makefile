@@ -201,13 +201,13 @@ $(objects): %.o: %.c
 	$(BIN)  $< $@
 
 flash:
-	sudo openocd -f stm32f0_flash.cfg
+	sudo openocd -f stm32f1_flash.cfg
 
 gdb:
-	sudo openocd -f stm32f0_gdb.cfg
+	sudo openocd -f stm32f1_gdb.cfg
 
 reset:
-	sudo openocd -f stm32f0_reset.cfg
+	sudo openocd -f stm32f1_reset.cfg
 
 clean:
 	rm -f $(OBJS)

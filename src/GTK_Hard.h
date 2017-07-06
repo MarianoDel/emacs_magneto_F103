@@ -3,10 +3,19 @@
 
 #include "stm32f10x_rcc.h"
 
-//--- Frecuencia del clock ---//
+//----- Board Configuration -------------------//
+//--- Hardware ------------------//
+#define HARDWARE_VERSION "Hardware Version: 2.0\r\n"
+//#define HARDWARE_VERSION "Hardware Version: 2.1\r\n"
+//--- Software ------------------//
+//#define SOFTWARE_VERSION "Software Version: 1.0\r\n"
+#define SOFTWARE_VERSION "Software Version: 1.1\r\n"
+//#define SOFTWARE_VERSION "Software Version: 1.2\r\n"
+//--- Clock frequency and Crystal selection ---//
 //#define sysFREC48
 //#define sysFREC72_XTAL_8
 #define sysFREC72_XTAL_12
+//----- End of Board Configuration ------------//
 
 //--- PARA FUNCIONAR SIN ANTENA CONECTADA ---//
 //#define FUNC_SIN_ANTENA_CH1

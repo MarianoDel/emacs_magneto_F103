@@ -22,7 +22,7 @@ volatile unsigned short timeRun = TIME_RUN_DEF;
 volatile unsigned char flagMuestreo = 0;
 volatile unsigned char take_current_samples = 0;
 
-//--- Externals para armar señales y comprobar el TIM5 en el inicio del programa
+//--- Externals para armar seï¿½ales y comprobar el TIM5 en el inicio del programa
 volatile unsigned int session_warning_up_channel_1_stage_time = 0;
 
 
@@ -111,8 +111,24 @@ int main (void)
 //		Wait_ms(100);
 	}
 
+//---- Defines from GTK_Hard.h -----//
+	UART_PC_Send("\r\nGausstek Limited Inc. -- Magnet Equipment\r\n");
+	UART_PC_Send("powered by: Kirno Technology\r\n");
 
-	UART_PC_Send("Ready! \r\n");
+#ifdef HARDWARE_VERSION
+	UART_PC_Send(HARDWARE_VERSION);
+#else
+#error	"No Hardware defined in GTK_Hard.h file"
+#endif
+
+#ifdef SOFTWARE_VERSION
+	UART_PC_Send(SOFTWARE_VERSION);
+#else
+#error	"No Soft Version defined in GTK_Hard.h file"
+#endif
+
+	UART_PC_Send("Ready!\r\n");
+//---- End of Defines from GTK_Hard.h -----//
 
 	//mando ENABLE los canales
 	ENA_CH1_ON;
@@ -184,8 +200,8 @@ int main (void)
 	}
 }
 
+//Dumb Function for compativility
 void SystemInit (void)
 {
 
 }
-

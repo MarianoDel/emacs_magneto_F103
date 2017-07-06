@@ -17,9 +17,41 @@
 #define sysFREC72_XTAL_12
 //----- End of Board Configuration ------------//
 
-//--- PARA FUNCIONAR SIN ANTENA CONECTADA ---//
-//#define FUNC_SIN_ANTENA_CH1
+//----- Use it whithout Antenna Board Configuration ----------//
+//#define WITHOUT_ANTENNA_BOARD_CH1
+//#define WITHOUT_ANTENNA_BOARD_CH2
+//#define WITHOUT_ANTENNA_BOARD_CH3
+//#define WITHOUT_ANTENNA_BOARD_CH4
 //#define WITH_TEMP_CH1
+#define HARDCODE_R_INT_CH1	10
+#define HARDCODE_R_DEC_CH1 0
+#define HARDCODE_L_INT_CH1 50
+#define HARDCODE_L_DEC_CH1 0
+#define HARDCODE_I_INT_CH1 2
+#define HARDCODE_I_DEC_CH1 0
+
+#define HARDCODE_R_INT_CH2	10
+#define HARDCODE_R_DEC_CH2 0
+#define HARDCODE_L_INT_CH2 50
+#define HARDCODE_L_DEC_CH2 0
+#define HARDCODE_I_INT_CH2 2
+#define HARDCODE_I_DEC_CH2 0
+
+#define HARDCODE_R_INT_CH3	10
+#define HARDCODE_R_DEC_CH3 0
+#define HARDCODE_L_INT_CH3 50
+#define HARDCODE_L_DEC_CH3 0
+#define HARDCODE_I_INT_CH3 2
+#define HARDCODE_I_DEC_CH3 0
+
+#define HARDCODE_R_INT_CH4	10
+#define HARDCODE_R_DEC_CH4 0
+#define HARDCODE_L_INT_CH4 50
+#define HARDCODE_L_DEC_CH4 0
+#define HARDCODE_I_INT_CH4 2
+#define HARDCODE_I_DEC_CH4 0
+//----- End of Use it whithout Antenna Board Configuration ---//
+
 
 enum resultados
 {

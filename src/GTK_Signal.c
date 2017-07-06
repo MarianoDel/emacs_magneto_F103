@@ -74,17 +74,17 @@ unsigned short session_channel_1_answer_temp = 0;
 unsigned short session_plateau_channel_1_time;
 unsigned int session_plateau_channel_1_stage_time = 0;
 
-unsigned short session_warning_up_channel_1_time;
-unsigned short session_warning_up_channel_1_time_2;
-extern volatile unsigned int session_warning_up_channel_1_stage_time;
+unsigned short session_warming_up_channel_1_time;
+unsigned short session_warming_up_channel_1_time_2;
+extern volatile unsigned int session_warming_up_channel_1_stage_time;
 
 unsigned short session_cooling_down_channel_1_time;
 unsigned short session_cooling_down_channel_1_time_2;
 unsigned int session_cooling_down_channel_1_stage_time = 0;
 
-unsigned char session_warning_up_channel_1_state = 0;
+unsigned char session_warming_up_channel_1_state = 0;
 
-enum session_warning_up_channel_states {
+enum session_warming_up_channel_states {
 
 	SESSION_WARMING_UP_CHANNEL_INIT = 0,
 	SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE,
@@ -97,8 +97,8 @@ enum session_warning_up_channel_states {
 	SESSION_WARMING_UP_CHANNEL_END_ERROR
 };
 
-unsigned char session_warning_up_channel_1_step = 0;
-unsigned short session_warning_up_channel_1_burst_cnt = 0;
+unsigned char session_warming_up_channel_1_step = 0;
+unsigned short session_warming_up_channel_1_burst_cnt = 0;
 unsigned char fall_type_step_ch1 = 0;
 
 float pwm_slope_channel_1;
@@ -142,17 +142,17 @@ unsigned short session_channel_2_answer_temp = 0;
 unsigned short session_plateau_channel_2_time;
 unsigned int session_plateau_channel_2_stage_time = 0;
 
-unsigned short session_warning_up_channel_2_time;
-unsigned short session_warning_up_channel_2_time_2;
-unsigned int session_warning_up_channel_2_stage_time = 0;
+unsigned short session_warming_up_channel_2_time;
+unsigned short session_warming_up_channel_2_time_2;
+unsigned int session_warming_up_channel_2_stage_time = 0;
 
 unsigned short session_cooling_down_channel_2_time;
 unsigned short session_cooling_down_channel_2_time_2;
 unsigned int session_cooling_down_channel_2_stage_time = 0;
 
-unsigned char session_warning_up_channel_2_state = 0;
-unsigned char session_warning_up_channel_2_step = 0;
-unsigned short session_warning_up_channel_2_burst_cnt = 0;
+unsigned char session_warming_up_channel_2_state = 0;
+unsigned char session_warming_up_channel_2_step = 0;
+unsigned short session_warming_up_channel_2_burst_cnt = 0;
 
 unsigned char fall_type_step_ch2 = 0;
 
@@ -173,15 +173,15 @@ unsigned short session_channel_3_answer_temp = 0;
 unsigned short session_plateau_channel_3_time;
 unsigned int session_plateau_channel_3_stage_time = 0;
 
-unsigned short session_warning_up_channel_3_time;
-unsigned short session_warning_up_channel_3_time_2;
-unsigned int session_warning_up_channel_3_stage_time = 0;
+unsigned short session_warming_up_channel_3_time;
+unsigned short session_warming_up_channel_3_time_2;
+unsigned int session_warming_up_channel_3_stage_time = 0;
 
 unsigned short session_cooling_down_channel_3_time;
 unsigned short session_cooling_down_channel_3_time_2;
 unsigned int session_cooling_down_channel_3_stage_time = 0;
 
-unsigned char session_warning_up_channel_3_state = 0;
+unsigned char session_warming_up_channel_3_state = 0;
 unsigned char fall_type_step_ch3 = 0;
 
 float pwm_slope_channel_3;
@@ -189,8 +189,8 @@ float pwm_channel_3;
 unsigned short session_plateau_channel_3_time_2;
 unsigned short session_plateau_channel_3_burst_cnt = 0;
 
-unsigned char session_warning_up_channel_3_step = 0;
-unsigned short session_warning_up_channel_3_burst_cnt = 0;
+unsigned char session_warming_up_channel_3_step = 0;
+unsigned short session_warming_up_channel_3_burst_cnt = 0;
 
 unsigned char session_cooling_down_channel_3_state = 0;
 unsigned char session_cooling_down_channel_3_step = 0;
@@ -203,15 +203,15 @@ unsigned short session_channel_4_answer_temp = 0;
 unsigned short session_plateau_channel_4_time;
 unsigned int session_plateau_channel_4_stage_time = 0;
 
-unsigned short session_warning_up_channel_4_time;
-unsigned short session_warning_up_channel_4_time_2;
-unsigned int session_warning_up_channel_4_stage_time = 0;
+unsigned short session_warming_up_channel_4_time;
+unsigned short session_warming_up_channel_4_time_2;
+unsigned int session_warming_up_channel_4_stage_time = 0;
 
 unsigned short session_cooling_down_channel_4_time;
 unsigned short session_cooling_down_channel_4_time_2;
 unsigned int session_cooling_down_channel_4_stage_time = 0;
 
-unsigned char session_warning_up_channel_4_state = 0;
+unsigned char session_warming_up_channel_4_state = 0;
 unsigned char fall_type_step_ch4 = 0;
 
 float pwm_slope_channel_4;
@@ -219,8 +219,8 @@ float pwm_channel_4;
 unsigned short session_plateau_channel_4_time_2;
 unsigned short session_plateau_channel_4_burst_cnt = 0;
 
-unsigned char session_warning_up_channel_4_step = 0;
-unsigned short session_warning_up_channel_4_burst_cnt = 0;
+unsigned char session_warming_up_channel_4_step = 0;
+unsigned short session_warming_up_channel_4_burst_cnt = 0;
 
 unsigned char session_cooling_down_channel_4_state = 0;
 unsigned char session_cooling_down_channel_4_step = 0;
@@ -272,10 +272,10 @@ void TIM5_IRQHandler (void)	//100uS
 			if (session_plateau_channel_1_stage_time)
 				session_plateau_channel_1_stage_time--;
 
-			session_warning_up_channel_1_time++;
+			session_warming_up_channel_1_time++;
 
-			if (session_warning_up_channel_1_stage_time)
-				session_warning_up_channel_1_stage_time--;
+			if (session_warming_up_channel_1_stage_time)
+				session_warming_up_channel_1_stage_time--;
 
 			session_cooling_down_channel_1_time++;
 
@@ -291,10 +291,10 @@ void TIM5_IRQHandler (void)	//100uS
 		if (session_plateau_channel_2_stage_time)
 			session_plateau_channel_2_stage_time--;
 
-		session_warning_up_channel_2_time++;
+		session_warming_up_channel_2_time++;
 
-		if (session_warning_up_channel_2_stage_time)
-			session_warning_up_channel_2_stage_time--;
+		if (session_warming_up_channel_2_stage_time)
+			session_warming_up_channel_2_stage_time--;
 
 		session_cooling_down_channel_2_time++;
 
@@ -311,10 +311,10 @@ void TIM5_IRQHandler (void)	//100uS
 		if (session_plateau_channel_3_stage_time)
 			session_plateau_channel_3_stage_time--;
 
-		session_warning_up_channel_3_time++;
+		session_warming_up_channel_3_time++;
 
-		if (session_warning_up_channel_3_stage_time)
-			session_warning_up_channel_3_stage_time--;
+		if (session_warming_up_channel_3_stage_time)
+			session_warming_up_channel_3_stage_time--;
 
 		session_cooling_down_channel_3_time++;
 
@@ -330,10 +330,10 @@ void TIM5_IRQHandler (void)	//100uS
 		if (session_plateau_channel_4_stage_time)
 			session_plateau_channel_4_stage_time--;
 
-		session_warning_up_channel_4_time++;
+		session_warming_up_channel_4_time++;
 
-		if (session_warning_up_channel_4_stage_time)
-			session_warning_up_channel_4_stage_time--;
+		if (session_warming_up_channel_4_stage_time)
+			session_warming_up_channel_4_stage_time--;
 
 		session_cooling_down_channel_4_time++;
 
@@ -382,53 +382,53 @@ unsigned char session_channel_2_state;
 unsigned char session_channel_3_state;
 unsigned char session_channel_4_state;
 
-//--- Warning up ---//
+//--- warming up ---//
 //--- Channel 1 ---//
 #define SESSION_WUP_CH1_BUFF_DIM 50
-warningup_coolingdown_typedef table_warning_up_channel_1[SESSION_WUP_CH1_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_1[SESSION_WUP_CH1_BUFF_DIM];
 
 //--- Channel 2 ---//
 #define SESSION_WUP_CH2_BUFF_DIM 50
-warningup_coolingdown_typedef table_warning_up_channel_2[SESSION_WUP_CH2_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_2[SESSION_WUP_CH2_BUFF_DIM];
 
 //--- Channel 3 ---//
 #define SESSION_WUP_CH3_BUFF_DIM 50
-warningup_coolingdown_typedef table_warning_up_channel_3[SESSION_WUP_CH3_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_3[SESSION_WUP_CH3_BUFF_DIM];
 
 //--- Channel 4 ---//
 #define SESSION_WUP_CH4_BUFF_DIM 50
-warningup_coolingdown_typedef table_warning_up_channel_4[SESSION_WUP_CH4_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_4[SESSION_WUP_CH4_BUFF_DIM];
 
 
 //--- Plateau ---//
 //--- Channel 1 ---//
-warningup_coolingdown_typedef table_plateau_channel_1[1];
+warmingup_coolingdown_typedef table_plateau_channel_1[1];
 
 //--- Channel 2 ---//
-warningup_coolingdown_typedef table_plateau_channel_2[1];
+warmingup_coolingdown_typedef table_plateau_channel_2[1];
 
 //--- Channel 3 ---//
-warningup_coolingdown_typedef table_plateau_channel_3[1];
+warmingup_coolingdown_typedef table_plateau_channel_3[1];
 
 //--- Channel 4 ---//
-warningup_coolingdown_typedef table_plateau_channel_4[1];
+warmingup_coolingdown_typedef table_plateau_channel_4[1];
 
 //--- Cooling down ---//
 //--- Channel 1 ---//
 #define SESSION_CDWN_CH1_BUFF_DIM 50
-warningup_coolingdown_typedef table_cooling_down_channel_1[SESSION_CDWN_CH1_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_1[SESSION_CDWN_CH1_BUFF_DIM];
 
 //--- Channel 2 ---//
 #define SESSION_CDWN_CH2_BUFF_DIM 50
-warningup_coolingdown_typedef table_cooling_down_channel_2[SESSION_CDWN_CH2_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_2[SESSION_CDWN_CH2_BUFF_DIM];
 
 //--- Channel 3 ---//
 #define SESSION_CDWN_CH3_BUFF_DIM 50
-warningup_coolingdown_typedef table_cooling_down_channel_3[SESSION_CDWN_CH3_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_3[SESSION_CDWN_CH3_BUFF_DIM];
 
 //--- Channel 4 ---//
 #define SESSION_CDWN_CH4_BUFF_DIM 50
-warningup_coolingdown_typedef table_cooling_down_channel_4[SESSION_CDWN_CH4_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_4[SESSION_CDWN_CH4_BUFF_DIM];
 
 //--- end ---//
 
@@ -438,9 +438,9 @@ void Channel_1_Init(void)
 {
 	channel_1_pause = 0;
 
-	session_warning_up_channel_1_time = 0;
-	session_warning_up_channel_1_time_2 = 0;
-	session_warning_up_channel_1_stage_time = 0;
+	session_warming_up_channel_1_time = 0;
+	session_warming_up_channel_1_time_2 = 0;
+	session_warming_up_channel_1_stage_time = 0;
 
 	session_plateau_channel_1_time = 0;
 	session_plateau_channel_1_stage_time = 0;
@@ -452,7 +452,7 @@ void Channel_1_Init(void)
 	session_channel_1_state = 0;
 
 	//limpio tabla WARMING_UP
-	memset(&table_warning_up_channel_1[0], '\0', sizeof(table_warning_up_channel_1));
+	memset(&table_warming_up_channel_1[0], '\0', sizeof(table_warming_up_channel_1));
 
 	//limpio tabla PLATEAU
 	memset(&table_plateau_channel_1[0], '\0', sizeof(table_plateau_channel_1));
@@ -466,7 +466,7 @@ enum states_channel_1 {
 
 	SESSION_CHANNEL_1_INIT = 0,
 	SESSION_CHANNEL_1_VERIFY_ANTENNA,
-	SESSION_CHANNEL_1_WARNING_UP,
+	SESSION_CHANNEL_1_WARMING_UP,
 	SESSION_CHANNEL_1_PLATEAU,
 	SESSION_CHANNEL_1_COOLING_DOWN,
 	SESSION_CHANNEL_1_END
@@ -585,7 +585,7 @@ void Session_Channel_1 (void)
 				PWM_CH1_TiempoBajada(0);
 
 				//Restart stages.
-				Session_Warning_Up_Channel_1_Restart();
+				Session_warming_Up_Channel_1_Restart();
 				Session_Plateau_Channel_1_Restart();
 				Session_Cooling_Down_Channel_1_Restart();
 
@@ -597,12 +597,24 @@ void Session_Channel_1 (void)
 
 			case SESSION_CHANNEL_1_VERIFY_ANTENNA:
 
-#ifndef FUNC_SIN_ANTENA_CH1
+#ifdef WITHOUT_ANTENNA_BOARD_CH1
+				//aviso que encontre la antenna y hago un hardcode de parametros
+				//--- Antenna parameters ---//
+				session_ch_1.stage_1_resistance_int = HARDCODE_R_INT_CH1;
+				session_ch_1.stage_1_resistance_dec = HARDCODE_R_DEC_CH1;
+				session_ch_1.stage_1_inductance_int = HARDCODE_L_INT_CH1;
+				session_ch_1.stage_1_inductance_dec = HARDCODE_L_DEC_CH1;
+				session_ch_1.stage_1_current_limit_int = HARDCODE_I_INT_CH1;
+				session_ch_1.stage_1_current_limit_dec = HARDCODE_I_DEC_CH1;
+
+				UART_PC_Send("Antenna hardcoded on CH1\r\n");
+				session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
+#else
 				i = Session_Channel_1_Verify_Antenna(&session_ch_1);
 
 
 				if (i == FIN_OK)
-					session_channel_1_state = SESSION_CHANNEL_1_WARNING_UP;
+					session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
 
 				else if (i == FIN_ERROR)
 				{
@@ -612,25 +624,12 @@ void Session_Channel_1 (void)
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(1));
 					UART_PC_Send(&buffSendErr[0]);
 				}
-#else
-				//aviso que encontre la antenna y hago un hardcode de parametros
-				//--- Antenna parameters ---//
-				session_ch_1.stage_1_resistance_int = 10;
-				session_ch_1.stage_1_resistance_dec = 0;
-				session_ch_1.stage_1_inductance_int = 50;
-				session_ch_1.stage_1_inductance_dec = 0;
-				session_ch_1.stage_1_current_limit_int = 2;
-				session_ch_1.stage_1_current_limit_dec = 0;
-
-
-				UART_PC_Send("Antenna hardcoded\r\n");
-				session_channel_1_state = SESSION_CHANNEL_1_WARNING_UP;
 #endif
 				break;
 
-			case SESSION_CHANNEL_1_WARNING_UP:
+			case SESSION_CHANNEL_1_WARMING_UP:
 
-				//Warning up.
+				//Warming up.
 				if (channel_1_pause == 0)
 				{
 
@@ -640,7 +639,7 @@ void Session_Channel_1 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_1_state = SESSION_CHANNEL_1_PLATEAU;
-						UART_PC_Send("End_Warning_Up,1\r\n");
+						UART_PC_Send("End_warming_Up,1\r\n");
 
 						PWM_CH1_TiempoSubida(0); //pwm 200V.
 						PWM_CH1_TiempoMantenimiento(0);
@@ -648,7 +647,7 @@ void Session_Channel_1 (void)
 
 					}
 
-					if ((i == TRABAJANDO) && (session_warning_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+					if ((i == TRABAJANDO) && (session_warming_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
 					{
 						Current_Limit_CheckCh1();
 //						if (LED2)
@@ -662,7 +661,7 @@ void Session_Channel_1 (void)
 						session_ch_1.status = 0;
 						SetBitGlobalErrors (CH1, BIT_ERROR_WARMING_UP);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARNING_UP(1));
+						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(1));
 						UART_PC_Send(&buffSendErr[0]);
 					}
 				}
@@ -763,16 +762,15 @@ void Session_Channel_1 (void)
 				break;
 		}
 
-		if (session_channel_1_state >= SESSION_CHANNEL_1_WARNING_UP)
+#ifndef WITHOUT_ANTENNA_BOARD_CH1
+		if (session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP)
 		{
 			if (session_channel_1_ask_temp == 0)
 			{
 				UART_CH1_Send("get_temp\r\n");
-
 				session_channel_1_ask_temp = SESSION_CHANNEL_ASK_TEMP;
 			}
 
-#ifdef WITH_TEMP_CH1
 			if ((temp_actual_channel_1_int != 0) || (temp_actual_channel_1_dec != 0))
 			{
 				if ((temp_actual_channel_1_int > session_ch_1.stage_1_temp_max_int)
@@ -781,35 +779,22 @@ void Session_Channel_1 (void)
 					session_ch_1.status = 0;
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
 					UART_PC_Send(&buffSendErr[0]);
-
-					temp_actual_channel_1_int = 0;
-					temp_actual_channel_1_dec = 0;
 				}
 				else
-				{
 					session_channel_1_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
 
-					temp_actual_channel_1_int = 0;
-					temp_actual_channel_1_dec = 0;
-				}
+				temp_actual_channel_1_int = 0;
+				temp_actual_channel_1_dec = 0;
 			}
-#else
-			session_channel_1_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
 
-			temp_actual_channel_1_int = 0;
-			temp_actual_channel_1_dec = 0;
-#endif
-
-#ifndef FUNC_SIN_ANTENA_CH1
 			if (session_channel_1_answer_temp == 0)
 			{
 				session_ch_1.status = 0;
-
 				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(1));
 				UART_PC_Send(&buffSendErr[0]);
 			}
-#endif
 		}
+#endif
 	}
 	else
 	{
@@ -828,11 +813,11 @@ void Session_Channel_1 (void)
 
 unsigned char sync_in_waiting = 0;
 
-void Session_Warning_Up_Channel_1_Restart(void)
+void Session_warming_Up_Channel_1_Restart(void)
 {
 	ch1_sync_state = 0;
 	sync_in_waiting = 0;
-	session_warning_up_channel_1_state = SESSION_WARMING_UP_CHANNEL_INIT;
+	session_warming_up_channel_1_state = SESSION_WARMING_UP_CHANNEL_INIT;
 }
 
 void Session_Plateau_Channel_1_Restart(void)
@@ -849,9 +834,9 @@ void Session_Cooling_Down_Channel_1_Restart(void)
 	session_cooling_down_channel_1_state = SESSION_COOLING_DOWN_CHANNEL_INIT;
 }
 
-void Session_Warning_Up_Channel_2_Restart(void)
+void Session_warming_Up_Channel_2_Restart(void)
 {
-	session_warning_up_channel_2_state = SESSION_WARMING_UP_CHANNEL_INIT;
+	session_warming_up_channel_2_state = SESSION_WARMING_UP_CHANNEL_INIT;
 }
 
 void Session_Plateau_Channel_2_Restart(void)
@@ -864,9 +849,9 @@ void Session_Cooling_Down_Channel_2_Restart(void)
 	session_cooling_down_channel_2_state = SESSION_COOLING_DOWN_CHANNEL_INIT;
 }
 
-void Session_Warning_Up_Channel_3_Restart(void)
+void Session_warming_Up_Channel_3_Restart(void)
 {
-	session_warning_up_channel_3_state = SESSION_WARMING_UP_CHANNEL_INIT;
+	session_warming_up_channel_3_state = SESSION_WARMING_UP_CHANNEL_INIT;
 }
 
 void Session_Plateau_Channel_3_Restart(void)
@@ -879,9 +864,9 @@ void Session_Cooling_Down_Channel_3_Restart(void)
 	session_cooling_down_channel_3_state = SESSION_COOLING_DOWN_CHANNEL_INIT;
 }
 
-void Session_Warning_Up_Channel_4_Restart(void)
+void Session_warming_Up_Channel_4_Restart(void)
 {
-	session_warning_up_channel_4_state = SESSION_WARMING_UP_CHANNEL_INIT;
+	session_warming_up_channel_4_state = SESSION_WARMING_UP_CHANNEL_INIT;
 }
 
 void Session_Plateau_Channel_4_Restart(void)
@@ -926,7 +911,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	unsigned char table_lenght = 0;
 
 	//los punteros a las estructuras correspondientes (que voy a usar)
-	warningup_coolingdown_typedef * p_table;
+	warmingup_coolingdown_typedef * p_table;
 	session_typedef * p_session;
 
 	//--- Primero debo saber que canal y que estado/escenario de sesion estoy calculando ---//
@@ -936,7 +921,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			switch (session_stage)
 			{
 				case WARMING_UP:
-					p_table = &table_warning_up_channel_1[0];
+					p_table = &table_warming_up_channel_1[0];
 					break;
 
 				case PLATEAU:
@@ -958,7 +943,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			switch (session_stage)
 			{
 				case WARMING_UP:
-					p_table = &table_warning_up_channel_2[0];
+					p_table = &table_warming_up_channel_2[0];
 					break;
 
 				case PLATEAU:
@@ -980,7 +965,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			switch (session_stage)
 			{
 				case WARMING_UP:
-					p_table = &table_warning_up_channel_3[0];
+					p_table = &table_warming_up_channel_3[0];
 					break;
 
 				case PLATEAU:
@@ -1002,7 +987,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			switch (session_stage)
 			{
 				case WARMING_UP:
-					p_table = &table_warning_up_channel_4[0];
+					p_table = &table_warming_up_channel_4[0];
 					break;
 
 				case PLATEAU:
@@ -1028,7 +1013,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	if (channel == 5)
 		return FIN_ERROR;
 
-	//--- Limpieza de las señales ---//
+	//--- Limpieza de las seï¿½ales ---//
 	if (session_stage == PLATEAU)
 		table_lenght = 1;
 	else
@@ -1081,7 +1066,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	current_limit += (float)p_session->stage_1_current_limit_int;
 
 	//tengo 196mV / A + offset 456mV
-	peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tensión con 50% de margen
+	peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tensiï¿½n con 50% de margen
 	peak_c = peak_c * 0.303;	//divido 3.3V
 	peak_c = peak_c * 4095;		//valor pico permitido en ADC
 
@@ -1126,7 +1111,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	for (i = 0; i < table_lenght; i++)
 	{
 		//--- Rising ---//
-		//--- Nivel de señal ---//
+		//--- Nivel de seï¿½al ---//
 		current = (float) final_current - (float) initial_current;
 		//current /= SESSION_WUP_CH1_BUFF_DIM;
 		current /= table_lenght;
@@ -1555,9 +1540,9 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 }
 
 //------ NUEVA WARMING UP ------//
-//esta rutina calcula los parametros y luego dibuja la señal con los PWM en cada canal
+//esta rutina calcula los parametros y luego dibuja la seï¿½al con los PWM en cada canal
 //para el stage de Warming UP
-//ademas va cambiando los niveles de señal generados
+//ademas va cambiando los niveles de seï¿½al generados
 unsigned char Session_Warming_Up_Channels (unsigned char channel)
 {
 
@@ -1567,7 +1552,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 	unsigned char * p_session_channel_step;
 	session_typedef * p_session_ch;
 	unsigned short * p_session_burst_cnt;
-	warningup_coolingdown_typedef * p_table;
+	warmingup_coolingdown_typedef * p_table;
 	float * p_pwm_slope;
 	float * p_pwm_ch;
 	volatile unsigned int * p_stage_time;
@@ -1579,57 +1564,57 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 	switch (channel)
 	{
 		case CH1:
-			p_session_state = &session_warning_up_channel_1_state;
-			p_session_channel_step = &session_warning_up_channel_1_step;
+			p_session_state = &session_warming_up_channel_1_state;
+			p_session_channel_step = &session_warming_up_channel_1_step;
 			p_session_ch = &session_ch_1;
-			p_session_burst_cnt = &session_warning_up_channel_1_burst_cnt;
-			p_table = &table_warning_up_channel_1[0];
+			p_session_burst_cnt = &session_warming_up_channel_1_burst_cnt;
+			p_table = &table_warming_up_channel_1[0];
 			p_pwm_slope = &pwm_slope_channel_1;
-			p_stage_time = &session_warning_up_channel_1_stage_time;	//lo actualiza cada 100us TIM5 (decrementa)
-			p_session_time = &session_warning_up_channel_1_time;		//lo actualiza cada 100us TIM5 (incrementa)
-			p_session_time_2 = &session_warning_up_channel_1_time_2;
+			p_stage_time = &session_warming_up_channel_1_stage_time;	//lo actualiza cada 100us TIM5 (decrementa)
+			p_session_time = &session_warming_up_channel_1_time;		//lo actualiza cada 100us TIM5 (incrementa)
+			p_session_time_2 = &session_warming_up_channel_1_time_2;
 			p_pwm_ch = &pwm_channel_1;
 			p_fall_type = &fall_type_step_ch1;
 			break;
 
 		case CH2:
-			p_session_state = &session_warning_up_channel_2_state;
-			p_session_channel_step = &session_warning_up_channel_2_step;
+			p_session_state = &session_warming_up_channel_2_state;
+			p_session_channel_step = &session_warming_up_channel_2_step;
 			p_session_ch = &session_ch_2;
-			p_session_burst_cnt = &session_warning_up_channel_2_burst_cnt;
-			p_table = &table_warning_up_channel_2[0];
+			p_session_burst_cnt = &session_warming_up_channel_2_burst_cnt;
+			p_table = &table_warming_up_channel_2[0];
 			p_pwm_slope = &pwm_slope_channel_2;
-			p_stage_time = &session_warning_up_channel_2_stage_time;
-			p_session_time = &session_warning_up_channel_2_time;
-			p_session_time_2 = &session_warning_up_channel_2_time_2;
+			p_stage_time = &session_warming_up_channel_2_stage_time;
+			p_session_time = &session_warming_up_channel_2_time;
+			p_session_time_2 = &session_warming_up_channel_2_time_2;
 			p_pwm_ch = &pwm_channel_2;
 			p_fall_type = &fall_type_step_ch2;
 			break;
 
 		case CH3:
-			p_session_state = &session_warning_up_channel_3_state;
-			p_session_channel_step = &session_warning_up_channel_3_step;
+			p_session_state = &session_warming_up_channel_3_state;
+			p_session_channel_step = &session_warming_up_channel_3_step;
 			p_session_ch = &session_ch_3;
-			p_session_burst_cnt = &session_warning_up_channel_3_burst_cnt;
-			p_table = &table_warning_up_channel_3[0];
+			p_session_burst_cnt = &session_warming_up_channel_3_burst_cnt;
+			p_table = &table_warming_up_channel_3[0];
 			p_pwm_slope = &pwm_slope_channel_3;
-			p_stage_time = &session_warning_up_channel_3_stage_time;
-			p_session_time = &session_warning_up_channel_3_time;
-			p_session_time_2 = &session_warning_up_channel_3_time_2;
+			p_stage_time = &session_warming_up_channel_3_stage_time;
+			p_session_time = &session_warming_up_channel_3_time;
+			p_session_time_2 = &session_warming_up_channel_3_time_2;
 			p_pwm_ch = &pwm_channel_3;
 			p_fall_type = &fall_type_step_ch3;
 			break;
 
 		case CH4:
-			p_session_state = &session_warning_up_channel_4_state;
-			p_session_channel_step = &session_warning_up_channel_4_step;
+			p_session_state = &session_warming_up_channel_4_state;
+			p_session_channel_step = &session_warming_up_channel_4_step;
 			p_session_ch = &session_ch_4;
-			p_session_burst_cnt = &session_warning_up_channel_4_burst_cnt;
-			p_table = &table_warning_up_channel_4[0];
+			p_session_burst_cnt = &session_warming_up_channel_4_burst_cnt;
+			p_table = &table_warming_up_channel_4[0];
 			p_pwm_slope = &pwm_slope_channel_4;
-			p_stage_time = &session_warning_up_channel_4_stage_time;
-			p_session_time = &session_warning_up_channel_4_time;
-			p_session_time_2 = &session_warning_up_channel_4_time_2;
+			p_stage_time = &session_warming_up_channel_4_stage_time;
+			p_session_time = &session_warming_up_channel_4_time;
+			p_session_time_2 = &session_warming_up_channel_4_time_2;
 			p_pwm_ch = &pwm_channel_4;
 			p_fall_type = &fall_type_step_ch4;
 			break;
@@ -1719,13 +1704,13 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 			{
 				*p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
 
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARNING_UP_PARAMETERS_CALCULATE(channel));
+				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(channel));
 				UART_PC_Send(&buffSendErr[0]);
 			}
 			break;
 
 		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:
-			//si todos los canales estan listos empiezo con las señales
+			//si todos los canales estan listos empiezo con las seï¿½ales
 
 			if (((global_error_ch1 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch1 & BIT_ERROR_CHECK_MASK)) &&
 					((global_error_ch2 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch2 & BIT_ERROR_CHECK_MASK)) &&
@@ -2684,7 +2669,7 @@ unsigned char Session_Plateau_Channels(unsigned char channel)
 
 	session_typedef * p_session_ch;
 	unsigned short * p_session_burst_cnt;
-	warningup_coolingdown_typedef * p_table;
+	warmingup_coolingdown_typedef * p_table;
 	float * p_pwm_slope;
 	float * p_pwm_ch;
 	unsigned int * p_stage_time;
@@ -3830,7 +3815,7 @@ unsigned char Session_Cooling_Down_Channels (unsigned char channel)
 	unsigned char * p_session_channel_step;
 	session_typedef * p_session_ch;
 	unsigned short * p_session_burst_cnt;
-	warningup_coolingdown_typedef * p_table;
+	warmingup_coolingdown_typedef * p_table;
 	float * p_pwm_slope;
 	float * p_pwm_ch;
 	unsigned int * p_stage_time;
@@ -4923,9 +4908,9 @@ void Channel_2_Init(void)
 	session_plateau_channel_2_time = 0;
 	session_plateau_channel_2_stage_time = 0;
 
-	session_warning_up_channel_2_time = 0;
-	session_warning_up_channel_2_time_2 = 0;
-	session_warning_up_channel_2_stage_time = 0;
+	session_warming_up_channel_2_time = 0;
+	session_warming_up_channel_2_time_2 = 0;
+	session_warming_up_channel_2_stage_time = 0;
 
 	session_cooling_down_channel_2_time = 0;
 	session_cooling_down_channel_2_time_2 = 0;
@@ -4934,7 +4919,7 @@ void Channel_2_Init(void)
 	session_channel_2_state = 0;
 
 	//limpio tabla WARMING_UP
-	memset(&table_warning_up_channel_2[0], '\0', sizeof(table_warning_up_channel_2));
+	memset(&table_warming_up_channel_2[0], '\0', sizeof(table_warming_up_channel_2));
 
 	//limpio tabla PLATEAU
 	memset(&table_plateau_channel_2[0], '\0', sizeof(table_plateau_channel_2));
@@ -4948,7 +4933,7 @@ enum states_channel_2 {
 
 	SESSION_CHANNEL_2_INIT = 0,
 	SESSION_CHANNEL_2_VERIFY_ANTENNA,
-	SESSION_CHANNEL_2_WARNING_UP,
+	SESSION_CHANNEL_2_WARMING_UP,
 	SESSION_CHANNEL_2_PLATEAU,
 	SESSION_CHANNEL_2_COOLING_DOWN,
 	SESSION_CHANNEL_2_END
@@ -5057,7 +5042,7 @@ void Session_Channel_2 (void)
 				PWM_CH2_TiempoBajada(0);
 
 				//Restart stages.
-				Session_Warning_Up_Channel_2_Restart();
+				Session_warming_Up_Channel_2_Restart();
 				Session_Plateau_Channel_2_Restart();
 				Session_Cooling_Down_Channel_2_Restart();
 
@@ -5067,12 +5052,23 @@ void Session_Channel_2 (void)
 				break;
 
 			case SESSION_CHANNEL_2_VERIFY_ANTENNA:
+#ifdef WITHOUT_ANTENNA_BOARD_CH2
+				//aviso que encontre la antenna y hago un hardcode de parametros
+				//--- Antenna parameters ---//
+				session_ch_2.stage_1_resistance_int = HARDCODE_R_INT_CH2;
+				session_ch_2.stage_1_resistance_dec = HARDCODE_R_DEC_CH2;
+				session_ch_2.stage_1_inductance_int = HARDCODE_L_INT_CH2;
+				session_ch_2.stage_1_inductance_dec = HARDCODE_L_DEC_CH2;
+				session_ch_2.stage_1_current_limit_int = HARDCODE_I_INT_CH2;
+				session_ch_2.stage_1_current_limit_dec = HARDCODE_I_DEC_CH2;
 
+				UART_PC_Send("Antenna hardcoded on CH2\r\n");
+				session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
+#else
 				i = Session_Channel_2_Verify_Antenna(&session_ch_2);
 
-
 				if (i == FIN_OK)
-					session_channel_2_state = SESSION_CHANNEL_2_WARNING_UP;
+					session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
 
 				else if (i == FIN_ERROR)
 				{
@@ -5082,10 +5078,11 @@ void Session_Channel_2 (void)
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(2));
 					UART_PC_Send(&buffSendErr[0]);
 				}
+#endif
 				break;
 
-			case SESSION_CHANNEL_2_WARNING_UP:
-				//Warning up.
+			case SESSION_CHANNEL_2_WARMING_UP:
+				//warming up.
 				if (channel_2_pause == 0)
 				{
 
@@ -5095,7 +5092,7 @@ void Session_Channel_2 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_2_state = SESSION_CHANNEL_2_PLATEAU;
-						UART_PC_Send("End_Warning_Up,2\r\n");
+						UART_PC_Send("End_warming_Up,2\r\n");
 
 						PWM_CH2_TiempoSubida(0); //pwm 200V.
 						PWM_CH2_TiempoMantenimiento(0);
@@ -5103,7 +5100,7 @@ void Session_Channel_2 (void)
 
 					}
 
-					if ((i == TRABAJANDO) && (session_warning_up_channel_2_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+					if ((i == TRABAJANDO) && (session_warming_up_channel_2_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
 					{
 						Current_Limit_CheckCh2();
 					}
@@ -5113,7 +5110,7 @@ void Session_Channel_2 (void)
 						session_ch_2.status = 0;
 						SetBitGlobalErrors (CH2, BIT_ERROR_WARMING_UP);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARNING_UP(2));
+						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(2));
 						UART_PC_Send(&buffSendErr[0]);
 					}
 				}
@@ -5213,13 +5210,12 @@ void Session_Channel_2 (void)
 				break;
 		}
 
-		if (session_channel_2_state >= SESSION_CHANNEL_2_WARNING_UP)
+#ifndef WITHOUT_ANTENNA_BOARD_CH2
+		if (session_channel_2_state >= SESSION_CHANNEL_2_WARMING_UP)
 		{
-
 			if (session_channel_2_ask_temp == 0)
 			{
 				UART_CH2_Send("get_temp\r\n");
-
 				session_channel_2_ask_temp = SESSION_CHANNEL_ASK_TEMP;
 			}
 
@@ -5231,27 +5227,22 @@ void Session_Channel_2 (void)
 					session_ch_2.status = 0;
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(2));
 					UART_PC_Send(&buffSendErr[0]);
-
-					temp_actual_channel_2_int = 0;
-					temp_actual_channel_2_dec = 0;
 				}
 				else
-				{
 					session_channel_2_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
 
-					temp_actual_channel_2_int = 0;
-					temp_actual_channel_2_dec = 0;
-				}
+				temp_actual_channel_2_int = 0;
+				temp_actual_channel_2_dec = 0;
 			}
 
 			if (session_channel_2_answer_temp == 0)
 			{
 				session_ch_2.status = 0;
-
 				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(2));
 				UART_PC_Send(&buffSendErr[0]);
 			}
 		}
+#endif
 	}
 	else
 	{
@@ -5281,9 +5272,9 @@ void Channel_3_Init(void)
 	session_plateau_channel_3_time = 0;
 	session_plateau_channel_3_stage_time = 0;
 
-	session_warning_up_channel_3_time = 0;
-	session_warning_up_channel_3_time_2 = 0;
-	session_warning_up_channel_3_stage_time = 0;
+	session_warming_up_channel_3_time = 0;
+	session_warming_up_channel_3_time_2 = 0;
+	session_warming_up_channel_3_stage_time = 0;
 
 	session_cooling_down_channel_3_time = 0;
 	session_cooling_down_channel_3_time_2 = 0;
@@ -5292,7 +5283,7 @@ void Channel_3_Init(void)
 	session_channel_3_state = 0;
 
 	//limpio tabla WARMING_UP
-	memset(&table_warning_up_channel_3[0], '\0', sizeof(table_warning_up_channel_3));
+	memset(&table_warming_up_channel_3[0], '\0', sizeof(table_warming_up_channel_3));
 
 	//limpio tabla PLATEAU
 	memset(&table_plateau_channel_3[0], '\0', sizeof(table_plateau_channel_3));
@@ -5305,7 +5296,7 @@ enum states_channel_3 {
 
 	SESSION_CHANNEL_3_INIT = 0,
 	SESSION_CHANNEL_3_VERIFY_ANTENNA,
-	SESSION_CHANNEL_3_WARNING_UP,
+	SESSION_CHANNEL_3_WARMING_UP,
 	SESSION_CHANNEL_3_PLATEAU,
 	SESSION_CHANNEL_3_COOLING_DOWN,
 	SESSION_CHANNEL_3_END
@@ -5415,7 +5406,7 @@ void Session_Channel_3 (void)
 				PWM_CH3_TiempoBajada(0);
 
 				//Restart stages.
-				Session_Warning_Up_Channel_3_Restart();
+				Session_warming_Up_Channel_3_Restart();
 				Session_Plateau_Channel_3_Restart();
 				Session_Cooling_Down_Channel_3_Restart();
 
@@ -5424,12 +5415,23 @@ void Session_Channel_3 (void)
 				break;
 
 			case SESSION_CHANNEL_3_VERIFY_ANTENNA:
+#ifdef WITHOUT_ANTENNA_BOARD_CH3
+				//aviso que encontre la antenna y hago un hardcode de parametros
+				//--- Antenna parameters ---//
+				session_ch_3.stage_1_resistance_int = HARDCODE_R_INT_CH3;
+				session_ch_3.stage_1_resistance_dec = HARDCODE_R_DEC_CH3;
+				session_ch_3.stage_1_inductance_int = HARDCODE_L_INT_CH3;
+				session_ch_3.stage_1_inductance_dec = HARDCODE_L_DEC_CH3;
+				session_ch_3.stage_1_current_limit_int = HARDCODE_I_INT_CH3;
+				session_ch_3.stage_1_current_limit_dec = HARDCODE_I_DEC_CH3;
 
+				UART_PC_Send("Antenna hardcoded on CH3\r\n");
+				session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
+#else
 				i = Session_Channel_3_Verify_Antenna(&session_ch_3);
 
-
 				if (i == FIN_OK)
-					session_channel_3_state = SESSION_CHANNEL_3_WARNING_UP;
+					session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
 
 				else if (i == FIN_ERROR)
 				{
@@ -5439,10 +5441,11 @@ void Session_Channel_3 (void)
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(3));
 					UART_PC_Send(&buffSendErr[0]);
 				}
+#endif
 				break;
 
-			case SESSION_CHANNEL_3_WARNING_UP:
-				//Warning up.
+			case SESSION_CHANNEL_3_WARMING_UP:
+				//warming up.
 				if (channel_3_pause == 0)
 				{
 
@@ -5452,7 +5455,7 @@ void Session_Channel_3 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_3_state = SESSION_CHANNEL_3_PLATEAU;
-						UART_PC_Send("End_Warning_Up,3\r\n");
+						UART_PC_Send("End_warming_Up,3\r\n");
 
 						PWM_CH3_TiempoSubida(0); //pwm 200V.
 						PWM_CH3_TiempoMantenimiento(0);
@@ -5460,7 +5463,7 @@ void Session_Channel_3 (void)
 
 					}
 
-					if ((i == TRABAJANDO) && (session_warning_up_channel_3_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+					if ((i == TRABAJANDO) && (session_warming_up_channel_3_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
 					{
 						Current_Limit_CheckCh3();
 					}
@@ -5470,7 +5473,7 @@ void Session_Channel_3 (void)
 						session_ch_3.status = 0;
 						SetBitGlobalErrors (CH3, BIT_ERROR_WARMING_UP);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARNING_UP(3));
+						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(3));
 						UART_PC_Send(&buffSendErr[0]);
 					}
 				}
@@ -5571,13 +5574,12 @@ void Session_Channel_3 (void)
 				break;
 		}
 
-		if (session_channel_3_state >= SESSION_CHANNEL_3_WARNING_UP)
+#ifndef WITHOUT_ANTENNA_BOARD_CH3
+		if (session_channel_3_state >= SESSION_CHANNEL_3_WARMING_UP)
 		{
-
 			if (session_channel_3_ask_temp == 0)
 			{
 				UART_CH3_Send("get_temp\r\n");
-
 				session_channel_3_ask_temp = SESSION_CHANNEL_ASK_TEMP;
 			}
 
@@ -5589,27 +5591,22 @@ void Session_Channel_3 (void)
 					session_ch_3.status = 0;
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(3));
 					UART_PC_Send(&buffSendErr[0]);
-
-					temp_actual_channel_3_int = 0;
-					temp_actual_channel_3_dec = 0;
 				}
 				else
-				{
 					session_channel_3_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
 
-					temp_actual_channel_3_int = 0;
-					temp_actual_channel_3_dec = 0;
-				}
+				temp_actual_channel_3_int = 0;
+				temp_actual_channel_3_dec = 0;
 			}
 
 			if (session_channel_3_answer_temp == 0)
 			{
 				session_ch_3.status = 0;
-
 				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(3));
 				UART_PC_Send(&buffSendErr[0]);
 			}
 		}
+#endif
 	}
 	else
 	{
@@ -5636,9 +5633,9 @@ void Channel_4_Init(void)
 	session_plateau_channel_4_time = 0;
 	session_plateau_channel_4_stage_time = 0;
 
-	session_warning_up_channel_4_time = 0;
-	session_warning_up_channel_4_time_2 = 0;
-	session_warning_up_channel_4_stage_time = 0;
+	session_warming_up_channel_4_time = 0;
+	session_warming_up_channel_4_time_2 = 0;
+	session_warming_up_channel_4_stage_time = 0;
 
 	session_cooling_down_channel_4_time = 0;
 	session_cooling_down_channel_4_time_2 = 0;
@@ -5648,7 +5645,7 @@ void Channel_4_Init(void)
 
 
 	//limpio tabla WARMING_UP
-	memset(&table_warning_up_channel_4[0], '\0', sizeof(table_warning_up_channel_4));
+	memset(&table_warming_up_channel_4[0], '\0', sizeof(table_warming_up_channel_4));
 
 	//limpio tabla PLATEAU
 	memset(&table_plateau_channel_4[0], '\0', sizeof(table_plateau_channel_4));
@@ -5661,7 +5658,7 @@ enum states_channel_4 {
 
 	SESSION_CHANNEL_4_INIT = 0,
 	SESSION_CHANNEL_4_VERIFY_ANTENNA,
-	SESSION_CHANNEL_4_WARNING_UP,
+	SESSION_CHANNEL_4_WARMING_UP,
 	SESSION_CHANNEL_4_PLATEAU,
 	SESSION_CHANNEL_4_COOLING_DOWN,
 	SESSION_CHANNEL_4_END
@@ -5770,7 +5767,7 @@ void Session_Channel_4 (void)
 				PWM_CH4_TiempoBajada(0);
 
 				//Restart stages.
-				Session_Warning_Up_Channel_4_Restart();
+				Session_warming_Up_Channel_4_Restart();
 				Session_Plateau_Channel_4_Restart();
 				Session_Cooling_Down_Channel_4_Restart();
 
@@ -5780,12 +5777,23 @@ void Session_Channel_4 (void)
 				break;
 
 			case SESSION_CHANNEL_4_VERIFY_ANTENNA:
+#ifdef WITHOUT_ANTENNA_BOARD_CH4
+				//aviso que encontre la antenna y hago un hardcode de parametros
+				//--- Antenna parameters ---//
+				session_ch_4.stage_1_resistance_int = HARDCODE_R_INT_CH4;
+				session_ch_4.stage_1_resistance_dec = HARDCODE_R_DEC_CH4;
+				session_ch_4.stage_1_inductance_int = HARDCODE_L_INT_CH4;
+				session_ch_4.stage_1_inductance_dec = HARDCODE_L_DEC_CH4;
+				session_ch_4.stage_1_current_limit_int = HARDCODE_I_INT_CH4;
+				session_ch_4.stage_1_current_limit_dec = HARDCODE_I_DEC_CH4;
 
+				UART_PC_Send("Antenna hardcoded on CH4\r\n");
+				session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
+#else
 				i = Session_Channel_4_Verify_Antenna(&session_ch_4);
 
-
 				if (i == FIN_OK)
-					session_channel_4_state = SESSION_CHANNEL_4_WARNING_UP;
+					session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
 
 				else if (i == FIN_ERROR)
 				{
@@ -5795,10 +5803,11 @@ void Session_Channel_4 (void)
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(4));
 					UART_PC_Send(&buffSendErr[0]);
 				}
+#endif
 				break;
 
-			case SESSION_CHANNEL_4_WARNING_UP:
-				//Warning up.
+			case SESSION_CHANNEL_4_WARMING_UP:
+				//warming up.
 				if (channel_4_pause == 0)
 				{
 
@@ -5812,7 +5821,7 @@ void Session_Channel_4 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_4_state = SESSION_CHANNEL_4_PLATEAU;
-						UART_PC_Send("End_Warning_Up,4\r\n");
+						UART_PC_Send("End_warming_Up,4\r\n");
 
 						PWM_CH4_TiempoSubida(0); //pwm 200V.
 						PWM_CH4_TiempoMantenimiento(0);
@@ -5820,7 +5829,7 @@ void Session_Channel_4 (void)
 
 					}
 
-					if ((i == TRABAJANDO) && (session_warning_up_channel_4_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+					if ((i == TRABAJANDO) && (session_warming_up_channel_4_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
 					{
 						Current_Limit_CheckCh4();
 					}
@@ -5834,7 +5843,7 @@ void Session_Channel_4 (void)
 						PWM_CH4_TiempoMantenimiento(0);
 						PWM_CH4_TiempoBajada(0);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARNING_UP(4));
+						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(4));
 						UART_PC_Send(&buffSendErr[0]);
 
 
@@ -5952,13 +5961,12 @@ void Session_Channel_4 (void)
 				break;
 		}
 
-		if (session_channel_4_state >= SESSION_CHANNEL_4_WARNING_UP)
+#ifndef WITHOUT_ANTENNA_BOARD_CH4
+		if (session_channel_4_state >= SESSION_CHANNEL_4_WARMING_UP)
 		{
-
 			if (session_channel_4_ask_temp == 0)
 			{
 				UART_CH4_Send("get_temp\r\n");
-
 				session_channel_4_ask_temp = SESSION_CHANNEL_ASK_TEMP;
 			}
 
@@ -5969,31 +5977,24 @@ void Session_Channel_4 (void)
 				{
 
 					session_ch_4.status = 0;
-
-
 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(4));
 					UART_PC_Send(&buffSendErr[0]);
-
-					temp_actual_channel_4_int = 0;
-					temp_actual_channel_4_dec = 0;
 				}
 				else
-				{
 					session_channel_4_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
 
-					temp_actual_channel_4_int = 0;
-					temp_actual_channel_4_dec = 0;
-				}
+				temp_actual_channel_4_int = 0;
+				temp_actual_channel_4_dec = 0;
 			}
 
 			if (session_channel_4_answer_temp == 0)
 			{
 				session_ch_4.status = 0;
-
 				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(4));
 				UART_PC_Send(&buffSendErr[0]);
 			}
 		}
+#endif
 	}
 	else
 	{
@@ -6470,5 +6471,4 @@ void Signal_TIM1MS (void)
 	}
 }
 
-//--- Fin de carga de señales ---//
-
+//--- Fin de carga de seï¿½ales ---//

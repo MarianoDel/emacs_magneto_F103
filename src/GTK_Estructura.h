@@ -159,7 +159,7 @@ enum channels
 	SESSION_CHANNEL_4
 };
 
-//--- warning up/cooling dawn---//
+//--- warming up/cooling dawn---//
 typedef struct {
 
 	//Rising.
@@ -193,7 +193,7 @@ typedef struct {
 
 	unsigned short burst_mode_on;
 	unsigned short burst_mode_off;
-}warningup_coolingdown_typedef;
+}warmingup_coolingdown_typedef;
 
 //Plateau.
 typedef struct session_plateau_channel_rising_typedef{

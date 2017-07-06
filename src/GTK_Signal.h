@@ -13,10 +13,10 @@ void Session_Channel_1_Start(void);
 void Session_Channel_1_Stop(void);
 unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session);
 void Session_Channel_1 (void);
-//Warning up.
-void Session_Warning_Up_Channel_1_Restart(void);
-unsigned char Session_Warning_Up_Channel_1(void);
-unsigned char Session_Warning_Up_Channel_1_Parameters_Calculate(void);
+//warming up.
+void Session_warming_Up_Channel_1_Restart(void);
+unsigned char Session_warming_Up_Channel_1(void);
+unsigned char Session_warming_Up_Channel_1_Parameters_Calculate(void);
 //Plateau.
 void Session_Plateau_Channel_1_Restart(void);
 unsigned char Session_Plateau_Channel_1(void);
@@ -37,10 +37,10 @@ void Session_Channel_2_Start(void);
 void Session_Channel_2_Stop(void);
 unsigned char Session_Channel_2_Verify_Antenna (session_typedef * ptr_session);
 void Session_Channel_2 (void);
-//Warning up.
-void Session_Warning_Up_Channel_2_Restart(void);
-unsigned char Session_Warning_Up_Channel_2(void);
-unsigned char Session_Warning_Up_Channel_2_Parameters_Calculate(void);
+//warming up.
+void Session_warming_Up_Channel_2_Restart(void);
+unsigned char Session_warming_Up_Channel_2(void);
+unsigned char Session_warming_Up_Channel_2_Parameters_Calculate(void);
 //Plateau.
 void Session_Plateau_Channel_2_Restart(void);
 unsigned char Session_Plateau_Channel_2(void);
@@ -56,10 +56,10 @@ void Session_Channel_3_Start(void);
 void Session_Channel_3_Stop(void);
 unsigned char Session_Channel_3_Verify_Antenna (session_typedef * ptr_session);
 void Session_Channel_3 (void);
-//Warning up.
-void Session_Warning_Up_Channel_3_Restart(void);
-unsigned char Session_Warning_Up_Channel_3(void);
-unsigned char Session_Warning_Up_Channel_3_Parameters_Calculate(void);
+//warming up.
+void Session_warming_Up_Channel_3_Restart(void);
+unsigned char Session_warming_Up_Channel_3(void);
+unsigned char Session_warming_Up_Channel_3_Parameters_Calculate(void);
 //Plateau.
 void Session_Plateau_Channel_3_Restart(void);
 unsigned char Session_Plateau_Channel_3(void);
@@ -76,10 +76,10 @@ void Session_Channel_4_Stop(void);
 unsigned char Session_Channel_4_Verify_Antenna (session_typedef * ptr_session);
 void Session_Channel_4 (void);
 
-//Warning up.
-void Session_Warning_Up_Channel_4_Restart(void);
-unsigned char Session_Warning_Up_Channel_4(void);
-unsigned char Session_Warning_Up_Channel_4_Parameters_Calculate(void);
+//warming up.
+void Session_warming_Up_Channel_4_Restart(void);
+unsigned char Session_warming_Up_Channel_4(void);
+unsigned char Session_warming_Up_Channel_4_Parameters_Calculate(void);
 //Plateau.
 void Session_Plateau_Channel_4_Restart(void);
 unsigned char Session_Plateau_Channel_4(void);

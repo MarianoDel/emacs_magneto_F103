@@ -23,7 +23,7 @@ volatile unsigned char flagMuestreo = 0;
 volatile unsigned char take_current_samples = 0;
 
 //--- Externals para armar se�ales y comprobar el TIM5 en el inicio del programa
-volatile unsigned int session_warning_up_channel_1_stage_time = 0;
+volatile unsigned int session_warming_up_channel_1_stage_time = 0;
 
 
 //Estructuras.
@@ -98,6 +98,8 @@ int main (void)
 	Channel_3_Init();
 	Channel_4_Init();
 
+	//Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
+	//de otra forma revisar el cristal elegido
 	//pruebo TIM5 100us step
 	for (i = 0; i < 20; i++)
 	{
@@ -106,8 +108,8 @@ int main (void)
 		else
 			LED1_ON;
 
-		while (session_warning_up_channel_1_stage_time != 0);
-		session_warning_up_channel_1_stage_time = 1000;	//100ms
+		while (session_warming_up_channel_1_stage_time != 0);
+		session_warming_up_channel_1_stage_time = 1000;	//100ms
 //		Wait_ms(100);
 	}
 

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 
-//stage 1:	warning up.
+//stage 1:	warming up.
 //stage 2: 	plateau.
 //stage 3:	cooling down.
 

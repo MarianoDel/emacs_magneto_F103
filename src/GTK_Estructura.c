@@ -242,20 +242,30 @@ void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage)
 
 }
 
+//carga el valor de antenna que recibe por la uart en la estructura de session
+//los parametros le llegan por el *ptr_antenna y donde guardarlo en *ptr_session
 void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna)
 {
-
 	unsigned char a;
+	unsigned short aa;
 
 	//Resistance.
-	a = ptr_antenna->resistance_int;
-	ptr_session->stage_1_resistance_int = a;
+	aa = ptr_antenna->resistance_int;
+	if (aa <= 999)
+		ptr_session->stage_1_resistance_int = aa;
+	else
+		ptr_session->stage_1_resistance_int = 999;
+
 	a = ptr_antenna->resistance_dec;
 	ptr_session->stage_1_resistance_dec = a;
 
 	//Inductance.
-	a = ptr_antenna->inductance_int;
-	ptr_session->stage_1_inductance_int = a;
+	aa = ptr_antenna->inductance_int;
+	if (aa <= 999)
+		ptr_session->stage_1_inductance_int = aa;
+	else
+		ptr_session->stage_1_inductance_int = 999;
+
 	a = ptr_antenna->inductance_dec;
 	ptr_session->stage_1_inductance_dec = a;
 
@@ -485,20 +495,22 @@ void Session_Get_Duration (session_typedef * ptr_session, unsigned char stage , 
 	}
 }
 
+//Preguntaa la sesion los valores de parametros antenna conectada
+//devuelve info por el puntero *ptr_antenna
 void Session_Get_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna)
 {
-
 	unsigned char a;
+	unsigned short aa;
 
 	//Resistance.
-	a = ptr_session->stage_1_resistance_int;
-	ptr_antenna->resistance_int = a;
+	aa = ptr_session->stage_1_resistance_int;
+	ptr_antenna->resistance_int = aa;
 	a = ptr_session->stage_1_resistance_dec;
 	ptr_antenna->resistance_dec = a;
 
 	//Inductance.
-	a = ptr_session->stage_1_inductance_int;
-	ptr_antenna->inductance_int = a;
+	aa = ptr_session->stage_1_inductance_int;
+	ptr_antenna->inductance_int = aa;
 	a = ptr_session->stage_1_inductance_dec;
 	ptr_antenna->inductance_dec = a;
 

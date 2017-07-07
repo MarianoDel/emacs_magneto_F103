@@ -15,40 +15,50 @@
 //#define sysFREC48
 //#define sysFREC72_XTAL_8
 #define sysFREC72_XTAL_12
+//--- Voltage of the Powers Supply used ---//
+#define PSU_40		40
+#define PSU_200	200
 //----- End of Board Configuration ------------//
 
 //----- Use it whithout Antenna Board Configuration ----------//
-//#define WITHOUT_ANTENNA_BOARD_CH1
-//#define WITHOUT_ANTENNA_BOARD_CH2
-//#define WITHOUT_ANTENNA_BOARD_CH3
-//#define WITHOUT_ANTENNA_BOARD_CH4
-//#define WITH_TEMP_CH1
-#define HARDCODE_R_INT_CH1	10
-#define HARDCODE_R_DEC_CH1 0
-#define HARDCODE_L_INT_CH1 50
+// #define WITHOUT_ANTENNA_BOARD_CH1
+// #define WITHOUT_ANTENNA_BOARD_CH2
+// #define WITHOUT_ANTENNA_BOARD_CH3
+// #define WITHOUT_ANTENNA_BOARD_CH4
+
+#define HARDCODE_R_INT_CH1	42
+#define HARDCODE_R_DEC_CH1 8
+#define HARDCODE_L_INT_CH1 400
 #define HARDCODE_L_DEC_CH1 0
-#define HARDCODE_I_INT_CH1 2
+#define HARDCODE_I_INT_CH1 1
 #define HARDCODE_I_DEC_CH1 0
 
-#define HARDCODE_R_INT_CH2	10
-#define HARDCODE_R_DEC_CH2 0
-#define HARDCODE_L_INT_CH2 50
+// #define HARDCODE_R_INT_CH1	42
+// #define HARDCODE_R_DEC_CH1 8
+// #define HARDCODE_L_INT_CH1 400
+// #define HARDCODE_L_DEC_CH1 0
+// #define HARDCODE_I_INT_CH1 1		//de 0.9 en adelante no va con 3 3 3 6 de senial
+// #define HARDCODE_I_DEC_CH1 0
+
+#define HARDCODE_R_INT_CH2	42
+#define HARDCODE_R_DEC_CH2 8
+#define HARDCODE_L_INT_CH2 400
 #define HARDCODE_L_DEC_CH2 0
-#define HARDCODE_I_INT_CH2 2
+#define HARDCODE_I_INT_CH2 1
 #define HARDCODE_I_DEC_CH2 0
 
-#define HARDCODE_R_INT_CH3	10
-#define HARDCODE_R_DEC_CH3 0
-#define HARDCODE_L_INT_CH3 50
+#define HARDCODE_R_INT_CH3	47
+#define HARDCODE_R_DEC_CH3 5
+#define HARDCODE_L_INT_CH3 500
 #define HARDCODE_L_DEC_CH3 0
-#define HARDCODE_I_INT_CH3 2
+#define HARDCODE_I_INT_CH3 1
 #define HARDCODE_I_DEC_CH3 0
 
-#define HARDCODE_R_INT_CH4	10
+#define HARDCODE_R_INT_CH4	49
 #define HARDCODE_R_DEC_CH4 0
-#define HARDCODE_L_INT_CH4 50
+#define HARDCODE_L_INT_CH4 350
 #define HARDCODE_L_DEC_CH4 0
-#define HARDCODE_I_INT_CH4 2
+#define HARDCODE_I_INT_CH4 1
 #define HARDCODE_I_DEC_CH4 0
 //----- End of Use it whithout Antenna Board Configuration ---//
 

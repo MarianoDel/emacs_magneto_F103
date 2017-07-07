@@ -5,28 +5,25 @@
 //--- Sesion ---//
 typedef struct
 {
-
-	//unsigned char channel; //Number of channel used by the antenna.
-
 	//--- --- --- --- --- Stage 1 --- --- --- --- ---//
-	//--- General ---//
+	//--- General ---//												//2 bytes
 	unsigned char stage_1_status; //Enable/Disable.
 	unsigned char stage_1_special_function;
 
-	//--- Duration ---//
+	//--- Duration ---//												//3 bytes
 	unsigned char stage_1_time_hours;
 	unsigned char stage_1_time_minutes;
 	unsigned char stage_1_time_seconds;
 
-	//--- Antenna parameters ---//
-	unsigned char stage_1_resistance_int;
+	//--- Antenna parameters ---//								//8 bytes
+	unsigned short stage_1_resistance_int;
 	unsigned char stage_1_resistance_dec;
-	unsigned char stage_1_inductance_int;
+	unsigned short stage_1_inductance_int;
 	unsigned char stage_1_inductance_dec;
 	unsigned char stage_1_current_limit_int;
 	unsigned char stage_1_current_limit_dec;
 
-	//--- Signal ---//
+	//--- Signal ---//												//20 bytes
 	unsigned char stage_1_initial_power;
 	unsigned char stage_1_final_power;
 	unsigned char stage_1_temp_max_int;
@@ -43,19 +40,18 @@ typedef struct
 	unsigned short stage_1_burst_mode_off;
 
 	//--- --- --- --- --- Stage 2 --- --- --- --- ---//
-	//--- General ---//
+	//--- General ---//												//2 bytes
 	unsigned char stage_2_status; //Enable/Disable.
 	unsigned char stage_2_special_function;
 
-	//--- Duration ---//
+	//--- Duration ---//												//3 bytes
 	unsigned char stage_2_time_hours;
 	unsigned char stage_2_time_minutes;
 	unsigned char stage_2_time_seconds;
 
-	//--- Signal ---//
+	//--- Signal ---//												//20 bytes
 	unsigned char stage_2_initial_power;
 	unsigned char stage_2_final_power;
-	//unsigned short stage_2_step_number;
 	unsigned char stage_2_temp_max_int;
 	unsigned char stage_2_temp_max_dec;
 
@@ -70,20 +66,18 @@ typedef struct
 	unsigned short stage_2_burst_mode_off;
 
 	//--- --- --- --- --- Stage 3 --- --- --- --- ---//
-	//--- General ---//
+	//--- General ---//												//2 bytes
 	unsigned char stage_3_status; //Enable/Disable.
 	unsigned char stage_3_special_function;
 
-
-	//--- Duration ---//
+	//--- Duration ---//												//3 bytes
 	unsigned char stage_3_time_hours;
 	unsigned char stage_3_time_minutes;
 	unsigned char stage_3_time_seconds;
 
-	//--- Signal ---//
+	//--- Signal ---//												//20 bytes
 	unsigned char stage_3_initial_power;
 	unsigned char stage_3_final_power;
-	//unsigned short stage_3_step_number;
 	unsigned char stage_3_temp_max_int;
 	unsigned char stage_3_temp_max_dec;
 
@@ -98,13 +92,13 @@ typedef struct
 	unsigned short stage_3_burst_mode_off;
 
 	//--- --- --- --- --- General Parameters --- --- --- --- ---//
-	unsigned char status;
+	unsigned char status;											//21 bytes
 	char connected_ant_name [17];
 	unsigned char sync_on;
 	unsigned short peak_current_limit;
 
+} session_typedef;													//total 104 bytes
 
-} session_typedef;
 
 typedef struct {
 
@@ -132,9 +126,9 @@ typedef struct {
 
 typedef struct {
 
-	unsigned char resistance_int;
+	unsigned short resistance_int;
 	unsigned char resistance_dec;
-	unsigned char inductance_int;
+	unsigned short inductance_int;
 	unsigned char inductance_dec;
 	unsigned char current_limit_int;
 	unsigned char current_limit_dec;
@@ -159,7 +153,7 @@ enum channels
 	SESSION_CHANNEL_4
 };
 
-//--- warming up/cooling dawn---//
+//--- warming up/cooling down---//
 typedef struct {
 
 	//Rising.

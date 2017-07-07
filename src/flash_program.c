@@ -20,14 +20,8 @@
 #include "GTK_Hard.h"
 
 //New buffer.
-#define USED_BUFFTEMP (84 + 17)
-//unsigned char buffTemp[USED_BUFFTEMP];
-//unsigned int auxBuffer_flash[210];
-unsigned int auxBuffer_flash[135];	//es un sizeof(session_slot_aux) * 5 >> 2 (porque es un int)
-
-//char * ptrSaveData;
-//char readData[64];
-//char * pReadData;
+//es un sizeof(session_slot_aux) * 5 >> 2 (porque es un int)
+unsigned int auxBuffer_flash [((sizeof(session_typedef) >> 2) * 5)];
 
 extern session_typedef session_slot_aux;
 

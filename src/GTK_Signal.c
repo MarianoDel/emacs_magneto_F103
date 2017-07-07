@@ -1013,7 +1013,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	if (channel == 5)
 		return FIN_ERROR;
 
-	//--- Limpieza de las se�ales ---//
+	//--- Signal Cleaning ---//
 	if (session_stage == PLATEAU)
 		table_lenght = 1;
 	else
@@ -1138,15 +1138,15 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		}
 
 
-		if (voltage > 200)
+		if (voltage > PSU_200)
 			return FIN_ERROR;
 		//Maximum voltage.
 		voltage2 = voltage + (float)(current * resistance);
 
-		if (voltage2 > 200)
+		if (voltage2 > PSU_200)
 			return FIN_ERROR;
 
-		if (voltage2 < 40)
+		if (voltage2 < PSU_40)
 		{
 			//Initial voltage.
 			auxiliar_duty = (float)voltage * 25;
@@ -1173,7 +1173,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			}
 			(p_table + i)->rising_step_number = auxiliar_duty;
 		}
-		else if ((voltage2 >= 40) && (voltage2 < 200))
+		else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
 		{
 			//Initial voltage.
 			auxiliar_duty = (float)voltage * 5;
@@ -1222,21 +1222,21 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 				break;
 		}
 
-		if (voltage > 40)
+		if (voltage > PSU_40)
 			return FIN_ERROR;
 
-		if (voltage <= 40)
+		if (voltage <= PSU_40)
 		{
 			auxiliar_duty = (float)voltage * 25;
 			(p_table + i)->maintenance_pwm_40 = (unsigned short)auxiliar_duty;
 		}
-		else if ((voltage > 40) && (voltage < 200))
-		{
-			auxiliar_duty = (float)voltage * 5;
-			(p_table + i)->maintenance_pwm_200 = (unsigned short)auxiliar_duty;
-		}
-		else
-			return FIN_ERROR;
+		// else if ((voltage > 40) && (voltage < PSU_200))	//TODO: revisar esta condicion parece al pedo
+		// {
+		// 	auxiliar_duty = (float)voltage * 5;
+		// 	(p_table + i)->maintenance_pwm_200 = (unsigned short)auxiliar_duty;
+		// }
+		// else
+		// 	return FIN_ERROR;
 
 		//--- Falling ---//
 		//Tau.
@@ -1272,8 +1272,8 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		//fin cuentas nuevas
 
 		//Nuevo programa bajada
-		Td *= 1000;
-		Td += 0.25;
+		Td *= 1000;		//paso a ms
+		Td += 0.25;		//ajusto un poquito
 
 		switch(session_stage)
 		{
@@ -1290,7 +1290,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage < 0)
 						voltage = 0;
 
-					if (voltage > 200)
+					if (voltage > PSU_200)
 						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
@@ -1299,10 +1299,10 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > 200)
+					if (voltage2 > PSU_200)
 						return FIN_ERROR;
 
-					if (voltage2 < 40)
+					if (voltage2 < PSU_40)
 					{
 						auxiliar_duty = (float)voltage * 25;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
@@ -1315,7 +1315,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
 					}
-					else if ((voltage2 >= 40) && (voltage2 < 200))
+					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
 					{
 						auxiliar_duty = (float)voltage * 5;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
@@ -1331,7 +1331,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 						return FIN_ERROR;
 				}
 				//LR discharge.
-				else if (p_session->stage_1_falling_time > (Td * 2))	//es myor que 2 veces la descarga rapida
+				else if (p_session->stage_1_falling_time > (Td * 2))	//es mayor que 2 veces la descarga rapida
 				{
 					(p_table + i)->falling_time = p_session->stage_1_falling_time;
 					auxiliar_duty = (float)(p_table + i)->falling_time * 10;
@@ -1375,7 +1375,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage < 0)
 						voltage = 0;
 
-					if (voltage > 200)
+					if (voltage > PSU_200)
 						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
@@ -1384,10 +1384,10 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > 200)
+					if (voltage2 > PSU_200)
 						return FIN_ERROR;
 
-					if (voltage2 < 40)
+					if (voltage2 < PSU_40)
 					{
 						auxiliar_duty = (float)voltage * 25;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
@@ -1400,7 +1400,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
 					}
-					else if ((voltage2 >= 40) && (voltage2 < 200))
+					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
 					{
 						auxiliar_duty = (float)voltage * 5;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
@@ -1460,7 +1460,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage < 0)
 						voltage = 0;
 
-					if (voltage > 200)
+					if (voltage > PSU_200)
 						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
@@ -1469,10 +1469,10 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > 200)
+					if (voltage2 > PSU_200)
 						return FIN_ERROR;
 
-					if (voltage2 < 40)
+					if (voltage2 < PSU_40)
 					{
 						auxiliar_duty = (float)voltage * 25;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
@@ -1485,7 +1485,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
 					}
-					else if ((voltage2 >= 40) && (voltage2 < 200))
+					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
 					{
 						auxiliar_duty = (float)voltage * 5;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;

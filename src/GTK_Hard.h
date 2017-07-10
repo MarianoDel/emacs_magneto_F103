@@ -18,19 +18,24 @@
 //--- Voltage of the Powers Supply used ---//
 #define PSU_40		40
 #define PSU_200	200
+#define RSNUBBER_POWER_MAX		15
+#define resistance_discharge 1175
+#define capacitance_discharge 100 //uF
+#define tau_discharge 0.1175 //RC
+
 //----- End of Board Configuration ------------//
 
 //----- Use it whithout Antenna Board Configuration ----------//
-// #define WITHOUT_ANTENNA_BOARD_CH1
+#define WITHOUT_ANTENNA_BOARD_CH1
 // #define WITHOUT_ANTENNA_BOARD_CH2
 // #define WITHOUT_ANTENNA_BOARD_CH3
 // #define WITHOUT_ANTENNA_BOARD_CH4
 
-#define HARDCODE_R_INT_CH1	42
-#define HARDCODE_R_DEC_CH1 8
-#define HARDCODE_L_INT_CH1 400
-#define HARDCODE_L_DEC_CH1 0
-#define HARDCODE_I_INT_CH1 1
+#define HARDCODE_R_INT_CH1	10
+#define HARDCODE_R_DEC_CH1 6
+#define HARDCODE_L_INT_CH1 78
+#define HARDCODE_L_DEC_CH1 2
+#define HARDCODE_I_INT_CH1 2
 #define HARDCODE_I_DEC_CH1 0
 
 // #define HARDCODE_R_INT_CH1	42

@@ -32,11 +32,7 @@
 
 
 //--- New code ---//
-#define resistance_discharge 1175
-#define capacitance_discharge 100 //uF
-#define tau_discharge 0.1175 //RC
-
-extern char buffSendErr[32];
+extern char buffSendErr[64];
 
 extern unsigned char channel_1_pause;
 extern unsigned char channel_2_pause;
@@ -881,7 +877,6 @@ void Session_Cooling_Down_Channel_4_Restart(void)
 
 unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage)
 {
-
 	//Antenna parameters.
 	float resistance = 0.0;
 	float inductance = 0.0;
@@ -892,15 +887,19 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	float final_current = 0.0;
 	float current = 0.0;
 
+	//usados para calculos intermedios
 	float auxiliar_duty = 0.0;
 	float voltage = 0.0;
 	float voltage2 = 0.0;
 
 	float LR_tau = 0.0;
-//	float Wp;
 	float Td = 0.0;
 	float Vsnubber = 0.0;
+	float period = 0.0;
 	float falling_time = 0.0;
+	float power_inductance = 0.0;
+	float power_r_inductance = 0.0;
+	float power_r_snubber = 0.0;
 
 	//Peak Current
 	float peak_c = 0.0;
@@ -1059,6 +1058,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	inductance = (float)p_session->stage_1_inductance_dec;
 	inductance /= 100;
 	inductance += (float)p_session->stage_1_inductance_int;
+	inductance /=1000;	//ahora este en [Hy]
 
 	//Current limit.
 	current_limit = (float)p_session->stage_1_current_limit_dec;
@@ -1066,7 +1066,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	current_limit += (float)p_session->stage_1_current_limit_int;
 
 	//tengo 196mV / A + offset 456mV
-	peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tensi�n con 50% de margen
+	peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tension con 50% de margen
 	peak_c = peak_c * 0.303;	//divido 3.3V
 	peak_c = peak_c * 4095;		//valor pico permitido en ADC
 
@@ -1121,7 +1121,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		//Duty.
 		//Minimum voltage.
 		voltage = current;
-		voltage *= (float)inductance;
+		voltage *= (float)inductance * 1000;	//ajusto los ms de lo que viene
 		switch(session_stage)
 		{
 			case WARMING_UP:
@@ -1137,9 +1137,6 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 				break;
 		}
 
-
-		if (voltage > PSU_200)
-			return FIN_ERROR;
 		//Maximum voltage.
 		voltage2 = voltage + (float)(current * resistance);
 
@@ -1149,11 +1146,11 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		if (voltage2 < PSU_40)
 		{
 			//Initial voltage.
-			auxiliar_duty = (float)voltage * 25;
+			auxiliar_duty = (float)voltage * 1000 / PSU_40;
 			(p_table + i)->rising_pwm_40_initial = (unsigned short)auxiliar_duty;
 
 			//Final voltage.
-			auxiliar_duty = (float)voltage2 * 25; //*1000/40.
+			auxiliar_duty = (float)voltage2 * 1000 / PSU_40;
 			(p_table + i)->rising_pwm_40_final = (unsigned short)auxiliar_duty;
 
 			//Steps.
@@ -1173,14 +1170,14 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			}
 			(p_table + i)->rising_step_number = auxiliar_duty;
 		}
-		else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
+		else	//ya se que es mayor a 40 y menor a 200
 		{
 			//Initial voltage.
-			auxiliar_duty = (float)voltage * 5;
+			auxiliar_duty = (float)voltage * 1000 / PSU_200;
 			(p_table + i)->rising_pwm_200_initial = (unsigned short)auxiliar_duty;
 
 			//Final voltage.
-			auxiliar_duty = (float)voltage2 * 5; //*1000/200.
+			auxiliar_duty = (float)voltage2 * 1000 / PSU_200;
 			(p_table + i)->rising_pwm_200_final = (unsigned short)auxiliar_duty;
 
 			//Steps.
@@ -1200,8 +1197,6 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			}
 			(p_table + i)->rising_step_number = auxiliar_duty;
 		}
-		else
-			return FIN_ERROR;
 
 		//--- Maintenance ---//
 		voltage = resistance;
@@ -1225,73 +1220,105 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		if (voltage > PSU_40)
 			return FIN_ERROR;
 
-		if (voltage <= PSU_40)
-		{
-			auxiliar_duty = (float)voltage * 25;
-			(p_table + i)->maintenance_pwm_40 = (unsigned short)auxiliar_duty;
-		}
-		// else if ((voltage > 40) && (voltage < PSU_200))	//TODO: revisar esta condicion parece al pedo
-		// {
-		// 	auxiliar_duty = (float)voltage * 5;
-		// 	(p_table + i)->maintenance_pwm_200 = (unsigned short)auxiliar_duty;
-		// }
-		// else
-		// 	return FIN_ERROR;
+		//voltage <= PSU_40
+		auxiliar_duty = (float)voltage * 1000 / PSU_40;
+		(p_table + i)->maintenance_pwm_40 = (unsigned short)auxiliar_duty;
 
 		//--- Falling ---//
 		//Tau.
 		//cuentas nuevas
-		LR_tau = (float) (inductance / (1000 * resistance));	//no tocar
+		//LR_tau = (float) (inductance / (1000 * resistance));	//no tocar !LO TOQUE inductance ahora me llega en Hy
+		LR_tau = (float) (inductance / (resistance));	//no tocar
+
+		// sprintf(&buffSendErr[0], "\r\nLR_tau: %dms", (int) (LR_tau * 1000));		//TODO:debug 9-7-17
+		// UART_PC_Send(&buffSendErr[0]);
+		// Wait_ms(30);
+
 		switch(session_stage)
 		{
 			case WARMING_UP:
-				falling_time = p_session->stage_1_rising_time + p_session->stage_1_maintenance_time + p_session->stage_1_falling_time + p_session->stage_1_low_time;
+				falling_time = p_session->stage_1_falling_time;
+				period = p_session->stage_1_rising_time + p_session->stage_1_maintenance_time + p_session->stage_1_falling_time + p_session->stage_1_low_time;
 				break;
 
 			case PLATEAU:
-				falling_time = p_session->stage_2_rising_time + p_session->stage_2_maintenance_time + p_session->stage_2_falling_time + p_session->stage_2_low_time;
+				falling_time = p_session->stage_2_falling_time;
+				period = p_session->stage_2_rising_time + p_session->stage_2_maintenance_time + p_session->stage_2_falling_time + p_session->stage_2_low_time;
 				break;
 
 			case COOLING_DOWN:
-				falling_time = p_session->stage_3_rising_time + p_session->stage_3_maintenance_time + p_session->stage_3_falling_time + p_session->stage_3_low_time;
+				falling_time = p_session->stage_3_falling_time;
+				period = p_session->stage_3_rising_time + p_session->stage_3_maintenance_time + p_session->stage_3_falling_time + p_session->stage_3_low_time;
 				break;
 		}
+		falling_time /= 1000;	//a segundos
+		period /= 1000;	//a segundos
 
-		Vsnubber = (float) 0.5 * inductance * final_current * final_current * resistance_discharge / falling_time;
-		Vsnubber = sqrt(Vsnubber);
+		//potencia en el inductor
+		power_inductance = (float) 0.5 * inductance * final_current * final_current / period;
+		//tension rms estimada en RL
+		voltage = final_current * resistance * sqrt(falling_time / (3.0 * period));
+		//potencia en RL
+		power_r_inductance = voltage * voltage / resistance;
+		//potencia en Rsnubber
+		power_r_snubber = power_inductance - power_r_inductance;
 
-		//corrijo snubber en Ipeak * Rserie
+		if (power_r_snubber > RSNUBBER_POWER_MAX)
+			return ERROR;
+
+		//tension rms estimada en Rsnubber (esta es la real del circuito)
+		Vsnubber = sqrt(power_r_snubber * resistance_discharge);
+		// sprintf(&buffSendErr[0], "\r\nVsnubber: %dV", (int) Vsnubber);		//TODO:debug 9-7-17
+		// UART_PC_Send(&buffSendErr[0]);
+		// Wait_ms(30);
+
+		//ajusto Vsnubber para calcular descarga rapida lo corrijo en Ipeak * Rserie
 		Vsnubber += final_current * resistance;
-
-		//Primer cruce por cero.
-		Td = 1.7175;
-		Td *= 1 - final_current * resistance / Vsnubber;
-		Td -= 1.597;
-		Td *= -LR_tau;
+		Td = (-LR_tau) * log(1 - (current_limit * resistance) / Vsnubber);
+		// sprintf(&buffSendErr[0], "\r\ndescarga rapida: %dms", (int) (Td * 1000));		//TODO:debug 9-7-17
+		// UART_PC_Send(&buffSendErr[0]);
+		// Wait_ms(30);
 
 		//fin cuentas nuevas
 
 		//Nuevo programa bajada
 		Td *= 1000;		//paso a ms
+
+		//reviso que Td no supere falling_time + low_time
+		switch(session_stage)
+		{
+			case WARMING_UP:
+				if (Td > (p_session->stage_1_falling_time + p_session->stage_1_low_time))
+					return ERROR;
+				break;
+
+			case PLATEAU:
+				if (Td > (p_session->stage_2_falling_time + p_session->stage_2_low_time))
+					return ERROR;
+				break;
+
+			case COOLING_DOWN:
+				if (Td > (p_session->stage_3_falling_time + p_session->stage_3_low_time))
+					return ERROR;
+				break;
+		}
+
 		Td += 0.25;		//ajusto un poquito
 
 		switch(session_stage)
 		{
 			case WARMING_UP:
 				//Slow discharge.
-				if (p_session->stage_1_falling_time > (1000 * LR_tau))	//desde 1 tau
+				if (p_session->stage_1_falling_time  > (1000 * LR_tau))	//desde 1 tau utilizo descarga lenta; LR_tau lo paso a ms
 				{
 					(p_table + i)->falling_time = p_session->stage_1_falling_time;
 					(p_table + i)->falling_type = FALLING_SLOW_DISCHARGE;
 
-					voltage =  resistance - ((float)inductance / p_session->stage_1_falling_time);
+					voltage =  resistance - (((float)inductance * 1000) / p_session->stage_1_falling_time);
 					voltage *= current;
 
 					if (voltage < 0)
 						voltage = 0;
-
-					if (voltage > PSU_200)
-						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
 					voltage2 = voltage - voltage2;
@@ -1299,43 +1326,30 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > PSU_200)
-						return FIN_ERROR;
-
-					if (voltage2 < PSU_40)
+					if ((voltage < PSU_40) && (voltage2 < PSU_40))
 					{
-						auxiliar_duty = (float)voltage * 25;
+						auxiliar_duty = (float)voltage * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
 
-						auxiliar_duty = (float)voltage2 * 25; //*1000/40.
+						auxiliar_duty = (float)voltage2 * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
 
 						//Steps.
 						auxiliar_duty = (float)(p_session->stage_1_falling_time + 0) * 10;
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
-					}
-					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
-					{
-						auxiliar_duty = (float)voltage * 5;
-						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
-
-						auxiliar_duty = (float)voltage2 * 5; //*1000/200.
-						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
-
-						//Steps.
-						auxiliar_duty = (float)(p_session->stage_1_falling_time + 0) * 10;
-						(p_table + i)->falling_step_number = auxiliar_duty;
 					}
 					else
 						return FIN_ERROR;
 				}
 				//LR discharge.
-				else if (p_session->stage_1_falling_time > (Td * 2))	//es mayor que 2 veces la descarga rapida
+				//else if (p_session->stage_1_falling_time > (Td * 2))	//es mayor que 2 veces la descarga rapida
+				else if (p_session->stage_1_falling_time > (float)(Td * 1.2))	//es mayor que 1.2 veces la descarga rapida
 				{
-					(p_table + i)->falling_time = p_session->stage_1_falling_time;
-					auxiliar_duty = (float)(p_table + i)->falling_time * 10;
-					(p_table + i)->falling_step_number = auxiliar_duty;
+					(p_table + i)->falling_time = p_session->stage_1_falling_time;	//aca le paso el valor elegido
+					//auxiliar_duty = (float)(p_table + i)->falling_time * 10;
+					auxiliar_duty = Td * 10;
+					(p_table + i)->falling_step_number = auxiliar_duty;				//aca le paso el valor fast discharge
 					(p_table + i)->falling_type = FALLING_LR;
 				}
 				//Fast discharge.
@@ -1347,9 +1361,9 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_pwm_40_initial = 0;
 					(p_table + i)->falling_pwm_n_final = 1000;
 					(p_table + i)->falling_pwm_n_initial = 1000;
-					(p_table + i)->falling_time = (unsigned short)Td; //mS.
-					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;
-
+					(p_table + i)->falling_time = (unsigned short)Td; //mS. 	//ACA modifico la bajada de la señal al tiempo
+					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;		// Td en vez de al elegido
+//TODO: revisar esto, si Td es menor a tiempo elegido estaria cambiando la frecuencia al pedo
 					auxiliar_duty = (float) Td * 10;
 					(p_table + i)->falling_step_number = auxiliar_duty;
 				}
@@ -1362,7 +1376,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 
 				break;
 
-			case PLATEAU:
+			case PLATEAU:		//TODO: cambiar descarga como WARMING_UP
 				//Slow discharge.
 				if (p_session->stage_2_falling_time > (1000 * LR_tau))	//desde 1 tau
 				{
@@ -1447,7 +1461,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 
 				break;
 
-			case COOLING_DOWN:
+			case COOLING_DOWN:	//TODO: cambiar descarga como WARMING_UP
 				//Slow discharge.
 				if (p_session->stage_3_falling_time > (1000 * LR_tau))	//desde 1 tau
 				{
@@ -1531,9 +1545,9 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 				(p_table + i)->burst_mode_on = p_session->stage_3_burst_mode_on;
 
 				break;
-		}
+		}	//fin switch session_stage
 
-	}
+	}	//fin for table_lenght
 
 	//--- end ---//
 	return FIN_OK;
@@ -2257,15 +2271,18 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 			}
 #endif
 			//primero reviso en que tipo de bajada estoy
-			//BAJADA FALLING_LR
+			//BAJADA FALLING_LR; en falling_time recibo lo elgido y en step_number la descarga rapida
 			if ((p_table + (*p_session_channel_step))->falling_type == FALLING_LR)
 			{
 				switch(*p_fall_type)
 				{
 					case FALL_START:
-						time_aux = (p_table + (*p_session_channel_step))->falling_step_number;
-						time_aux >>= 2;
-						if (*p_session_time > ((p_table + (*p_session_channel_step))->falling_step_number - time_aux))
+						//time_aux = (p_table + (*p_session_channel_step))->falling_step_number;
+						time_aux = (p_table + (*p_session_channel_step))->falling_time;
+						time_aux *= 10;
+						time_aux -= (p_table + (*p_session_channel_step))->falling_step_number;	//le resto la parte de descarga rapida
+						//if (*p_session_time > ((p_table + (*p_session_channel_step))->falling_step_number - time_aux))
+						if (*p_session_time > time_aux)
 						{
 							switch(channel)
 							{
@@ -2290,7 +2307,10 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 						break;
 
 					case FALL_MED:
-						if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
+						//if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
+						time_aux = (p_table + (*p_session_channel_step))->falling_time;
+						time_aux *= 10;
+						if (*p_session_time >= time_aux)
 							*p_fall_type = FALL_FAST;
 						break;
 

@@ -1005,7 +1005,7 @@ buffUART1rx2[0] = '\0';
 			else
 				UART_PC_Send((char *)"ERROR\r\n");
 		}
-
+		//example. signal,100,100,0000,0003,0003,0003,0006,0000,0000,1
 		else if (!strncmp((const char *)&buffUART1rx2[0], (const char *)"signal,", (sizeof("signal,") - 1)))
 		{
 			//signal,%03d,%03d,0%x%x%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n",
@@ -1029,7 +1029,7 @@ buffUART1rx2[0] = '\0';
 				UART_PC_Send((char *)"ERROR\r\n");
 
 		}
-
+		//example.	duration,00,10,00,1
 		else if (!strncmp((const char *)&buffUART1rx2[0], (const char *)"duration,", (sizeof("duration,") - 1)))
 		{
 
@@ -1162,7 +1162,7 @@ buffUART1rx2[0] = '\0';
 				UART3Send((char *)"ERROR\r\n");
 */
 		}
-
+		//example. state_of_stage,0,1
 		else if (!strncmp((const char *)&buffUART1rx2[0], (const char *)"state_of_stage,", (sizeof("state_of_stage,") - 1)))
 		{
 

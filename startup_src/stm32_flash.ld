@@ -15,7 +15,7 @@
 **
 **  Environment : GNU GCC Compiler
 **
-**  Distribution: The file is distributed “as is,” without any warranty
+**  Distribution: The file is distributed ï¿½as is,ï¿½ without any warranty
 **                of any kind.
 **
 **  MARIANO
@@ -37,7 +37,7 @@ _estack = 0x20010000;    /* end of 64K RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x100;      /* required amount of heap  */
-_Min_Stack_Size = 0x200; /* required amount of stack */
+_Min_Stack_Size = 0x400; /* required amount of stack */
 
 MEMORY
 {
@@ -67,14 +67,14 @@ SECTIONS
         __exidx_end = .;
     } >rom
 
-    _sidata = .;         /* global needed for startup_stm3210x_md_vl.S */  
+    _sidata = .;         /* global needed for startup_stm3210x_md_vl.S */
 
   /*now start ram area with initialized data section */
   .data :
-  {   
+  {
     _sdata = .;        /* global needed for startup_stm3210x_md_vl.S */
-    *(.data)          
-    *(.data*)         
+    *(.data)
+    *(.data*)
     . = ALIGN(4);
     _edata = .;        /* global needed for startup_stm3210x_md_vl.S */
   } >ram AT>rom
@@ -91,7 +91,7 @@ SECTIONS
     _ebss = .;        /* global needed for startup_stm3210x_md_vl.S */
   } >ram
 
- 
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack :
   {

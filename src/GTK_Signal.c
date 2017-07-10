@@ -1361,16 +1361,32 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_pwm_40_initial = 0;
 					(p_table + i)->falling_pwm_n_final = 1000;
 					(p_table + i)->falling_pwm_n_initial = 1000;
-					(p_table + i)->falling_time = (unsigned short)Td; //mS. 	//ACA modifico la bajada de la señal al tiempo
-					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;		// Td en vez de al elegido
-//TODO: revisar esto, si Td es menor a tiempo elegido estaria cambiando la frecuencia al pedo
-					auxiliar_duty = (float) Td * 10;
-					(p_table + i)->falling_step_number = auxiliar_duty;
+					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;
+
+					(p_table + i)->falling_time = p_session->stage_1_falling_time;	//aca le paso el valor elegido
+
+					if (Td < p_session->stage_1_falling_time)
+					{
+						auxiliar_duty = p_session->stage_1_falling_time;
+						auxiliar_duty *= 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//descargo mas rapido que el tiempo pedido
+						auxiliar_duty = 0;
+					}
+					else	//Td es mayor que el tiempo disponible
+					{
+						auxiliar_duty = (float) Td * 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//aca le paso el valor fast discharge
+						auxiliar_duty -= (p_session->stage_1_falling_time) * 10;
+					}
 				}
 				//Fin nuevo programa bajada
 
 				//--- LOW ---//
-				(p_table + i)->low_step_number = p_session->stage_1_low_time * 10;
+				if ((p_table + i)->falling_type == FALLING_FAST_DISCHARGE)
+					(p_table + i)->low_step_number = (p_session->stage_1_low_time * 10) - auxiliar_duty;
+				else
+					(p_table + i)->low_step_number = p_session->stage_1_low_time * 10;
+
 				(p_table + i)->burst_mode_off = p_session->stage_1_burst_mode_off;
 				(p_table + i)->burst_mode_on = p_session->stage_1_burst_mode_on;
 

@@ -1392,21 +1392,18 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 
 				break;
 
-			case PLATEAU:		//TODO: cambiar descarga como WARMING_UP
+			case PLATEAU:
 				//Slow discharge.
 				if (p_session->stage_2_falling_time > (1000 * LR_tau))	//desde 1 tau
 				{
 					(p_table + i)->falling_time = p_session->stage_2_falling_time;
 					(p_table + i)->falling_type = FALLING_SLOW_DISCHARGE;
 
-					voltage =  resistance - ((float)inductance / p_session->stage_2_falling_time);
+					voltage =  resistance - (((float)inductance * 1000) / p_session->stage_2_falling_time);
 					voltage *= current;
 
 					if (voltage < 0)
 						voltage = 0;
-
-					if (voltage > PSU_200)
-						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
 					voltage2 = voltage - voltage2;
@@ -1414,43 +1411,28 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > PSU_200)
-						return FIN_ERROR;
-
-					if (voltage2 < PSU_40)
+					if ((voltage < PSU_40) && (voltage2 < PSU_40))
 					{
-						auxiliar_duty = (float)voltage * 25;
+						auxiliar_duty = (float)voltage * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
 
-						auxiliar_duty = (float)voltage2 * 25; //*1000/40.
+						auxiliar_duty = (float)voltage2 * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
 
 						//Steps.
 						auxiliar_duty = (float)(p_session->stage_2_falling_time + 0) * 10;
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
-					}
-					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
-					{
-						auxiliar_duty = (float)voltage * 5;
-						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
-
-						auxiliar_duty = (float)voltage2 * 5; //*1000/200.
-						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
-
-						//Steps.
-						auxiliar_duty = (float)(p_session->stage_2_falling_time + 0) * 10;
-						(p_table + i)->falling_step_number = auxiliar_duty;
 					}
 					else
 						return FIN_ERROR;
 				}
 				//LR discharge.
-				else if (p_session->stage_2_falling_time > (Td * 2))	//es myor que 2 veces la descarga rapida
+				else if (p_session->stage_2_falling_time > (float)(Td * 1.2))	//es mayor que 1.2 veces la descarga rapida
 				{
-					(p_table + i)->falling_time = p_session->stage_2_falling_time;
-					auxiliar_duty = (float)(p_table + i)->falling_time * 10;
-					(p_table + i)->falling_step_number = auxiliar_duty;
+					(p_table + i)->falling_time = p_session->stage_2_falling_time;	//aca le paso el valor elegido
+					auxiliar_duty = Td * 10;
+					(p_table + i)->falling_step_number = auxiliar_duty;				//aca le paso el valor fast discharge
 					(p_table + i)->falling_type = FALLING_LR;
 				}
 				//Fast discharge.
@@ -1462,16 +1444,32 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_pwm_40_initial = 0;
 					(p_table + i)->falling_pwm_n_final = 1000;
 					(p_table + i)->falling_pwm_n_initial = 1000;
-					(p_table + i)->falling_time = (unsigned short)Td; //mS.
 					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;
 
-					auxiliar_duty = (float) Td * 10;
-					(p_table + i)->falling_step_number = auxiliar_duty;
+					(p_table + i)->falling_time = p_session->stage_2_falling_time;	//aca le paso el valor elegido
+
+					if (Td < p_session->stage_2_falling_time)
+					{
+						auxiliar_duty = p_session->stage_2_falling_time;
+						auxiliar_duty *= 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//descargo mas rapido que el tiempo pedido
+						auxiliar_duty = 0;
+					}
+					else	//Td es mayor que el tiempo disponible
+					{
+						auxiliar_duty = (float) Td * 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//aca le paso el valor fast discharge
+						auxiliar_duty -= (p_session->stage_2_falling_time) * 10;
+					}
 				}
 				//Fin nuevo programa bajada
 
 				//--- LOW ---//
-				(p_table + i)->low_step_number = p_session->stage_2_low_time * 10;
+				if ((p_table + i)->falling_type == FALLING_FAST_DISCHARGE)
+					(p_table + i)->low_step_number = (p_session->stage_2_low_time * 10) - auxiliar_duty;
+				else
+					(p_table + i)->low_step_number = p_session->stage_2_low_time * 10;
+
 				(p_table + i)->burst_mode_off = p_session->stage_2_burst_mode_off;
 				(p_table + i)->burst_mode_on = p_session->stage_2_burst_mode_on;
 
@@ -1484,14 +1482,11 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_time = p_session->stage_3_falling_time;
 					(p_table + i)->falling_type = FALLING_SLOW_DISCHARGE;
 
-					voltage =  resistance - ((float)inductance / p_session->stage_3_falling_time);
+					voltage =  resistance - (((float)inductance * 1000) / p_session->stage_3_falling_time);
 					voltage *= current;
 
 					if (voltage < 0)
 						voltage = 0;
-
-					if (voltage > PSU_200)
-						return FIN_ERROR;
 
 					voltage2 = (float) resistance * current;
 					voltage2 = voltage - voltage2;
@@ -1499,42 +1494,27 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					if (voltage2 < 0)
 						voltage2 = 0;
 
-					if (voltage2 > PSU_200)
-						return FIN_ERROR;
-
-					if (voltage2 < PSU_40)
+					if ((voltage < PSU_40) && (voltage2 < PSU_40))
 					{
-						auxiliar_duty = (float)voltage * 25;
+						auxiliar_duty = (float)voltage * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
 
-						auxiliar_duty = (float)voltage2 * 25; //*1000/40.
+						auxiliar_duty = (float)voltage2 * 1000 / PSU_40;
 						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
 
 						//Steps.
 						auxiliar_duty = (float)(p_session->stage_3_falling_time + 0) * 10;
 						(p_table + i)->falling_step_number = auxiliar_duty;
 
-					}
-					else if ((voltage2 >= PSU_40) && (voltage2 < PSU_200))
-					{
-						auxiliar_duty = (float)voltage * 5;
-						(p_table + i)->falling_pwm_40_initial = (unsigned short)auxiliar_duty;
-
-						auxiliar_duty = (float)voltage2 * 5; //*1000/200.
-						(p_table + i)->falling_pwm_40_final = (unsigned short)auxiliar_duty;
-
-						//Steps.
-						auxiliar_duty = (float)(p_session->stage_3_falling_time + 0) * 10;
-						(p_table + i)->falling_step_number = auxiliar_duty;
 					}
 					else
 						return FIN_ERROR;
 				}
 				//LR discharge.
-				else if (p_session->stage_3_falling_time > (Td * 2))	//es myor que 2 veces la descarga rapida
+				else if (p_session->stage_3_falling_time > (float)(Td * 1.2))	//es mayor que 1.2 veces la descarga rapida
 				{
 					(p_table + i)->falling_time = p_session->stage_3_falling_time;
-					auxiliar_duty = (float)(p_table + i)->falling_time * 10;
+					auxiliar_duty = Td * 10;
 					(p_table + i)->falling_step_number = auxiliar_duty;
 					(p_table + i)->falling_type = FALLING_LR;
 				}
@@ -1547,16 +1527,32 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_pwm_40_initial = 0;
 					(p_table + i)->falling_pwm_n_final = 1000;
 					(p_table + i)->falling_pwm_n_initial = 1000;
-					(p_table + i)->falling_time = (unsigned short)Td; //mS.
 					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;
 
-					auxiliar_duty = (float) Td * 10;
-					(p_table + i)->falling_step_number = auxiliar_duty;
+					(p_table + i)->falling_time = p_session->stage_3_falling_time;	//aca le paso el valor elegido
+
+					if (Td < p_session->stage_3_falling_time)
+					{
+						auxiliar_duty = p_session->stage_3_falling_time;
+						auxiliar_duty *= 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//descargo mas rapido que el tiempo pedido
+						auxiliar_duty = 0;
+					}
+					else	//Td es mayor que el tiempo disponible
+					{
+						auxiliar_duty = (float) Td * 10;
+						(p_table + i)->falling_step_number = auxiliar_duty;		//aca le paso el valor fast discharge
+						auxiliar_duty -= (p_session->stage_3_falling_time) * 10;
+					}
 				}
 				//Fin nuevo programa bajada
 
 				//--- LOW ---//
-				(p_table + i)->low_step_number = p_session->stage_3_low_time * 10;
+				if ((p_table + i)->falling_type == FALLING_FAST_DISCHARGE)
+					(p_table + i)->low_step_number = (p_session->stage_3_low_time * 10) - auxiliar_duty;
+				else
+					(p_table + i)->low_step_number = p_session->stage_3_low_time * 10;
+
 				(p_table + i)->burst_mode_off = p_session->stage_3_burst_mode_off;
 				(p_table + i)->burst_mode_on = p_session->stage_3_burst_mode_on;
 

@@ -7,6 +7,14 @@
 void Signal_TIM1MS (void);
 void TIM5_IRQHandler (void);
 void TIM5_Init (void);
+
+unsigned char Session_Channels_Fixed_Parameters (unsigned char, unsigned char);
+unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage);
+unsigned char Session_Warming_Up_Channels (unsigned char channel);
+unsigned char Session_Cooling_Down_Channels (unsigned char channel);
+unsigned char Session_Plateau_Channels(unsigned char channel);
+
+//--- Old Code ---//
 //--- Channel 1 ---//
 void Channel_1_Init(void);
 void Session_Channel_1_Start(void);
@@ -25,11 +33,6 @@ unsigned char Session_Plateau_Channel_1_Parameters_Calculate(void);
 unsigned char Session_Cooling_Down_Channel_1(void);
 unsigned char Session_Cooling_Down_Channel_1_Parameters_Calculate(void);
 void Session_Cooling_Down_Channel_1_Restart(void);
-
-unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage);
-unsigned char Session_Warming_Up_Channels (unsigned char channel);
-unsigned char Session_Cooling_Down_Channels (unsigned char channel);
-unsigned char Session_Plateau_Channels(unsigned char channel);
 
 //--- Channel 2 ---//
 void Channel_2_Init(void);

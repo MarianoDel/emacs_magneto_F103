@@ -49,6 +49,7 @@ extern session_typedef session_ch_4;
 unsigned char ch1_sync_state = 0;
 #define SYNC_REQUIRED	0x80
 #define NO_SYNC_REQUIRED_MASK	0x7F
+
 #define SYNC_RESET			0x00
 #define SYNC_IN_RISING		0x01
 #define SYNC_IN_MAINTENANCE	0x02
@@ -645,11 +646,8 @@ void Session_Channel_1 (void)
 
 					if ((i == TRABAJANDO) && (session_warming_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
 					{
+						//i = Current_Limit_CheckCh1();	//TODO: tengo que leer error para que salga la func. abajo
 						Current_Limit_CheckCh1();
-//						if (LED2)
-//							LED2_OFF;
-//						else
-//							LED2_ON;
 					}
 
 					if (i == FIN_ERROR)
@@ -875,6 +873,137 @@ void Session_Cooling_Down_Channel_4_Restart(void)
 	session_cooling_down_channel_4_state = SESSION_COOLING_DOWN_CHANNEL_INIT;
 }
 
+//Funcion que carga la tabla de PWM con parametros fijos para pruebas de bobinas
+//utilizar con cuidado, no verifica maximos
+//También incluye una breve explicación del funcionamiento del programa / sesion / tratamiento
+unsigned char Session_Channels_Fixed_Parameters (unsigned char channel, unsigned char session_stage)
+{
+	unsigned char i;
+	unsigned char table_length;
+	//la sesion (tratamiento) se divide en tres partes Warming UP, Plateau, Cooling Down
+	//sobre Warming Up y Cooling Down se puede modificar la potencia entregada Wm Up sube, Cool Dwn baja
+	//estructura session_typedef; en particular se llaman session_ch_1; session_ch_2; session_ch_3; session_ch_4
+	//stage_1 Warming Up
+	//stage_2 Plateau
+	//stage_3 Cooling Down
+	//incluye mas parametros como: tiempo de cada parte y etapa, parametros de antena conectada, señal elegida
+
+	//se cuenta con una tabla de 50 posiciones para ir cambiando la potencia de las señales
+	//si se necesitara en Wm Up y Cool Dwn
+	//estructura warmingup_coolingdown_typedef; tabla 50 pos table_warming_up_channel_1; table_warming_up_channel_2
+	//table_warming_up_channel_3; table_warming_up_channel_4
+	//que incluye todos los pwm y tiempos necesarios para armar la señal, y
+	//la tabla contiene estos pwm para las variaciones de potencia
+	//el tiempo de avance de cada paso de potencia (50 pasos) se guarda en la estructura de sesion
+	//session_ch_1.stage_1_time_per_step; pasos de 100us incremental con TIM5
+
+
+	//se avanza en cada posicion de la tabla por un timer que se verifica luego de cada señal
+	//todos los calculos y carga de la tabla se realiza antes de empezar el tratamiento
+	//con la funcion Session_Channels_Parameters_Calculate(channel, session_stage);
+
+
+
+	//cada señal dispone de 4 partes Rising, Maintenance, Falling, Stop
+	//estas partes tambien se calculan en la funcion Session_Channels_Parameters_Calculate(channel, session_stage);
+
+	//para dibujar una señal entoces necesito: por ejemplo a Wm Up
+	//session_ch_1.
+	//rising_step_number timer con tick de 100us donde termina el rising time	(10 = 1ms)
+	//RISING pwm_200 o pwm_40 inicial y final + step
+	//warmingup_coolingdown_typedef.rising_step_number = 30;				//3m
+	//MAINTENANCE pwm_40 + step
+	//warmingup_coolingdown_typedef.maintenance_step_number = 100;		//10m
+	//FALLING_DOWN pwm_n inicial final + step + falling type + falling time + falling step number
+	//warmingup_coolingdown_typedef.falling_step_number = 30;				//3m
+	//CHANNEL_LOW low step number
+	//warmingup_coolingdown_typedef.low_step_number = 60;				//6m
+
+	//los punteros a las estructuras correspondientes (que voy a usar)
+	warmingup_coolingdown_typedef * p_table;
+	session_typedef * p_session;
+
+	//por ahora solo CH1 y WM UP
+	p_table = &table_warming_up_channel_1[0];
+	p_session = &session_ch_1;
+
+	//--- Signal Cleaning ---//
+	//--- Rising ---//
+	for (i = 0; i < SESSION_WUP_CH1_BUFF_DIM; i++)
+	{
+		(p_table + i)->rising_pwm_200_final = 0;
+		(p_table + i)->rising_pwm_200_initial = 0;
+		(p_table + i)->rising_pwm_40_final = 0;
+		(p_table + i)->rising_pwm_40_initial = 0;
+		(p_table + i)->rising_pwm_n_final = 0;
+		(p_table + i)->rising_pwm_n_initial = 0;
+		(p_table + i)->rising_step_number = 0;
+	}
+
+	//--- Maintenance ---//
+	p_table->maintenance_pwm_200 = 0;
+	p_table->maintenance_pwm_40 = 0;
+	p_table->maintenance_pwm_n = 0;
+	p_table->maintenance_step_number = 0;
+
+	//--- Falling ---//
+	for (i = 0; i < SESSION_WUP_CH1_BUFF_DIM; i++)
+	{
+		(p_table + i)->falling_pwm_200_final = 0;
+		(p_table + i)->falling_pwm_200_initial = 0;
+		(p_table + i)->falling_pwm_40_final = 0;
+		(p_table + i)->falling_pwm_40_initial = 0;
+		(p_table + i)->falling_pwm_n_final = 0;
+		(p_table + i)->falling_pwm_n_initial = 0;
+		(p_table + i)->falling_step_number = 0;
+		(p_table + i)->falling_type = 0;
+	}
+
+	//corriente maxima que voy a permitir
+	p_session->peak_current_limit = 3780;	//5A aprox.
+
+	//tiempo de avance de la tabla (como ticks de 100us)
+	p_session->stage_1_time_per_step = 2200;	//le doy tiempo de una señal completa
+
+	table_length = 1;		//no pasarse de SESSION_WUP_CH1_BUFF_DIM
+
+	//tiempo de a sesion va a ser (p_session->stage_1_time_per_step) * tble lenght
+	for (i = 0; i < table_length; i++)
+	{
+
+		//cargo pwm de las señales por ahora un solo paso de tabla
+		//Rising
+		p_table->rising_pwm_40_initial = 0;
+		p_table->rising_pwm_40_final = 0;
+		p_table->rising_pwm_200_initial = 261;
+		p_table->rising_pwm_200_final = 367;
+
+		p_table->rising_step_number = 30;		//(como ticks de 100us)
+
+		//Maintenance
+		p_table->maintenance_pwm_40 = 530;
+
+		p_table->maintenance_step_number = 100;	//(como ticks de 100us)
+
+		//Falling Down
+		//LR discharge.
+		p_table->falling_time = 3;								//aca le paso el valor elegido (en ms)
+		p_table->falling_step_number = 17;					//aca le paso el valor fast discharge (como ticks de 100us)
+		p_table->falling_type = FALLING_LR;
+
+		// //Fast discharge.
+		// p_table->falling_time = 3;							//aca le paso el valor elegido
+		// p_table->falling_step_number = auxiliar_duty;		//descargo mas rapido que el tiempo pedido
+		// p_table->falling_type = FALLING_FAST_DISCHARGE;
+
+		//Stop Time
+		p_table->low_step_number = 60;		//(como ticks de 100us)
+	}
+
+	//--- end ---//
+	return FIN_OK;
+}
+
 unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage)
 {
 	//Antenna parameters.
@@ -1066,10 +1195,17 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	current_limit += (float)p_session->stage_1_current_limit_int;
 
 	//tengo 196mV / A + offset 456mV
-	peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tension con 50% de margen
-	peak_c = peak_c * 0.303;	//divido 3.3V
-	peak_c = peak_c * 4095;		//valor pico permitido en ADC
+	// peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tension con 50% de margen
+	// peak_c = peak_c * 0.303;	//divido 3.3V
+	// peak_c = peak_c * 4095;		//valor pico permitido en ADC
 
+	//#PRUEBAS PARA VERSION 2.1 600mV / A		//TODO: pruebas de corriente max 11-07-17
+	// //corte en 4A
+	//peak_c = 2978;
+	//corte en 5A
+	peak_c = 3722;
+
+	//
 	p_session->peak_current_limit = (unsigned short) peak_c;
 
 	//TODO: OJO ESTOS DOS VER QUE PASA EN MAINTENANCE
@@ -1094,6 +1230,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		case PLATEAU:
 			initial_current *= p_session->stage_2_initial_power;
 			final_current *= p_session->stage_2_final_power;		//Plateau no usa final_current
+			//TODO: y stage_2_time_per_step tampoco????
 			break;
 
 		case COOLING_DOWN:
@@ -1111,7 +1248,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	for (i = 0; i < table_lenght; i++)
 	{
 		//--- Rising ---//
-		//--- Nivel de se�al ---//
+		//--- Nivel de señal ---//
 		current = (float) final_current - (float) initial_current;
 		//current /= SESSION_WUP_CH1_BUFF_DIM;
 		current /= table_lenght;
@@ -1264,7 +1401,7 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		power_r_snubber = power_inductance - power_r_inductance;
 
 		if (power_r_snubber > RSNUBBER_POWER_MAX)
-			return ERROR;
+			return FIN_ERROR;
 
 		//tension rms estimada en Rsnubber (esta es la real del circuito)
 		Vsnubber = sqrt(power_r_snubber * resistance_discharge);
@@ -1289,17 +1426,17 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		{
 			case WARMING_UP:
 				if (Td > (p_session->stage_1_falling_time + p_session->stage_1_low_time))
-					return ERROR;
+					return FIN_ERROR;
 				break;
 
 			case PLATEAU:
 				if (Td > (p_session->stage_2_falling_time + p_session->stage_2_low_time))
-					return ERROR;
+					return FIN_ERROR;
 				break;
 
 			case COOLING_DOWN:
 				if (Td > (p_session->stage_3_falling_time + p_session->stage_3_low_time))
-					return ERROR;
+					return FIN_ERROR;
 				break;
 		}
 
@@ -1566,9 +1703,9 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 }
 
 //------ NUEVA WARMING UP ------//
-//esta rutina calcula los parametros y luego dibuja la se�al con los PWM en cada canal
+//esta rutina calcula los parametros y luego dibuja la señal con los PWM en cada canal
 //para el stage de Warming UP
-//ademas va cambiando los niveles de se�al generados
+//ademas va cambiando los niveles de señal generados
 unsigned char Session_Warming_Up_Channels (unsigned char channel)
 {
 
@@ -1719,6 +1856,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE:
 
 			i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);	//retorna FIN_OK o FIN_ERROR rutina nueva 19-03-15
+//			i = Session_Channels_Fixed_Parameters(channel, WARMING_UP);
 
 			if (i == FIN_OK)
 			{
@@ -1736,7 +1874,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 			break;
 
 		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:
-			//si todos los canales estan listos empiezo con las se�ales
+			//si todos los canales estan listos empiezo con las señales
 
 			if (((global_error_ch1 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch1 & BIT_ERROR_CHECK_MASK)) &&
 					((global_error_ch2 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch2 & BIT_ERROR_CHECK_MASK)) &&
@@ -1746,7 +1884,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 
 				*p_session_burst_cnt = 0;
 
-				//--- Slope ---//
+				//--- Slope ---//		//TODO: ??????????????
 				*p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
 				*p_pwm_slope /= (float)10;
 				*p_pwm_slope /= p_session_ch->stage_1_rising_time;
@@ -1833,6 +1971,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 
 			if (*p_stage_time == 0)		//TODO: esto no tine mucho sentido, se agoto el tiempo de change level???
 			{							//o ser que el buffer tiene menos posiciones y pas muchas veces por aca
+										//como llego a ese case si no habia agotado este timer
 				if (*p_session_channel_step < (SESSION_WUP_CH1_BUFF_DIM - 1))
 				{
 					//--- Time per step ---//
@@ -6079,7 +6218,8 @@ void Session_Current_Limit_control (void)
 			if (session_ch_1.status)
 			{
 				flagMuestreo = 0;
-				ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
+				//ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
+				ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_239Cycles5);
 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 				current_limit_state = CURRENT_CH1_WAIT_SAMPLE;
 			}
@@ -6118,7 +6258,8 @@ void Session_Current_Limit_control (void)
 			if (session_ch_2.status)
 			{
 				flagMuestreo = 0;
-				ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
+				//ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
+				ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_239Cycles5);
 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 				current_limit_state = CURRENT_CH2_WAIT_SAMPLE;
 			}
@@ -6157,7 +6298,8 @@ void Session_Current_Limit_control (void)
 			if (session_ch_3.status)
 			{
 				flagMuestreo = 0;
-				ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_28Cycles5);
+				//ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_28Cycles5);
+				ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_239Cycles5);
 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 				current_limit_state = CURRENT_CH3_WAIT_SAMPLE;
 			}
@@ -6197,6 +6339,7 @@ void Session_Current_Limit_control (void)
 			{
 				flagMuestreo = 0;
 				ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_28Cycles5);
+				ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_239Cycles5);
 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 				current_limit_state = CURRENT_CH4_WAIT_SAMPLE;
 			}

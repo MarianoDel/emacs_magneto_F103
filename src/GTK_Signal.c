@@ -970,7 +970,6 @@ unsigned char Session_Channels_Fixed_Parameters (unsigned char channel, unsigned
 	//tiempo de a sesion va a ser (p_session->stage_1_time_per_step) * tble lenght
 	for (i = 0; i < table_length; i++)
 	{
-
 		//cargo pwm de las señales por ahora un solo paso de tabla
 		//Rising
 		p_table->rising_pwm_40_initial = 0;
@@ -1884,7 +1883,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 
 				*p_session_burst_cnt = 0;
 
-				//--- Slope ---//		//TODO: ??????????????
+				//--- Slope ---//		//slope del primer rising edge
 				*p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
 				*p_pwm_slope /= (float)10;
 				*p_pwm_slope /= p_session_ch->stage_1_rising_time;
@@ -1969,9 +1968,8 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 
 		case SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL:
 
-			if (*p_stage_time == 0)		//TODO: esto no tine mucho sentido, se agoto el tiempo de change level???
-			{							//o ser que el buffer tiene menos posiciones y pas muchas veces por aca
-										//como llego a ese case si no habia agotado este timer
+			if (*p_stage_time == 0)		//reviso el timer del stage despues de haber terminado la señal completa
+			{									//avanzo en la tabla si tengo mas posiciones
 				if (*p_session_channel_step < (SESSION_WUP_CH1_BUFF_DIM - 1))
 				{
 					//--- Time per step ---//
@@ -2240,7 +2238,6 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 							}
 							break;
 					}
-
 				}
 			}
 			else
@@ -2317,7 +2314,6 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 						}
 						break;
 				}
-
 			}
 			break;
 

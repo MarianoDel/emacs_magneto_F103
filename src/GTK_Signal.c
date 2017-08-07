@@ -1202,7 +1202,10 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	// //corte en 4A
 	//peak_c = 2978;
 	//corte en 5A
-	peak_c = 3722;
+	//peak_c = 3722;
+	//Ahora tengo aprox. 600mV/A o 744./A
+	//pruebo exceso de I
+	peak_c = 1116;	//1.5A aprox
 
 	//
 	p_session->peak_current_limit = (unsigned short) peak_c;
@@ -6390,7 +6393,8 @@ unsigned char Current_Limit_CheckCh1 (void)
 				Session_Channel_1_Stop();
 				SetBitGlobalErrors (CH1, BIT_ERROR_CURRENT);
 
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
+				//sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
+				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
 				UART_PC_Send(&buffSendErr[0]);
 				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH1]);
 				UART_PC_Send(&buffSendErr[0]);
@@ -6415,7 +6419,8 @@ unsigned char Current_Limit_CheckCh2 (void)
 				Session_Channel_2_Stop();
 				SetBitGlobalErrors (CH2, BIT_ERROR_CURRENT);
 
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
+				// sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
+				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
 				UART_PC_Send(&buffSendErr[0]);
 				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH2]);
 				UART_PC_Send(&buffSendErr[0]);
@@ -6440,7 +6445,8 @@ unsigned char Current_Limit_CheckCh3 (void)
 				Session_Channel_3_Stop();
 				SetBitGlobalErrors (CH3, BIT_ERROR_CURRENT);
 
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
+//				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
+				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
 				UART_PC_Send(&buffSendErr[0]);
 				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH3]);
 				UART_PC_Send(&buffSendErr[0]);
@@ -6465,7 +6471,8 @@ unsigned char Current_Limit_CheckCh4 (void)
 				Session_Channel_4_Stop();
 				SetBitGlobalErrors (CH4, BIT_ERROR_CURRENT);
 
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
+				//sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
+				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
 				UART_PC_Send(&buffSendErr[0]);
 				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH4]);
 				UART_PC_Send(&buffSendErr[0]);
@@ -6489,20 +6496,49 @@ void Current_Limit_Counter_Reset (void)
 //
 void CheckforGlobalErrors (void)
 {
+	unsigned char dummy_stop = 0;
 	//primero me fijo si tengo que revisar los canales
-	if ((global_error_ch1 & BIT_ERROR_CHECK) &&
-			(global_error_ch2 & BIT_ERROR_CHECK) &&
-			(global_error_ch3 & BIT_ERROR_CHECK) &&
+	//lo activa la sesion de cada canal al iniciar
+	if ((global_error_ch1 & BIT_ERROR_CHECK) ||
+			(global_error_ch2 & BIT_ERROR_CHECK) ||
+			(global_error_ch3 & BIT_ERROR_CHECK) ||
 			(global_error_ch4 & BIT_ERROR_CHECK))
 	{
-		if ((global_error_ch1 & BIT_ERROR_CHECK_MASK) &&
-				(global_error_ch2 & BIT_ERROR_CHECK_MASK) &&
-				(global_error_ch3 & BIT_ERROR_CHECK_MASK) &&
-				(global_error_ch4 & BIT_ERROR_CHECK_MASK))
+		if (global_error_ch1 & BIT_ERROR_CURRENT)
 		{
-			//tengo error en todos los canales, aviso del error para parar display
-			UART_PC_Send((char *) (const char *) "STOP\r\n");
-			ResetCheckGlobalErrors ();
+			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
+			UART_PC_Send(&buffSendErr[0]);
+			dummy_stop = 1;
+		}
+
+		if (global_error_ch2 & BIT_ERROR_CURRENT)
+		{
+			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
+			UART_PC_Send(&buffSendErr[0]);
+			dummy_stop = 1;
+		}
+
+		if (global_error_ch3 & BIT_ERROR_CURRENT)
+		{
+			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
+			UART_PC_Send(&buffSendErr[0]);
+			dummy_stop = 1;
+		}
+
+		if (global_error_ch4 & BIT_ERROR_CURRENT)
+		{
+			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
+			UART_PC_Send(&buffSendErr[0]);
+			dummy_stop = 1;
+		}
+
+		if (dummy_stop)
+		{
+			Session_Channel_1_Stop();
+			Session_Channel_2_Stop();
+			Session_Channel_3_Stop();
+			Session_Channel_4_Stop();
+
 			//por las dudas antes de la demora apago todos los PWM
 			PWM_CH1_TiempoSubida(0); //pwm 200V.
 			PWM_CH1_TiempoMantenimiento(0);
@@ -6520,11 +6556,43 @@ void CheckforGlobalErrors (void)
 			PWM_CH4_TiempoMantenimiento(0);
 			PWM_CH4_TiempoBajada(0);
 
-
-			Wait_ms(1000);
+			Wait_ms(2000);
+			ResetCheckGlobalErrors ();
 			UART_PC_Send((char *) (const char *) "STOP\r\n");
 			UART_PC_Send((char *) (const char *) "STOP\r\n");
 		}
+
+
+		// if ((global_error_ch1 & BIT_ERROR_CHECK_MASK) &&
+		// 		(global_error_ch2 & BIT_ERROR_CHECK_MASK) &&
+		// 		(global_error_ch3 & BIT_ERROR_CHECK_MASK) &&
+		// 		(global_error_ch4 & BIT_ERROR_CHECK_MASK))
+		// {
+		// 	//tengo error en todos los canales, aviso del error para parar display
+		// 	UART_PC_Send((char *) (const char *) "STOP\r\n");
+		// 	ResetCheckGlobalErrors ();
+		// 	//por las dudas antes de la demora apago todos los PWM
+		// 	PWM_CH1_TiempoSubida(0); //pwm 200V.
+		// 	PWM_CH1_TiempoMantenimiento(0);
+		// 	PWM_CH1_TiempoBajada(0);
+		//
+		// 	PWM_CH2_TiempoSubida(0); //pwm 200V.
+		// 	PWM_CH2_TiempoMantenimiento(0);
+		// 	PWM_CH2_TiempoBajada(0);
+		//
+		// 	PWM_CH3_TiempoSubida(0); //pwm 200V.
+		// 	PWM_CH3_TiempoMantenimiento(0);
+		// 	PWM_CH3_TiempoBajada(0);
+		//
+		// 	PWM_CH4_TiempoSubida(0); //pwm 200V.
+		// 	PWM_CH4_TiempoMantenimiento(0);
+		// 	PWM_CH4_TiempoBajada(0);
+		//
+		//
+		// 	Wait_ms(1000);
+		// 	UART_PC_Send((char *) (const char *) "STOP\r\n");
+		// 	UART_PC_Send((char *) (const char *) "STOP\r\n");
+		// }
 	}
 }
 

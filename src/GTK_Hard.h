@@ -26,11 +26,12 @@
 //----- End of Board Configuration ------------//
 
 //----- Use it whithout Antenna Board Configuration ----------//
-#define WITHOUT_ANTENNA_BOARD_CH1
-#define WITHOUT_ANTENNA_BOARD_CH2
-#define WITHOUT_ANTENNA_BOARD_CH3
-#define WITHOUT_ANTENNA_BOARD_CH4
+// #define WITHOUT_ANTENNA_BOARD_CH1
+// #define WITHOUT_ANTENNA_BOARD_CH2
+// #define WITHOUT_ANTENNA_BOARD_CH3
+// #define WITHOUT_ANTENNA_BOARD_CH4
 
+//valores decimales son enteros/100, 0.9 es 90
 // #define HARDCODE_R_INT_CH1	3
 // #define HARDCODE_R_DEC_CH1 0		//estos los divide por 10 y los suma al int
 // #define HARDCODE_L_INT_CH1 18

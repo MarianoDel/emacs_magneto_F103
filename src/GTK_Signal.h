@@ -99,6 +99,7 @@ unsigned char Current_Limit_CheckCh2 (void);
 unsigned char Current_Limit_CheckCh3 (void);
 unsigned char Current_Limit_CheckCh4 (void);
 void Current_Limit_Counter_Reset (void);
+void StopAllChannels (void);
 
 //--- Para errores globales de antena
 //

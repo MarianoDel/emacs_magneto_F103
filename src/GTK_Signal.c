@@ -1201,6 +1201,8 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 	// peak_c = peak_c * 4095;		//valor pico permitido en ADC
 
 	peak_c = (current_limit * 1.2) * 0.6;		//600mV / A + 20%
+	// peak_c = (current_limit * 1.08) * 0.6;		//600mV / A + 8%
+	peak_c += 0.3;										//sumo 300mV de offet
 	peak_c = peak_c * 0.303;	//divido 3.3V
 	peak_c = peak_c * 4095;		//valor pico permitido en ADC
 
@@ -6413,6 +6415,11 @@ unsigned char Current_Limit_CheckCh1 (void)
 				return FIN_ERROR;
 			}
 		}
+		else
+		{
+			if (current_limit_cnt_ch1)
+				current_limit_cnt_ch1--;
+		}
 		new_current_sample_ch1 = 0;
 	}
 	return TRABAJANDO;
@@ -6439,6 +6446,12 @@ unsigned char Current_Limit_CheckCh2 (void)
 				return FIN_ERROR;
 			}
 		}
+		else
+		{
+			if (current_limit_cnt_ch2)
+				current_limit_cnt_ch2--;
+		}
+
 		new_current_sample_ch2 = 0;
 	}
 	return TRABAJANDO;
@@ -6465,6 +6478,12 @@ unsigned char Current_Limit_CheckCh3 (void)
 				return FIN_ERROR;
 			}
 		}
+		else
+		{
+			if (current_limit_cnt_ch3)
+				current_limit_cnt_ch3--;
+		}
+
 		new_current_sample_ch3 = 0;
 	}
 	return TRABAJANDO;
@@ -6491,6 +6510,12 @@ unsigned char Current_Limit_CheckCh4 (void)
 				return FIN_ERROR;
 			}
 		}
+		else
+		{
+			if (current_limit_cnt_ch4)
+				current_limit_cnt_ch4--;
+		}
+
 		new_current_sample_ch4 = 0;
 	}
 	return TRABAJANDO;

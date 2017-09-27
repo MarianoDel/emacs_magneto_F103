@@ -25,6 +25,9 @@ volatile unsigned char take_current_samples = 0;
 //--- Externals para armar se�ales y comprobar el TIM5 en el inicio del programa
 volatile unsigned int session_warming_up_channel_1_stage_time = 0;
 
+//--- Externals para el BUZZER
+unsigned short buzzer_timeout = 0;
+
 
 //Estructuras.
 session_typedef session_slot_aux;
@@ -104,32 +107,40 @@ int main (void)
 	for (i = 0; i < 20; i++)
 	{
 		if (LED1)
+		{
 			LED1_OFF;
+			// ENA_CH4_OFF;
+		}
 		else
+		{
 			LED1_ON;
+			// ENA_CH4_ON;
+		}
 
 		while (session_warming_up_channel_1_stage_time != 0);
 		session_warming_up_channel_1_stage_time = 1000;	//100ms
 //		Wait_ms(100);
 	}
+	LED1_OFF;
 
 //---- Defines from GTK_Hard.h -----//
 	UART_PC_Send("\r\nGausstek Limited Inc. -- Magnet Equipment\r\n");
 	UART_PC_Send("powered by: Kirno Technology\r\n");
 
-#ifdef HARDWARE_VERSION
-	UART_PC_Send(HARDWARE_VERSION);
+#ifdef HARD
+	UART_PC_Send(HARD);
 #else
 #error	"No Hardware defined in GTK_Hard.h file"
 #endif
 
-#ifdef SOFTWARE_VERSION
-	UART_PC_Send(SOFTWARE_VERSION);
+#ifdef SOFT
+	UART_PC_Send(SOFT);
 #else
 #error	"No Soft Version defined in GTK_Hard.h file"
 #endif
 
 	UART_PC_Send("Ready!\r\n");
+	// BuzzerCommands(BUZZER_MULTIPLE_SHORT, 1);
 //---- End of Defines from GTK_Hard.h -----//
 
 	//mando ENABLE los canales
@@ -198,6 +209,9 @@ int main (void)
 
 		//Chequeo de errores globales
 		CheckforGlobalErrors();
+
+		//Funciones del Buzzer
+		UpdateBuzzer();
 
 	}
 }

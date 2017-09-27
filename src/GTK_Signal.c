@@ -589,6 +589,10 @@ void Session_Channel_1 (void)
 				ch1_sync_state = SYNC_RESET;
 				SetBitGlobalErrors (CH1, BIT_ERROR_CHECK);
 
+				//Buzzer empezar tratamiento USO ESTE PARA TODOS LOS CANALES
+				BuzzerCommands(BUZZER_MULTIPLE_HALF, 1);
+
+
 				session_channel_1_state = SESSION_CHANNEL_1_VERIFY_ANTENNA;
 				break;
 
@@ -717,12 +721,14 @@ void Session_Channel_1 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_1_state = SESSION_CHANNEL_1_END;
-						UART_PC_Send("End_Cooling_Down,1\r\n");
 
-						UART_PC_Send("finish,1\r\n");
 						PWM_CH1_TiempoSubida(0); //pwm 200V.
 						PWM_CH1_TiempoMantenimiento(0);
 						PWM_CH1_TiempoBajada(0);
+
+						UART_PC_Send("End_Cooling_Down,1\r\n");
+						UART_PC_Send("finish,1\r\n");
+						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 					}
 
 					if ((i == TRABAJANDO) && (session_cooling_down_channel_1_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
@@ -5350,12 +5356,13 @@ void Session_Channel_2 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_2_state = SESSION_CHANNEL_2_END;
-						UART_PC_Send("End_Cooling_Down,2\r\n");
-
-						UART_PC_Send("finish,2\r\n");
 						PWM_CH2_TiempoSubida(0); //pwm 200V.
 						PWM_CH2_TiempoMantenimiento(0);
 						PWM_CH2_TiempoBajada(0);
+
+						UART_PC_Send("End_Cooling_Down,2\r\n");
+						UART_PC_Send("finish,2\r\n");
+						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 					}
 
 					if ((i == TRABAJANDO) && (session_cooling_down_channel_2_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
@@ -5715,12 +5722,13 @@ void Session_Channel_3 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_3_state = SESSION_CHANNEL_3_END;
-						UART_PC_Send("End_Cooling_Down,3\r\n");
-
-						UART_PC_Send("finish,3\r\n");
 						PWM_CH3_TiempoSubida(0); //pwm 200V.
 						PWM_CH3_TiempoMantenimiento(0);
 						PWM_CH3_TiempoBajada(0);
+
+						UART_PC_Send("End_Cooling_Down,3\r\n");
+						UART_PC_Send("finish,3\r\n");
+						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 					}
 
 					if ((i == TRABAJANDO) && (session_cooling_down_channel_3_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
@@ -6101,12 +6109,13 @@ void Session_Channel_4 (void)
 					if (i == FIN_OK)
 					{
 						session_channel_4_state = SESSION_CHANNEL_4_END;
-						UART_PC_Send("End_Cooling_Down,4\r\n");
-
-						UART_PC_Send("finish,4\r\n");
 						PWM_CH4_TiempoSubida(0); //pwm 200V.
 						PWM_CH4_TiempoMantenimiento(0);
 						PWM_CH4_TiempoBajada(0);
+
+						UART_PC_Send("End_Cooling_Down,4\r\n");
+						UART_PC_Send("finish,4\r\n");
+						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 					}
 
 					if ((i == TRABAJANDO) && (session_cooling_down_channel_4_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
@@ -6544,6 +6553,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch1 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
+			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 			Wait_ms(100);
 			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
 			UART_PC_Send(&buffSendErr[0]);
@@ -6559,6 +6569,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch2 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
+			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 			Wait_ms(100);
 			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
 			UART_PC_Send(&buffSendErr[0]);
@@ -6574,6 +6585,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch3 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
+			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 			Wait_ms(100);
 			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
 			UART_PC_Send(&buffSendErr[0]);
@@ -6589,6 +6601,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch4 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
+			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 			Wait_ms(100);
 			sprintf(&buffSendErr[0], (const char *) "ERROR(0x%02X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
 			UART_PC_Send(&buffSendErr[0]);
@@ -6601,7 +6614,7 @@ void CheckforGlobalErrors (void)
 			dummy_stop = 1;
 		}
 
-		if (!dummy_stop)
+		if (!dummy_stop)	//revisa no haber saltado por corriente antes
 		{
 			if ((global_error_ch1 & (BIT_ERROR_ANTENNA | BIT_ERROR_WARMING_UP)) &&
 					(global_error_ch2 & (BIT_ERROR_ANTENNA | BIT_ERROR_WARMING_UP)) &&
@@ -6610,6 +6623,7 @@ void CheckforGlobalErrors (void)
 					{
 						//tengo errores en todos los canales que no son por corriente
 						StopAllChannels ();
+						BuzzerCommands(BUZZER_MULTIPLE_LONG, 1);
 						Wait_ms(100);
 						UART_PC_Send((char *) (const char *) "STOP\r\n");
 
@@ -6677,6 +6691,7 @@ void StopAllChannels (void)
 	PWM_CH4_TiempoSubida(0); //pwm 200V.
 	PWM_CH4_TiempoMantenimiento(0);
 	PWM_CH4_TiempoBajada(0);
+
 }
 
 void SetCheckGlobalErrors (unsigned char channel)

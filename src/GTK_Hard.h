@@ -5,12 +5,30 @@
 
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
-#define HARDWARE_VERSION "Hardware Version: 2.0\r\n"
-//#define HARDWARE_VERSION "Hardware Version: 2.1\r\n"
+#define HARDWARE_VERSION_2_1
+//#define HARDWARE_VERSION_2_0
+#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa
+//#define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
+//#define SOFTWARE_VERSION_1_0
+
+#ifdef HARDWARE_VERSION_2_0
+#define HARD "Hardware Version: 2.0\r\n"
+#endif
+#ifdef HARDWARE_VERSION_2_1
+#define HARD "Hardware Version: 2.1\r\n"
+#endif
+
 //--- Software ------------------//
-//#define SOFTWARE_VERSION "Software Version: 1.0\r\n"
-#define SOFTWARE_VERSION "Software Version: 1.1\r\n"
-//#define SOFTWARE_VERSION "Software Version: 1.2\r\n"
+#ifdef SOFTWARE_VERSION_1_2
+#define SOFT "Software Version: 1.2\r\n"
+#endif
+#ifdef SOFTWARE_VERSION_1_1
+#define SOFT "Software Version: 1.1\r\n"
+#endif
+#ifdef SOFTWARE_VERSION_1_0
+#define SOFT "Software Version: 1.0\r\n"
+#endif
+
 //--- Clock frequency and Crystal selection ---//
 //#define sysFREC48
 //#define sysFREC72_XTAL_8
@@ -113,15 +131,6 @@ enum bool
 };
 
 
-//--- Clock ---//
-void RCC_Config (void);
-
-//--- Leds ---//
-void Led_Config();
-void Led1Toggle(void);
-void Led2Toggle(void);
-void Led3Toggle(void);
-
 //--- Configuracion de leds ---//
 //--- PC0 ---//
 #define LED1 ((GPIOC->ODR & 0x0001) == 0)
@@ -132,6 +141,13 @@ void Led3Toggle(void);
 #define LED2 ((GPIOC->ODR & 0x0002) == 0)
 #define LED2_OFF GPIOC->BSRR = 0x00000002
 #define LED2_ON GPIOC->BSRR = 0x00020000
+
+//--- PC13 ---//
+#ifdef HARDWARE_VERSION_2_1
+#define BUZZER ((GPIOC->ODR & 0x2000) != 0)
+#define BUZZER_ON GPIOC->BSRR = 0x00002000
+#define BUZZER_OFF GPIOC->BSRR = 0x20000000
+#endif
 
 //--- PB12 ---//
 #define LED3 ((GPIOB->ODR & 0x1000) == 0)
@@ -154,12 +170,15 @@ void Led3Toggle(void);
 #define ENA_CH3_OFF GPIOB->BSRR = 0x00040000
 
 //--- PB13 ---//
-//#define ENA_CH4 ((GPIOB->ODR & 0x2000) != 0)
-//#define ENA_CH4_ON GPIOB->BSRR = 0x00002000
-//#define ENA_CH4_OFF GPIOB->BSRR = 0x20000000
+#ifdef HARDWARE_VERSION_2_0
 #define ENA_CH4 LED3
 #define ENA_CH4_ON LED3_OFF
 #define ENA_CH4_OFF LED3_ON
+#else
+#define ENA_CH4 ((GPIOB->ODR & 0x2000) != 0)
+#define ENA_CH4_ON GPIOB->BSRR = 0x00002000
+#define ENA_CH4_OFF GPIOB->BSRR = 0x20000000
+#endif
 
 //--- RCC clkEnable ---//
 #define RCC_GPIOA_clk (RCC->APB2ENR & 0x00000004)
@@ -233,5 +252,40 @@ void Led3Toggle(void);
 #define RCC_ADC3_CLK (RCC->APB2ENR & 0x00008000)
 #define RCC_ADC3_CLKEN RCC->APB2ENR |= 0x00008000
 #define RCC_ADC3_CLKDIS RCC->APB2ENR &= ~0x00008000
+
+typedef enum
+{
+	BUZZER_INIT = 0,
+	BUZZER_MULTIPLE_SHORT,
+	BUZZER_MULTIPLE_SHORTA,
+	BUZZER_MULTIPLE_SHORTB,
+	BUZZER_MULTIPLE_HALF,
+	BUZZER_MULTIPLE_HALFA,
+	BUZZER_MULTIPLE_HALFB,
+	BUZZER_MULTIPLE_LONG,
+	BUZZER_MULTIPLE_LONGA,
+	BUZZER_MULTIPLE_LONGB,
+	BUZZER_TO_STOP
+
+} tBuzzer;
+
+//--- Tiempos (TIMEOUT) del buzzer
+#define TIM_BIP_SHORT       300
+#define TIM_BIP_SHORT_WAIT        500
+#define TIM_BIP_HALF        600
+#define TIM_BIP_HALF_WAIT        800
+#define TIM_BIP_LONG        2000
+#define TIM_BIP_LONG_WAIT        2000
+
+//--- Exported Module Functions ----
+//--- Clock ---//
+void RCC_Config (void);
+//--- Leds ---//
+void Led_Config();
+void Led1Toggle(void);
+void Led2Toggle(void);
+void Led3Toggle(void);
+void UpdateBuzzer (void);
+void BuzzerCommands(unsigned char , unsigned char );
 
 #endif

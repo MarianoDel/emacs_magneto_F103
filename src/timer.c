@@ -2,12 +2,17 @@
 #include "timer.h"
 #include "stm32f10x.h"
 #include "GTK_Signal.h"
+#include "GTK_Hard.h"
 #include "adc.h"
 #include "uart.h"
 #include "misc.h"
 
 extern volatile unsigned short timeRun;
 extern volatile unsigned char take_current_samples;
+#ifdef SOFTWARE_VERSION_1_2
+extern unsigned short buzzer_timeout;
+#endif
+
 
 //Wait_ms
 volatile unsigned short timer_wait;
@@ -17,8 +22,6 @@ void TIM7_IRQHandler (void)	//1mS
 {
 
 	Signal_TIM1MS ();
-
-	//Led3Toggle();
 
 	//Led3Toggle();
 	flagMuestreo = 1;
@@ -37,6 +40,11 @@ void TIM7_IRQHandler (void)	//1mS
 	//bajar flag
 	if (TIM7->SR & 0x01)	//bajo el flag
 		TIM7->SR = 0x00;
+
+#ifdef SOFTWARE_VERSION_1_2
+	if (buzzer_timeout)
+		buzzer_timeout--;
+#endif
 }
 
 

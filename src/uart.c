@@ -1225,6 +1225,19 @@ buffUART1rx2[0] = '\0';
 			UART_PC_Send((char *)"OK\r\n");
 		}
 
+#ifdef HARDWARE_VERSION_2_1
+		else if (!strncmp((const char *)&buffUART1rx2[0], (const char *)"finish_ok,", (sizeof("finish_ok,") - 1)))
+		{
+			Session_Channel_1_Stop();
+			Session_Channel_2_Stop();
+			Session_Channel_3_Stop();
+			Session_Channel_4_Stop();
+
+			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
+			UART_PC_Send((char *)"OK\r\n");
+		}
+#endif
+
 		else if (!strncmp((const char *)&buffUART1rx2[0], (const char *)"read_channel,", (sizeof("read_channel,") - 1)))
 		{
 			if (((buffUART1rx2[13] - 48) < 5) && ((buffUART1rx2[13] - 48) > 0))

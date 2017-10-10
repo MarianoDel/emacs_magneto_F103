@@ -210,8 +210,10 @@ int main (void)
 		//Chequeo de errores globales
 		CheckforGlobalErrors();
 
+#ifdef SOFTWARE_VERSION_1_2
 		//Funciones del Buzzer
 		UpdateBuzzer();
+#endif
 
 	}
 }

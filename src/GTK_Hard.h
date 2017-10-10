@@ -5,10 +5,10 @@
 
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
-#define HARDWARE_VERSION_2_1
-//#define HARDWARE_VERSION_2_0
-#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa
-//#define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
+//#define HARDWARE_VERSION_2_1
+#define HARDWARE_VERSION_2_0
+//#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa
+#define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
 
 #ifdef HARDWARE_VERSION_2_0

@@ -5,11 +5,13 @@
 
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
-//#define HARDWARE_VERSION_2_1
-#define HARDWARE_VERSION_2_0
-//#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa
+// #define HARDWARE_VERSION_2_1
+#define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio
+// #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
+#define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
+#define NO_ERRORS_IN_RISING
 
 #ifdef HARDWARE_VERSION_2_0
 #define HARD "Hardware Version: 2.0\r\n"
@@ -34,7 +36,7 @@
 //#define sysFREC72_XTAL_8
 #define sysFREC72_XTAL_12
 //--- Voltage of the Powers Supply used ---//
-#define PSU_40		40
+#define PSU_40		48
 #define PSU_200	200
 #define RSNUBBER_POWER_MAX		15
 #define resistance_discharge 1175
@@ -44,11 +46,12 @@
 //----- End of Board Configuration ------------//
 
 //----- Use it whithout Antenna Board Configuration ----------//
-// #define WITHOUT_ANTENNA_BOARD_CH1
-// #define WITHOUT_ANTENNA_BOARD_CH2
-// #define WITHOUT_ANTENNA_BOARD_CH3
-// #define WITHOUT_ANTENNA_BOARD_CH4
-
+#ifdef ANTENNA_HARDCODED
+#define WITHOUT_ANTENNA_BOARD_CH1
+#define WITHOUT_ANTENNA_BOARD_CH2
+#define WITHOUT_ANTENNA_BOARD_CH3
+#define WITHOUT_ANTENNA_BOARD_CH4
+#endif
 //valores decimales son enteros/100, 0.9 es 90
 // #define HARDCODE_R_INT_CH1	3
 // #define HARDCODE_R_DEC_CH1 0		//estos los divide por 10 y los suma al int

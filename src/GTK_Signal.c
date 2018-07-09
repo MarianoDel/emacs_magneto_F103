@@ -557,6 +557,7 @@ unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session)
 extern unsigned char temp_actual_channel_1_int;
 extern unsigned char temp_actual_channel_1_dec;
 
+
 void Session_Channel_1 (void)
 {
 
@@ -1296,8 +1297,13 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		//Maximum voltage.
 		voltage2 = voltage + (float)(current * resistance);
 
+#ifdef NO_ERRORS_IN_RISING
+		// if (voltage2 > PSU_200)
+		// 	return FIN_ERROR;
+#else
 		if (voltage2 > PSU_200)
-			return FIN_ERROR;
+			return FIN_ERROR;                
+#endif
 
 		if (voltage2 < PSU_40)
 		{
@@ -1328,6 +1334,20 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		}
 		else	//ya se que es mayor a 40 y menor a 200
 		{
+#ifdef NO_ERRORS_IN_RISING
+                    if (voltage2 > PSU_200)
+                    {
+                        //si da mal PWM al 100%
+			auxiliar_duty = 1000;
+			(p_table + i)->rising_pwm_200_initial = (unsigned short)auxiliar_duty;
+
+			//Final voltage.
+			auxiliar_duty = 1000;
+			(p_table + i)->rising_pwm_200_final = (unsigned short)auxiliar_duty;
+                    }
+                    else
+                    {
+                        //si da bien, hace la cuenta como siempre
 			//Initial voltage.
 			auxiliar_duty = (float)voltage * 1000 / PSU_200;
 			(p_table + i)->rising_pwm_200_initial = (unsigned short)auxiliar_duty;
@@ -1335,7 +1355,18 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 			//Final voltage.
 			auxiliar_duty = (float)voltage2 * 1000 / PSU_200;
 			(p_table + i)->rising_pwm_200_final = (unsigned short)auxiliar_duty;
+                    }
 
+
+#else
+			//Initial voltage.
+			auxiliar_duty = (float)voltage * 1000 / PSU_200;
+			(p_table + i)->rising_pwm_200_initial = (unsigned short)auxiliar_duty;
+
+			//Final voltage.
+			auxiliar_duty = (float)voltage2 * 1000 / PSU_200;
+			(p_table + i)->rising_pwm_200_final = (unsigned short)auxiliar_duty;                        
+#endif
 			//Steps.
 			switch(session_stage)
 			{

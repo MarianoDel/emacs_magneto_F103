@@ -139,6 +139,12 @@ int main (void)
 #error	"No Soft Version defined in GTK_Hard.h file"
 #endif
 
+#ifdef ANTENNA_HARDCODED
+        UART_PC_Send("Antenna HardCoded!!!\r\n");
+#endif
+#ifdef NO_ERRORS_IN_RISING
+        UART_PC_Send("No errors in rising\r\n");
+#endif
 	UART_PC_Send("Ready!\r\n");
 	// BuzzerCommands(BUZZER_MULTIPLE_SHORT, 1);
 //---- End of Defines from GTK_Hard.h -----//

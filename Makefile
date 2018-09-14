@@ -28,12 +28,17 @@ MCU  = cortex-m3
 
 # List all default C defines here, like -D_DEBUG=1
 DDEFS = -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DUSE_STM3210E_EVAL
-#DDEFS = -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DUSE_STM3210E_EVAL -D__GNUC__
+#para el micro STM32F103RC
+# DDEFS = -DSTM32F10X_HD
+#para el micro STM32F103C8
+# DDEFS = -DSTM32F10X_MD
+
 # List all default ASM defines here, like -D_DEBUG=1
 DADEFS =
 
 # List all default directories to look for include files here
 DINCDIR = ./src
+CORELIBDIR = ./cmsis_core
 
 # List the default directory to look for the libraries here
 DLIBDIR =
@@ -61,7 +66,7 @@ UADEFS =
 
 # List C source files here
 LIBSDIR    = ../STM32F10x_StdPeriph_Lib_V3.5.0/Libraries
-CORELIBDIR = $(LIBSDIR)/CMSIS/CM3/CoreSupport
+# CORELIBDIR = $(LIBSDIR)/CMSIS/CM3/CoreSupport
 DEVDIR  = $(LIBSDIR)/CMSIS/CM3/DeviceSupport/ST/STM32F10x
 STMSPDDIR    = $(LIBSDIR)/STM32F10x_StdPeriph_Driver
 STMSPSRCDDIR = $(STMSPDDIR)/src
@@ -80,6 +85,7 @@ SRC += ./src/timer.c
 SRC += ./src/pwm.c
 SRC += ./src/flash_program.c
 SRC += ./src/adc.c
+SRC += ./src/comms.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c
@@ -184,6 +190,7 @@ assobjects = $(assemblersources:.s=.o)
 
 all: $(assobjects) $(objects) $(FULL_PRJ).elf $(FULL_PRJ).bin
 	arm-none-eabi-size $(FULL_PRJ).elf
+	gtags -q
 
 $(assobjects): %.o: %.s
 	$(AS) -c $(ASFLAGS) $< -o $@

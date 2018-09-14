@@ -1753,9 +1753,9 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 }
 
 //------ NUEVA WARMING UP ------//
-//esta rutina calcula los parametros y luego dibuja la señal con los PWM en cada canal
+//esta rutina calcula los parametros y luego dibuja la senial con los PWM en cada canal
 //para el stage de Warming UP
-//ademas va cambiando los niveles de señal generados
+//ademas va cambiando los niveles de senial generados
 unsigned char Session_Warming_Up_Channels (unsigned char channel)
 {
 
@@ -1924,7 +1924,7 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 			break;
 
 		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:
-			//si todos los canales estan listos empiezo con las señales
+			//si todos los canales estan listos empiezo con las seniales
 
 			if (((global_error_ch1 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch1 & BIT_ERROR_CHECK_MASK)) &&
 					((global_error_ch2 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch2 & BIT_ERROR_CHECK_MASK)) &&

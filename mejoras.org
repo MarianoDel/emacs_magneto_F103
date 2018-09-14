@@ -1,0 +1,55 @@
+* Mejoras al Soft del MotherBoard principal para nuevo soft Raspberry
+** DONE Empiezo docs de cambios
+   CLOSED: [2018-09-13 Thu 18:28]
+** TODO Enviar con cada nueva conexion de antena los 4 strings de canales
+** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
+** TODO Avisar de la desconexion de un canal
+** TODO Agregar codigo de Hardware de MotherBoard
+** Errores encontrados
+   - arrancan 2 antenas quito 1 (no avisa) si a cambio en 5 segundos no ve la desconexion??
+   - arranca con 1 la cambio de lugar y sigue
+
+* Migrar a emacs y repositorio github atom -> emacs
+** DONE Crear primero bin y revisar tamanios
+   CLOSED: [2018-09-14 Fri 08:39]
+   arm-none-eabi-size Magneto_GTK_rom.elf
+   text    data     bss     dec     hex filename
+  74984     112   25620  100716   1896c Magneto_GTK_rom.elf
+   
+** TODO Utilizar nuevo Makefile
+   - usar global
+   - cargar todos los archivos para flash de micro
+   - utilizar configuracion del README de blue pill
+   - revisar diferencias .gitignore
+   - cambie cmsis_core OK
+
+
+** TODO Quitar LibST de donde se pueda
+   - usar emacs_arduino y emacs_stretcher_F103
+
+*** para usar usart.c usart.h desde emacs_stretcher_F103
+    - armo un modulo de comm para quitar el codigo de comunicaciones
+      entre MotherBoard, PC y antennas del modulo uart y poder usar
+      modulo nuevo
+    - con el nuevo modulo mismo tamanio de codigo
+
+** TODO Armar nuevos modelos de archivos en modulos
+   - .h .c con nuevo modelo
+** TODO Upgrade del repositorio remoto GitHub
+   - pasar a emacs...
+
+
+* Respecto del hardware Raspberry
+** perdio el RTC
+   - podria traer problemas de conexion original
+
+
+* Respecto del software Raspberry
+** Necesita red para arrancar
+** En los primeros 20 seg de tratamiento no acepta STOP
+** Barra desplazamiento frecuencia un poco mas grande (por el touch)
+** Quitar entradas setup adicionales si no va a tener pantalla
+*** Se frizo el boton de setup
+*** Un para de veces entra a una pantalla blanca y queda ahí
+
+** Necesitaria alguna pantalla de configuracion de red si no va a bootear

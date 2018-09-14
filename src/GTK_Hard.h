@@ -11,7 +11,7 @@
 #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
 #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
-#define NO_ERRORS_IN_RISING
+#define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
 
 #ifdef HARDWARE_VERSION_2_0
 #define HARD "Hardware Version: 2.0\r\n"

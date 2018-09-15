@@ -2,7 +2,8 @@
 #include "stm32f10x.h"
 #include "GTK_Hard.h"
 #include "timer.h"
-#include "uart.h"
+// #include "uart.h"
+#include "usart.h"
 #include "pwm.h"
 #include "adc.h"
 #include "GTK_Estructura.h"
@@ -10,9 +11,16 @@
 #include "flash_program.h"
 #include "GTK_Errors.h"
 
+#include "comms.h"
+
 
 //--- Externals para enviar errores en UART
 char buffSendErr[64];
+volatile unsigned char usart1_have_data = 0;
+volatile unsigned char usart2_have_data = 0;
+volatile unsigned char usart3_have_data = 0;
+volatile unsigned char usart4_have_data = 0;
+volatile unsigned char usart5_have_data = 0;
 
 //--- Externals para enviar keepalive por UART
 #define TIME_RUN_DEF 250

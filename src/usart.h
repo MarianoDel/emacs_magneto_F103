@@ -22,19 +22,45 @@
 //se pueden colocar ifdef para cada usart y habilitar o no cada una
 //reduciria el codigo generado por el compilador
 
+//---- Exported Macros and Defines --------------------
+#define UART_PC_Init() 		Usart1Config()
+#define UART_PC_Send(x) 	Usart1Send(x)
+
+#define UART_CH1_Init()		Usart2Config()
+#define UART_CH1_Send(x)	Usart2Send(x)
+
+#define UART_CH2_Init()		Usart3Config()
+#define UART_CH2_Send(x)	Usart3Send(x)
+
+#define UART_CH3_Init()		Uart4Config()
+#define UART_CH3_Send(x)	Uart4Send(x)
+
+#define UART_CH4_Init()		Uart5Config()
+#define UART_CH4_Send(x)	Uart5Send(x)
+
 //---- Common Defines --------------------
 // 0xMMMF    Mantissa MMM Fraction F/16
 //
-// #define USART_PCKL1_9600        0x0EA6    //con xtal
-#define USART_PCKL1_9600        0x0DD3    //con rc interno da 9060, corrijo
-// #define USART_PCKL2_9600        0x1D4C
-#define USART_PCKL2_9600        0x1B40    //con rc interno da 8930, corrijo
+// Para utilizar con XTAL y freq 72MHz
+#define USART_XTAL_PCKL1_9600        0x0EA6
+#define USART_XTAL_PCKL2_9600        0x1D4C
 
-#define USART1_9600        USART_PCKL2_9600
-#define USART2_9600        USART_PCKL1_9600
-#define USART3_9600        USART_PCKL1_9600
-#define UART4_9600        USART_PCKL1_9600
-#define UART5_9600        USART_PCKL1_9600
+// Para utilizar con RC interno (estan compensadas las diferencias)
+#define USART_RC_PCKL1_9600        0x0DD3    //con rc interno da 9060, corrijo
+#define USART_RC_PCKL2_9600        0x1B40    //con rc interno da 8930, corrijo
+
+
+#define USART1_9600        USART_XTAL_PCKL2_9600
+#define USART2_9600        USART_XTAL_PCKL1_9600
+#define USART3_9600        USART_XTAL_PCKL1_9600
+#define UART4_9600         USART_XTAL_PCKL1_9600
+#define UART5_9600         USART_XTAL_PCKL1_9600
+
+// #define USART1_9600        USART_RC_PCKL2_9600
+// #define USART2_9600        USART_RC_PCKL1_9600
+// #define USART3_9600        USART_RC_PCKL1_9600
+// #define UART4_9600         USART_RC_PCKL1_9600
+// #define UART5_9600         USART_RC_PCKL1_9600
 
 #define RCC_USART1_CLK (RCC->APB2ENR & 0x00004000)
 #define RCC_USART1_CLKEN RCC->APB2ENR |= 0x00004000

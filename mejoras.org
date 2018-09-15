@@ -32,6 +32,13 @@
       entre MotherBoard, PC y antennas del modulo uart y poder usar
       modulo nuevo
     - con el nuevo modulo mismo tamanio de codigo
+    - con el cambio uart -> usart mejoro algo de codigo
+
+*** con modulo usart ver los pines alternativos, son distintos segun hardware
+*** TODO FALTA PROBAR ANTERIOR
+
+*** migro modulo timer
+    - ojo hay un monton de pwm que no estan en este modulo
 
 ** TODO Armar nuevos modelos de archivos en modulos
    - .h .c con nuevo modelo

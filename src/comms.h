@@ -20,12 +20,21 @@
 
 
 //---- Common Defines --------------------
-
+#define UART_CH1_Receive()	UART2_Receive()
+#define UART_CH2_Receive()	UART3_Receive()
+#define UART_CH3_Receive()	UART4_Receive()
+#define UART_CH4_Receive()	UART5_Receive()
+#define UART_PC_Receive()	UART1_Receive()
 
 
 
 
 //--- Exported functions ---//
+void UART1_Receive (void);
+void UART2_Receive (void);
+void UART3_Receive (void);
+void UART4_Receive (void);
+void UART5_Receive (void);
 
 
 

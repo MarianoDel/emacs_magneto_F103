@@ -18,7 +18,8 @@
 //#include "stdio.h"
 #include "GTK_Hard.h"
 #include "timer.h"
-#include "uart.h"
+#include "usart.h"
+// #include "uart.h"
 
 #include "float.h"
 
@@ -6858,4 +6859,6 @@ void Signal_TIM1MS (void)
 	}
 }
 
-//--- Fin de carga de se�ales ---//
+//--- Fin de carga de seniales ---//
+
+//--- end of file ---//

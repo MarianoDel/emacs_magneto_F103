@@ -1,7 +1,8 @@
 //#include "GTK_Header.h"
 
 #include "GTK_Estructura.h"
-#include "uart.h"
+// #include "uart.h"
+#include "usart.h"
 #include "flash_program.h"
 #include "GTK_Signal.h"
 #include "GTK_Hard.h"
@@ -887,13 +888,13 @@ void SessionSend(session_typedef * ptr_session)
 
 	//Antenna.
 /*	sprintf(&buffChar[0],"antenna,%03d,%02d,%03d,%02d,%02d,%02d,1\r\n", ptr_session->stage_1_resistance_int, ptr_session->stage_1_resistance_dec, ptr_session->stage_1_inductance_int, ptr_session->stage_1_inductance_dec, ptr_session->stage_1_current_limit_int, ptr_session->stage_1_current_limit_dec);
-	UART3Send(&buffChar[0]);
+	UART_PC_Send(&buffChar[0]);
 	Wait_ms(delay_session_send);
 	sprintf(&buffChar[0],"antenna,%03d,%02d,%03d,%02d,%02d,%02d,2\r\n", ptr_session->stage_2_resistance_int, ptr_session->stage_2_resistance_dec, ptr_session->stage_2_inductance_int, ptr_session->stage_2_inductance_dec, ptr_session->stage_2_current_limit_int, ptr_session->stage_2_current_limit_dec);
-	UART3Send(&buffChar[0]);
+	UART_PC_Send(&buffChar[0]);
 	Wait_ms(delay_session_send);
 	sprintf(&buffChar[0],"antenna,%03d,%02d,%03d,%02d,%02d,%02d,3\r\n", ptr_session->stage_3_resistance_int, ptr_session->stage_3_resistance_dec, ptr_session->stage_3_inductance_int, ptr_session->stage_3_inductance_dec, ptr_session->stage_3_current_limit_int, ptr_session->stage_3_current_limit_dec);
-	UART3Send(&buffChar[0]);
+	UART_PC_Send(&buffChar[0]);
 	Wait_ms(delay_session_send);
 */
 	//Signal.
@@ -1155,7 +1156,7 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel)
 	a = ptr_session_channel->stage_3_burst_mode_off;
 	ptr_session->stage_3_burst_mode_off = a;
 
-	UART3Send("LOAD OK\r\n");
+	UART_PC_Send("LOAD OK\r\n");
 
 
 }
@@ -1171,7 +1172,7 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 
 	if (a == FIN_ERROR)
 	{
-		UART3Send("LOAD ERROR\r\n");
+		UART_PC_Send("LOAD ERROR\r\n");
 	}
 	else if (a == FIN_OK)
 	{
@@ -1413,7 +1414,7 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 		a = ptr_session_slot.sync_on;
 		ptr_session_channel->sync_on = a;
 
-		UART3Send("LOAD OK\r\n");
+		UART_PC_Send("LOAD OK\r\n");
 	}
 }
 

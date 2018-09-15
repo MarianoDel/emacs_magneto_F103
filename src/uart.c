@@ -8,32 +8,34 @@
 #include "flash_program.h"
 #include "timer.h"
 
+#include "comms.h"
+
 #include <stdio.h>
 #include <string.h>
 
 
 //External variable.
 //General.
-extern session_typedef session_slot_aux;
+// extern session_typedef session_slot_aux;
 
-extern session_typedef session_ch_1;
-extern session_typedef session_ch_2;
-extern session_typedef session_ch_3;
-extern session_typedef session_ch_4;
+// extern session_typedef session_ch_1;
+// extern session_typedef session_ch_2;
+// extern session_typedef session_ch_3;
+// extern session_typedef session_ch_4;
 
-extern unsigned char temp_actual_channel_1_int;
-extern unsigned char temp_actual_channel_1_dec;
-extern unsigned char temp_actual_channel_2_int;
-extern unsigned char temp_actual_channel_2_dec;
-extern unsigned char temp_actual_channel_3_int;
-extern unsigned char temp_actual_channel_3_dec;
-extern unsigned char temp_actual_channel_4_int;
-extern unsigned char temp_actual_channel_4_dec;
+// extern unsigned char temp_actual_channel_1_int;
+// extern unsigned char temp_actual_channel_1_dec;
+// extern unsigned char temp_actual_channel_2_int;
+// extern unsigned char temp_actual_channel_2_dec;
+// extern unsigned char temp_actual_channel_3_int;
+// extern unsigned char temp_actual_channel_3_dec;
+// extern unsigned char temp_actual_channel_4_int;
+// extern unsigned char temp_actual_channel_4_dec;
 
-extern unsigned char channel_1_pause;
-extern unsigned char channel_2_pause;
-extern unsigned char channel_3_pause;
-extern unsigned char channel_4_pause;
+// extern unsigned char channel_1_pause;
+// extern unsigned char channel_2_pause;
+// extern unsigned char channel_3_pause;
+// extern unsigned char channel_4_pause;
 
 //--- USART1 ---//
 #define BUFFUART1RX_DIM 256

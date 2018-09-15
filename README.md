@@ -1,5 +1,29 @@
-# Magneto placa grande hasta 4 Amper
-# atom_magneto_F103
-Equipo de Magneto placa grande
-Utiliza lib de ST que debe estar guardada en:
-../STM32F10x_StdPeriph_Lib_V3.5.0
+# Placa - MotherBoard - de equipo Magneto
+micro STM32F103RCT6
+
+
+Antes de empezar revisar seleccion del micro y configuracion
+------------------------------------------------------------
+
+* work area size y flash image
+>stm32f1_flash.cfg
+
+* work area size y flash image
+>stm32f1_flash_lock.cfg
+
+* work area size
+>stm32f1_gdb.cfg
+
+* work area size
+>stm32f1_reset.cfg
+
+* end of ram; stack size; memory lenght
+>./startup_src/stm32_flash.ld
+
+* elegir clock (xtal o rc)
+>./src/hard.h
+
+* elegir procesador definiciones en linea 66 de stm32f1xx.h -> pero modificar en Makefile
+>./src/stm32f1xx.h
+>.Makefile
+

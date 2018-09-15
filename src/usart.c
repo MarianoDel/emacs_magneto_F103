@@ -11,7 +11,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
 #include "stm32f10x.h"
-#include "hard.h"
+// #include "hard.h"
   
 #include <stdio.h>
 #include <string.h>
@@ -71,6 +71,8 @@ volatile unsigned short dummy = 0;
 //---- USART1 Functions ----
 void Usart1Config(void)
 {
+    unsigned long temp;
+    
     //---- Clk USART1 ----
     if (!RCC_USART1_CLK)
         RCC_USART1_CLKEN;
@@ -88,11 +90,13 @@ void Usart1Config(void)
     USART1->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;	//para pruebas TX
 
     //---- Configuro salidas alternativas ----
-    // temp = GPIOA->AFR[1];
-    // temp &= 0xFFFFF00F;
-    // temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
-    // GPIOA->AFR[1] = temp;
-
+    //----GPIOA----//
+    //----TX:PA9 RX:PA10----//
+    temp = GPIOA->CRH;
+    temp &= 0xFFFFF00F;
+    temp |= 0x000004B0;
+    GPIOA->CRH = temp;
+        
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(USART1_IRQn);
     NVIC_SetPriority(USART1_IRQn, 7);
@@ -202,6 +206,7 @@ void USART1_IRQHandler (void)
 //---- USART2 Functions ----
 void Usart2Config(void)
 {
+    unsigned long temp;
     //---- Clk USART2 ----
     if (!RCC_USART2_CLK)
         RCC_USART2_CLKEN;
@@ -219,10 +224,13 @@ void Usart2Config(void)
     USART2->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;	//para pruebas TX
 
     //---- Configuro salidas alternativas ----
-    // temp = GPIOA->AFR[1];
-    // temp &= 0xFFFFF00F;
-    // temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
-    // GPIOA->AFR[1] = temp;
+    //----GPIOA----//
+    //----TX:PA2 RX:PA3----//
+    temp = GPIOA->CRL;
+    temp &= 0xFFFF00FF;
+    temp |= 0x00004B00;
+    GPIOA->CRL = temp;
+    
 
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(USART2_IRQn);
@@ -333,6 +341,8 @@ void USART2_IRQHandler (void)
 //---- USART3 Functions ----
 void Usart3Config(void)
 {
+    unsigned long temp;
+    
     //---- Clk USART3 ----
     if (!RCC_USART3_CLK)
         RCC_USART3_CLKEN;
@@ -350,10 +360,12 @@ void Usart3Config(void)
     USART3->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;	//para pruebas TX
 
     //---- Configuro salidas alternativas ----
-    // temp = GPIOA->AFR[1];
-    // temp &= 0xFFFFF00F;
-    // temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
-    // GPIOA->AFR[1] = temp;
+    //----GPIOB----//
+    //----TX:PB10 RX:PB11----//
+    temp = GPIOB->CRH;
+    temp &= 0xFFFF00FF;
+    temp |= 0x00004B00;
+    GPIOB->CRH = temp;
 
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(USART3_IRQn);
@@ -466,6 +478,8 @@ void USART3_IRQHandler (void)
 //---- UART4 Functions ----
 void Uart4Config(void)
 {
+    unsigned long temp;
+    
     //---- Clk UART4 ----
     if (!RCC_UART4_CLK)
         RCC_UART4_CLKEN;
@@ -483,10 +497,13 @@ void Uart4Config(void)
     UART4->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;	//para pruebas TX
 
     //---- Configuro salidas alternativas ----
-    // temp = GPIOA->AFR[1];
-    // temp &= 0xFFFFF00F;
-    // temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
-    // GPIOA->AFR[1] = temp;
+    //----GPIOA----//
+    //----TX:PC10 RX:PC11----//
+    temp = GPIOC->CRH;
+    temp &= 0xFFFF00FF;
+    temp |= 0x00004B00;
+    GPIOC->CRH = temp;
+    
 
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(UART4_IRQn);
@@ -597,6 +614,8 @@ void UART4_IRQHandler (void)
 //---- UART5 Functions ----
 void Uart5Config(void)
 {
+    unsigned long temp;
+    
     //---- Clk UART5 ----
     if (!RCC_UART5_CLK)
         RCC_UART5_CLKEN;
@@ -614,11 +633,19 @@ void Uart5Config(void)
     UART5->CR1 = USART_CR1_RXNEIE | USART_CR1_RE | USART_CR1_TE | USART_CR1_UE;	//para pruebas TX
 
     //---- Configuro salidas alternativas ----
-    // temp = GPIOA->AFR[1];
-    // temp &= 0xFFFFF00F;
-    // temp |= 0x00000110;	//PA10 -> AF1 PA9 -> AF1
-    // GPIOA->AFR[1] = temp;
+    //----GPIOC/D----//
+    //----TX:PC12 RX:PD3----//
+    temp = GPIOC->CRH;
+    temp &= 0xFFF0FFFF;
+    temp |= 0x000B0000;
+    GPIOC->CRH = temp;
+    
+    temp = GPIOD->CRL;
+    temp &= 0xFFFFF0FF;
+    temp |= 0x00000400;
+    GPIOD->CRL = temp;
 
+        
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(UART5_IRQn);
     NVIC_SetPriority(UART5_IRQn, 7);

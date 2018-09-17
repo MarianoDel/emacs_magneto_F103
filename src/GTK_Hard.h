@@ -1,7 +1,7 @@
 #ifndef GTK_HARD_H_
 #define GTK_HARD_H_
 
-#include "stm32f10x_rcc.h"
+#include "stm32f10x.h"
 
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
@@ -261,13 +261,6 @@ typedef enum
 #define TIM_BIP_LONG_WAIT        2000
 
 //--- Exported Module Functions ----
-//--- Clock ---//
-void RCC_Config (void);
-//--- Leds ---//
-void Led_Config();
-void Led1Toggle(void);
-void Led2Toggle(void);
-void Led3Toggle(void);
 void UpdateBuzzer (void);
 void BuzzerCommands(unsigned char , unsigned char );
 

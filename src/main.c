@@ -120,7 +120,7 @@ int main (void)
 	UART_CH3_Init();
 	UART_CH4_Init();
 
-	//Actvate timers for the PWM outputs
+	//Activate timers for the PWM outputs
         TIM_1_Init();        
         TIM_2_Init();
         TIM_3_Init();

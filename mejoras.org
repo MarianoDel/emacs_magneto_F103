@@ -75,6 +75,8 @@
     stm32f10x_conf.h la pide stm32f10x.h con el STD_PERIPH_DRIVER desde el Makefile 
     para usar assert_params
 
+*** TODO flash_program tambien usa libST
+
 ** TODO Armar nuevos modelos de archivos en modulos
    - .h .c con nuevo modelo
 ** TODO Upgrade del repositorio remoto GitHub

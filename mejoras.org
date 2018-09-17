@@ -37,8 +37,40 @@
 *** con modulo usart ver los pines alternativos, son distintos segun hardware
 *** TODO FALTA PROBAR ANTERIOR
 
-*** migro modulo timer
+*** TODO migro modulo timer
     - ojo hay un monton de pwm que no estan en este modulo
+
+*** DONE Migro el modulo de clock general a startup_src
+    CLOSED: [2018-09-17 Mon 15:14]
+    - codigo antes
+    arm-none-eabi-size Magneto_GTK_rom.elf
+    text    data     bss     dec     hex filename
+    73728     112   22916   96756   179f4 Magneto_GTK_rom.elf
+
+    - agrego hard.h en src por las definiciones de clock, despues lo debo juntar con GTK_Hard.h
+    - tambien quito dumb function SystemInit() del main (prototipo y definicion)
+
+    - despues de implementar
+    arm-none-eabi-size Magneto_GTK_rom.elf
+    text    data     bss     dec     hex filename
+    73144     112   22916   96172   177ac Magneto_GTK_rom.elf
+    
+    - ahora pruebo de quitar rcc de libST pero no puedo porque el adc lo sigue usando
+    - esta dificil porque en emacs_arduino y en emacs_stertcher no esta implementado el adc sin libST
+
+*** migro modulo gpio que no estaba quitando los inits de las primeras funciones de main
+    - quito Tamper_Config del GTK_Hard.c
+    - quito stm32gpio del makefile OK
+
+
+*** DONE No funciona nada!!!!
+    CLOSED: [2018-09-17 Mon 15:13]
+    - aparentemente se esta llamando dos veces a SystemInit() una desde el startup assembler
+      y otra dentro de main
+
+*** no sale la libST
+    stm32f10x_conf.h la pide stm32f10x.h con el STD_PERIPH_DRIVER desde el Makefile 
+    para usar assert_params
 
 ** TODO Armar nuevos modelos de archivos en modulos
    - .h .c con nuevo modelo

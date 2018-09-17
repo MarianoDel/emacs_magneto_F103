@@ -4,7 +4,7 @@
 #include "timer.h"
 // #include "uart.h"
 #include "usart.h"
-#include "pwm.h"
+// #include "pwm.h"
 #include "adc.h"
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
@@ -12,6 +12,9 @@
 #include "GTK_Errors.h"
 
 #include "comms.h"
+// #include "hard.h"
+#include "startup_clocks.h"
+#include "gpio.h"
 
 
 //--- Externals para enviar errores en UART
@@ -66,29 +69,49 @@ unsigned char channel_3_pause = 0;
 unsigned char channel_4_pause = 0;
 
 
-void SystemInit (void);		//dumb function en otro momento inicializaba clock aca
+// void SystemInit (void);		//dumb function en otro momento inicializaba clock aca
 
 int main (void)
 {
 	unsigned char i = 0;
 	unsigned char counter_keep_alive = 0;
-	//Configuracion de clock.
-	RCC_Config ();
 
-	//Configuracion led. & Enabled Channels
-	Led_Config();
+        //Configuracion de clock.
+        // SystemInit();    //SystemInit() is called from startup_stm32f10x_hd.s before main()
+
+	//Configure all gpios and alternative functions pins
+	// Led_Config();
+        GpioInit();
+        LED2_OFF;
+        LED3_OFF;
 
 	//Timer 1ms -- Wait_ms()
 	TIM7_Init();
-
+        
 	//Timer 100ms.
 	TIM6_Init();
 
 	//Signal timer -- 100us
 	TIM5_Init();
 
+        //Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
+	//de otra forma revisar el cristal elegido
+	//pruebo TIM5 100us step
+	for (i = 0; i < 20; i++)
+	{
+            if (LED1)
+                LED1_OFF;
+            else
+                LED1_ON;
+
+            while (session_warming_up_channel_1_stage_time != 0);
+            session_warming_up_channel_1_stage_time = 1000;	//100ms
+		// Wait_ms(100);
+	}
+
+        //TODO: luego habilitar sin libST
 	//ADC1.
-	ADC1_Init();
+	// ADC1_Init();
 
 	//UART_Debug Config.
 	UART_PC_Init();
@@ -97,11 +120,34 @@ int main (void)
 	UART_CH3_Init();
 	UART_CH4_Init();
 
-	//Configuracion PWM.
-	PWM1_Init();
-	PWM2_Init();
-	PWM3_Init();
-	PWM4_Init();
+	//Actvate timers for the PWM outputs
+        TIM_1_Init();        
+        TIM_2_Init();
+        TIM_3_Init();
+        TIM_4_Init();
+
+        PWM_CH1_TiempoSubida(DUTY_NONE);
+        PWM_CH1_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH1_TiempoBajada(DUTY_50_PERCENT);
+        
+        PWM_CH2_TiempoSubida(DUTY_NONE);
+        PWM_CH2_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH2_TiempoBajada(DUTY_50_PERCENT);
+        
+        PWM_CH3_TiempoSubida(DUTY_NONE);
+        PWM_CH3_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH3_TiempoBajada(DUTY_50_PERCENT);
+
+        PWM_CH4_TiempoSubida(DUTY_NONE);
+        PWM_CH4_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH4_TiempoBajada(DUTY_50_PERCENT);
+
+        
+        while (1);
+	// PWM1_Init();
+	// PWM2_Init();
+	// PWM3_Init();
+	// PWM4_Init();
 
 	//Initialize channels.
 	Channel_1_Init();
@@ -109,26 +155,6 @@ int main (void)
 	Channel_3_Init();
 	Channel_4_Init();
 
-	//Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
-	//de otra forma revisar el cristal elegido
-	//pruebo TIM5 100us step
-	for (i = 0; i < 20; i++)
-	{
-		if (LED1)
-		{
-			LED1_OFF;
-			// ENA_CH4_OFF;
-		}
-		else
-		{
-			LED1_ON;
-			// ENA_CH4_ON;
-		}
-
-		while (session_warming_up_channel_1_stage_time != 0);
-		session_warming_up_channel_1_stage_time = 1000;	//100ms
-//		Wait_ms(100);
-	}
 	LED1_OFF;
 
 //---- Defines from GTK_Hard.h -----//
@@ -232,8 +258,8 @@ int main (void)
 	}
 }
 
-//Dumb Function for compativility
-void SystemInit (void)
-{
+// //Dumb Function for compativility
+// void SystemInit (void)
+// {
 
-}
+// }

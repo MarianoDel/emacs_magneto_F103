@@ -5,13 +5,13 @@
 
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
-// #define HARDWARE_VERSION_2_1
-#define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio
-// #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
-#define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
+#define HARDWARE_VERSION_2_1
+// #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio
+#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
+// #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
-#define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
-#define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
+// #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
+// #define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
 
 #ifdef HARDWARE_VERSION_2_0
 #define HARD "Hardware Version: 2.0\r\n"
@@ -203,26 +203,6 @@ enum bool
 #define RCC_AFIO_CLK (RCC->APB2ENR & 0x00000001)
 #define RCC_AFIO_CLKEN RCC->APB2ENR |= 0x00000001
 #define RCC_AFIO_CLKDIS RCC->APB2ENR &= ~0x00000001
-
-#define RCC_TIM1_CLK (RCC->APB2ENR & 0x00000800)
-#define RCC_TIM1_CLKEN RCC->APB2ENR |= 0x00000800
-#define RCC_TIM1_CLKDIS RCC->APB2ENR &= ~0x00000800
-
-#define RCC_TIM2_CLK (RCC->APB1ENR & 0x00000001)
-#define RCC_TIM2_CLKEN RCC->APB1ENR |= 0x00000001
-#define RCC_TIM2_CLKDIS RCC->APB1ENR &= ~0x00000001
-
-#define RCC_TIM3_CLK (RCC->APB1ENR & 0x00000002)
-#define RCC_TIM3_CLKEN RCC->APB1ENR |= 0x00000002
-#define RCC_TIM3_CLKDIS RCC->APB1ENR &= ~0x00000002
-
-#define RCC_TIM4_CLK (RCC->APB1ENR & 0x00000004)
-#define RCC_TIM4_CLKEN RCC->APB1ENR |= 0x00000004
-#define RCC_TIM4_CLKDIS RCC->APB1ENR &= ~0x00000004
-
-#define RCC_TIM5_CLK (RCC->APB1ENR & 0x00000008)
-#define RCC_TIM5_CLKEN RCC->APB1ENR |= 0x00000008
-#define RCC_TIM5_CLKDIS RCC->APB1ENR &= ~0x00000008
 
 #define RCC_USART1_CLK (RCC->APB2ENR & 0x00004000)
 #define RCC_USART1_CLKEN RCC->APB2ENR |= 0x00004000

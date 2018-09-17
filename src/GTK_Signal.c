@@ -23,7 +23,7 @@
 
 #include "float.h"
 
-#include "pwm.h"
+// #include "pwm.h"
 #include "adc.h"
 #include "stm32f10x_adc.h"
 #include "GTK_Estructura.h"
@@ -257,121 +257,90 @@ unsigned char global_error_ch3 = 0;
 unsigned char global_error_ch4 = 0;
 
 
-//--- Channel 1 ---//
-void TIM5_IRQHandler (void)	//100uS
+//--- Timer 5 Callback ---//
+void TIM5_IRQ_Callback (void)
 {
+    //Channel 1.
+    if (channel_1_pause == 0)
+    {
 
-	//Channel 1.
-	if (channel_1_pause == 0)
-	{
+        session_plateau_channel_1_time++;
 
-			session_plateau_channel_1_time++;
+        if (session_plateau_channel_1_stage_time)
+            session_plateau_channel_1_stage_time--;
 
-			if (session_plateau_channel_1_stage_time)
-				session_plateau_channel_1_stage_time--;
+        session_warming_up_channel_1_time++;
 
-			session_warming_up_channel_1_time++;
+        if (session_warming_up_channel_1_stage_time)
+            session_warming_up_channel_1_stage_time--;
 
-			if (session_warming_up_channel_1_stage_time)
-				session_warming_up_channel_1_stage_time--;
+        session_cooling_down_channel_1_time++;
 
-			session_cooling_down_channel_1_time++;
+        if (session_cooling_down_channel_1_stage_time)
+            session_cooling_down_channel_1_stage_time--;
+    }
+    //Channel 2.
+    if (channel_2_pause == 0)
+    {
 
-			if (session_cooling_down_channel_1_stage_time)
-				session_cooling_down_channel_1_stage_time--;
-	}
-	//Channel 2.
-	if (channel_2_pause == 0)
-	{
+        session_plateau_channel_2_time++;
 
-		session_plateau_channel_2_time++;
+        if (session_plateau_channel_2_stage_time)
+            session_plateau_channel_2_stage_time--;
 
-		if (session_plateau_channel_2_stage_time)
-			session_plateau_channel_2_stage_time--;
+        session_warming_up_channel_2_time++;
 
-		session_warming_up_channel_2_time++;
+        if (session_warming_up_channel_2_stage_time)
+            session_warming_up_channel_2_stage_time--;
 
-		if (session_warming_up_channel_2_stage_time)
-			session_warming_up_channel_2_stage_time--;
+        session_cooling_down_channel_2_time++;
 
-		session_cooling_down_channel_2_time++;
+        if (session_cooling_down_channel_2_stage_time)
+            session_cooling_down_channel_2_stage_time--;
 
-		if (session_cooling_down_channel_2_stage_time)
-			session_cooling_down_channel_2_stage_time--;
+    }
+    //Channel 3.
+    if (channel_3_pause == 0)
+    {
 
-	}
-	//Channel 3.
-	if (channel_3_pause == 0)
-	{
+        session_plateau_channel_3_time++;
 
-		session_plateau_channel_3_time++;
+        if (session_plateau_channel_3_stage_time)
+            session_plateau_channel_3_stage_time--;
 
-		if (session_plateau_channel_3_stage_time)
-			session_plateau_channel_3_stage_time--;
+        session_warming_up_channel_3_time++;
 
-		session_warming_up_channel_3_time++;
+        if (session_warming_up_channel_3_stage_time)
+            session_warming_up_channel_3_stage_time--;
 
-		if (session_warming_up_channel_3_stage_time)
-			session_warming_up_channel_3_stage_time--;
+        session_cooling_down_channel_3_time++;
 
-		session_cooling_down_channel_3_time++;
+        if (session_cooling_down_channel_3_stage_time)
+            session_cooling_down_channel_3_stage_time--;
+    }
+    //Channel 4.
+    if (channel_4_pause == 0)
+    {
 
-		if (session_cooling_down_channel_3_stage_time)
-			session_cooling_down_channel_3_stage_time--;
-	}
-	//Channel 4.
-	if (channel_4_pause == 0)
-	{
+        session_plateau_channel_4_time++;
 
-		session_plateau_channel_4_time++;
+        if (session_plateau_channel_4_stage_time)
+            session_plateau_channel_4_stage_time--;
 
-		if (session_plateau_channel_4_stage_time)
-			session_plateau_channel_4_stage_time--;
+        session_warming_up_channel_4_time++;
 
-		session_warming_up_channel_4_time++;
+        if (session_warming_up_channel_4_stage_time)
+            session_warming_up_channel_4_stage_time--;
 
-		if (session_warming_up_channel_4_stage_time)
-			session_warming_up_channel_4_stage_time--;
+        session_cooling_down_channel_4_time++;
 
-		session_cooling_down_channel_4_time++;
+        if (session_cooling_down_channel_4_stage_time)
+            session_cooling_down_channel_4_stage_time--;
 
-		if (session_cooling_down_channel_4_stage_time)
-			session_cooling_down_channel_4_stage_time--;
+    }
 
-	}
-	//bajar flag
-	if (TIM5->SR & 0x01)	//bajo el flag
-		TIM5->SR = 0x00;
 }
 
-
-void TIM5_Init (void)
-{
-
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	if (!RCC_TIM5_CLK)
-		RCC_TIM5_CLKEN;
-
-	TIM5->CR1 = 0x0000;
-
-	//Configuracion del timer.
-	TIM5->ARR = 100; //100uS.
-	TIM5->CNT = 0;
-	//TIM5->PSC = 71;
-	TIM5->PSC = 143;		//error en frecuencia para TIM5 me da x2
-	//TIM5->EGR = TIM_EGR_UG;
-
-	// Enable timer ver UDIS
-	TIM5->DIER |= TIM_DIER_UIE;
-	TIM5->CR1 |= TIM_CR1_CEN;
-
-	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 10;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-}
 //--- end ---//
 
 //--- Channel 1 ---//

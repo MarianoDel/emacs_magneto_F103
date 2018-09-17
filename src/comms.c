@@ -528,8 +528,6 @@ void UART1_Receive (void)
         //--- end ---//
         usart1_have_data = 0;
     }
-
-
 }
 
 //--- Channel 1 ---//

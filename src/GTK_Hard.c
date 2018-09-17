@@ -19,6 +19,7 @@ unsigned char buzz_multiple = 0;
 #endif
 
 //************************************************************************************//
+//TODO: despues de probar un buen arranque de SystemInit() quitar esto func.
 void RCC_Config (void){
 
 	//Configuracion clock.
@@ -70,22 +71,22 @@ void RCC_Config (void){
 }
 
 //--- Tamper config ---//
-void Tamper_Config(void)
-{
-	unsigned long temp;
+// void Tamper_Config(void)
+// {
+// 	unsigned long temp;
 
-	//--- GPIOB ---//
-	//--- Clock ---//
-	if (!(RCC->APB2ENR & 0x00000008))
-		RCC->APB2ENR |= 0x00000008;
+// 	//--- GPIOB ---//
+// 	//--- Clock ---//
+// 	if (!(RCC->APB2ENR & 0x00000008))
+// 		RCC->APB2ENR |= 0x00000008;
 
-	//--- Config pines ---//
-	temp = GPIOB->CRH;
-	temp &= 0xFF0FFFFF;
-	temp |= 0x00800000;
-	GPIOB->CRH = temp;
-	GPIOB->BSRR = 0x00002000;
-}
+// 	//--- Config pines ---//
+// 	temp = GPIOB->CRH;
+// 	temp &= 0xFF0FFFFF;
+// 	temp |= 0x00800000;
+// 	GPIOB->CRH = temp;
+// 	GPIOB->BSRR = 0x00002000;
+// }
 
 //------- GPIO REGISTERS ----------//
 //

@@ -28,6 +28,7 @@ MCU  = cortex-m3
 
 # List all default C defines here, like -D_DEBUG=1
 DDEFS = -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DUSE_STM3210E_EVAL
+# DDEFS = -DSTM32F10X_HD -DUSE_STM3210E_EVAL
 #para el micro STM32F103RC
 # DDEFS = -DSTM32F10X_HD
 #para el micro STM32F103C8
@@ -39,6 +40,7 @@ DADEFS =
 # List all default directories to look for include files here
 DINCDIR = ./src
 CORELIBDIR = ./cmsis_core
+STARTUPDIR = ./startup_src
 
 # List the default directory to look for the libraries here
 DLIBDIR =
@@ -83,14 +85,16 @@ SRC += ./src/GTK_Signal.c
 # SRC += ./src/uart.c
 SRC += ./src/usart.c
 SRC += ./src/timer.c
-SRC += ./src/pwm.c
+# SRC += ./src/pwm.c
 SRC += ./src/flash_program.c
 SRC += ./src/adc.c
 SRC += ./src/comms.c
+SRC += ./src/gpio.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c
 SRC += $(CORELIBDIR)/core_cm3.c
+SRC += ./startup_src/startup_clocks.c
 ## used parts of the STM-Library
 SRC += $(STMSPSRCDDIR)/misc.c
 SRC += $(STMSPSRCDDIR)/stm32f10x_adc.c
@@ -102,15 +106,15 @@ SRC += $(STMSPSRCDDIR)/stm32f10x_adc.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_dma.c
 SRC += $(STMSPSRCDDIR)/stm32f10x_exti.c
 SRC += $(STMSPSRCDDIR)/stm32f10x_flash.c
-SRC += $(STMSPSRCDDIR)/stm32f10x_gpio.c
+# SRC += $(STMSPSRCDDIR)/stm32f10x_gpio.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_syscfg.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_i2c.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_iwdg.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_pwr.c
-SRC += $(STMSPSRCDDIR)/stm32f10x_rcc.c
+# SRC += $(STMSPSRCDDIR)/stm32f10x_rcc.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_rtc.c
 SRC += $(STMSPSRCDDIR)/stm32f10x_spi.c
-SRC += $(STMSPSRCDDIR)/stm32f10x_tim.c
+# SRC += $(STMSPSRCDDIR)/stm32f10x_tim.c
 SRC += $(STMSPSRCDDIR)/stm32f10x_usart.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_wwdg.c
 #SRC += $(STMSPSRCDDIR)/stm32f10x_misc.c
@@ -122,6 +126,7 @@ UINCDIR = $(DEVDIR) \
           $(CORELIBDIR) \
           $(STMSPINCDDIR) \
           $(DISCOVERY)    \
+	  $(STARTUPDIR)    \
           ./inc
 # List the user directory to look for the libraries here
 ULIBDIR =

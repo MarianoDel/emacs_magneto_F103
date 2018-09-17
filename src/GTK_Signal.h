@@ -5,8 +5,7 @@
 
 //--- New code ---//
 void Signal_TIM1MS (void);
-void TIM5_IRQHandler (void);
-void TIM5_Init (void);
+void TIM5_IRQ_Callback (void);
 
 unsigned char Session_Channels_Fixed_Parameters (unsigned char, unsigned char);
 unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage);

@@ -37,8 +37,11 @@
 *** con modulo usart ver los pines alternativos, son distintos segun hardware
 *** TODO FALTA PROBAR ANTERIOR
 
-*** TODO migro modulo timer
+*** DONE migro modulo timer
+    CLOSED: [2018-09-17 Mon 19:42]
     - ojo hay un monton de pwm que no estan en este modulo
+    - paso todas las funciones pwm al nuevomodulo timer, compila OK, genera OK
+    - borro archivos modulo pwm
 
 *** DONE Migro el modulo de clock general a startup_src
     CLOSED: [2018-09-17 Mon 15:14]

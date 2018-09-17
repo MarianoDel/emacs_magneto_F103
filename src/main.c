@@ -143,7 +143,7 @@ int main (void)
         PWM_CH4_TiempoBajada(DUTY_50_PERCENT);
 
         
-        while (1);
+        // while (1);
 	// PWM1_Init();
 	// PWM2_Init();
 	// PWM3_Init();

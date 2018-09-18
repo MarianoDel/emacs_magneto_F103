@@ -256,7 +256,7 @@ void TIM7_IRQHandler (void)	//1mS
 	flagMuestreo = 1;
 	take_current_samples = 1;
 
-	ADC_TIM7_ISR();
+	// ADC_TIM7_ISR();
 	//GTK_SIGNAL_TIME_1MS ();
 
 	if (timeRun)

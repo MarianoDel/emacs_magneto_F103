@@ -1,346 +1,239 @@
+//---------------------------------------------
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### ADC.C #################################
+//---------------------------------------------
 
+/* Includes ------------------------------------------------------------------*/
 #include "adc.h"
-#include "stm32f10x_adc.h"
-#include "misc.h"
-#include "GTK_Hard.h"
+#include "stm32f10x.h"
+#include "hard.h"
 
 
-#define BUFF_ADC_DIMENSION 	8
-#define BUFF_ADC_DIVISION	3
+/* Externals ------------------------------------------------------------------*/
+extern volatile unsigned short adc_ch [];
 
-volatile unsigned short buffADC[BUFF_ADC_DIMENSION];
-volatile unsigned short * pbuffADC_Write;
-volatile unsigned short * pbuffADC_Read;
-unsigned char ADC1_MUESTREAR_TimeOut;
 
-//--- Current limit Externals ---//
-extern volatile unsigned char flagMuestreo;
+#ifdef ADC_WITH_INT
+extern volatile unsigned char seq_ready;
+#endif
 
-void ADC_TIM7_ISR(void)
+#ifdef ADC_WITH_TEMP_SENSE
+extern volatile unsigned short tt_take_temp_sample;
+#endif
+
+/* Globals ------------------------------------------------------------------*/
+#ifdef ADC_WITH_INT
+volatile unsigned short * p_channel;
+#endif
+
+#ifdef ADC_WITH_TEMP_SENSE
+// ------- del sensor de Temperatura -------
+unsigned short board_temp [SIZEOF_BOARD_TEMP];
+unsigned short last_temp = 0;
+unsigned char board_temp_index = 0;
+unsigned char new_temp_sample = 0;
+#endif
+
+
+/* Module Functions -----------------------------------------------------------*/
+//Single conversion mode (CONT=0)
+//In Single conversion mode, the ADC performs a single sequence of conversions,
+//converting all the channels once.
+
+//Continuous conversion mode (CONT=1)
+//In continuous conversion mode, when a software or hardware trigger event occurs,
+//the ADC performs a sequence of conversions, converting all the channels once and then
+//automatically re-starts and continuously performs the same sequence of conversions
+
+//Discontinuous mode (DISCEN)
+//In this mode (DISCEN=1), a hardware or software trigger event is required to start
+//each conversion defined in the sequence. Only with (CONT=0)
+
+void AdcConfig (void)
 {
-	if (ADC1_MUESTREAR_TimeOut)
-		ADC1_MUESTREAR_TimeOut--;
+    // RCC_ADC_PRESCALER_DIV_8;    //72MHz / 8 = 9MHz
+    RCC_ADC_PRESCALER_DIV_6;    //72MHz / 6 = 12MHz    
+    
+    if (!RCC_ADC_CLK)
+        RCC_ADC_CLK_ON;
+
+    // preseteo los registros a default, la mayoria necesita tener ADC apagado
+    ADC1->CR1 = 0x00000000;
+    ADC1->CR2 = 0x00000000;
+    ADC1->SMPR1 = 0x00000000;
+    ADC1->SMPR2 = 0x00000000;
+    ADC1->SQR1 = 0x00000000;
+    ADC1->SQR2 = 0x00000000;    
+    
+    //set trigger & Continuos or Discontinuous
+    // ADC1->CR1 |= ADC_CR1_SCAN;
+    // ADC1->CR2 |= ADC_CR2_CONT | ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_1 | ADC_CR2_EXTSEL_0;    //soft trigger continuos
+    ADC1->CR2 |= ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_1 | ADC_CR2_EXTSEL_0;    //soft trigger discontinuos
+    
+    //set sampling time for each channel
+    ADC1->SMPR2 |= ADC_SMPR2_SMP4_2 | ADC_SMPR2_SMP4_1 | ADC_SMPR2_SMP4_0;    //sample time Channel 4
+    ADC1->SMPR2 |= ADC_SMPR2_SMP5_2 | ADC_SMPR2_SMP5_1 | ADC_SMPR2_SMP5_0;    //sample time Channel 5
+    ADC1->SMPR2 |= ADC_SMPR2_SMP6_2 | ADC_SMPR2_SMP6_1 | ADC_SMPR2_SMP6_0;    //sample time Channel 6
+    ADC1->SMPR2 |= ADC_SMPR2_SMP7_2 | ADC_SMPR2_SMP7_1 | ADC_SMPR2_SMP7_0;    //sample time Channel 7
+    ADC1->SMPR1 |= ADC_SMPR1_SMP14_2 | ADC_SMPR1_SMP14_1 | ADC_SMPR1_SMP14_0;    //sample time Channel 14
+    ADC1->SMPR1 |= ADC_SMPR1_SMP15_2 | ADC_SMPR1_SMP15_1 | ADC_SMPR1_SMP15_0;    //sample time Channel 15   
+
+
+    //set regular channel selection
+    ADC1->SQR3 |= ADC_SQR3_SQ1_2;                     //Channel 4
+    ADC1->SQR3 |= ADC_SQR3_SQ2_2 | ADC_SQR3_SQ2_0;    //Channel 5
+    ADC1->SQR3 |= ADC_SQR3_SQ3_2 | ADC_SQR3_SQ3_1;    //Channel 6
+    ADC1->SQR3 |= ADC_SQR3_SQ4_2 | ADC_SQR3_SQ4_1 | ADC_SQR3_SQ4_0;    //Channel 7
+    ADC1->SQR3 |= ADC_SQR3_SQ5_3 | ADC_SQR3_SQ5_3 | ADC_SQR3_SQ5_1;    //Channel 14
+    ADC1->SQR3 |= ADC_SQR3_SQ6_3 | ADC_SQR3_SQ6_2 | ADC_SQR3_SQ6_1 | ADC_SQR3_SQ6_0;    //Channel 15   
+
+    //set the quantity of channels to convert
+    ADC1->SQR1 |= ADC_SQR1_L_2 | ADC_SQR1_L_1;    //convert 6 channels
+    
+
+
+
+    
+#ifdef ADC_WITH_INT        
+    //set interrupts
+    ADC1->IER |= ADC_IT_EOC;
+
+    //set pointer
+    p_channel = &adc_ch[0];
+
+    NVIC_EnableIRQ(ADC1_IRQn);
+    NVIC_SetPriority(ADC1_IRQn, 3);
+#endif
+
+#ifdef ADC_WITH_TEMP_SENSE
+    ADC->CCR |= ADC_CCR_TSEN;
+#endif
+
+    //Enable and ADC calibration
+    ADC1->CR2 |= ADC_CR2_ADON;    
+    //	ADC calibration (optional, but recommended at power on)
+    ADC1->CR2 |= ADC_CR2_RSTCAL;    // Reset previous calibration
+    while (ADC1->CR2 & ADC_CR2_RSTCAL);
+    ADC1->CR2 |= ADC_CR2_CAL;    // Start new calibration (ADC must be off at that time)
+    while (ADC1->CR2 & ADC_CR2_CAL);
+
+
+#ifdef ADC_WITH_DMA
+    ADC1->CR2 |= ADC_CR2_DMA;
+#endif
+    
+    // Enable ADC1
+    ADC1->CR2 |= ADC_CR2_ADON;
 }
 
-void ADC1_2_IRQHandler (void)
+#ifdef ADC_WITH_INT
+void ADC1_COMP_IRQHandler (void)
 {
-	if (ADC_GetITStatus(ADC1, ADC_IT_EOC))
-	{
+    if (ADC1->ISR & ADC_IT_EOC)
+    {
+        if (ADC1->ISR & ADC_IT_EOSEQ)	//seguro que es channel4 en posicion 3 en ver_1_1, 3 y 2 en ver_1_0
+        {
+            p_channel = &adc_ch[ADC_LAST_CHANNEL_QUANTITY];
+            *p_channel = ADC1->DR;
+            p_channel = &adc_ch[0];
+            seq_ready = 1;
+        }
+        else
+        {
+            *p_channel = ADC1->DR;		//
+            if (p_channel < &adc_ch[ADC_LAST_CHANNEL_QUANTITY])
+                p_channel++;
+        }
+        //clear pending
+        ADC1->ISR |= ADC_IT_EOC | ADC_IT_EOSEQ;
+    }
+}
+#endif
 
-		flagMuestreo = 1;
-//		*pbuffADC_Write = ADC1->DR;
-//
-//		if (pbuffADC_Write != &buffADC[BUFF_ADC_DIMENSION])
-//		{
-//			pbuffADC_Write++;
-//			ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-//		}
 
-		ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
-	}
+
+#ifdef ADC_WITH_TEMP_SENSE
+void UpdateTemp(void)
+{
+    //hago update cada 1 seg
+    if (!tt_take_temp_sample)
+    {
+        tt_take_temp_sample = 1000;
+
+        board_temp [board_temp_index] = ReadADC1_SameSampleTime(ADC_CH16);
+        //board_temp [0] = ReadADC1_SameSampleTime(ADC_CH16);
+
+        if (board_temp_index < (SIZEOF_BOARD_TEMP - 1))
+            board_temp_index++;
+        else
+            board_temp_index = 0;
+
+        new_temp_sample = 1;
+    }
 }
 
-void  ADC1_Init(void)
+//devuelve el valor promedio de la temperatura
+//si existen nuevas muestras hace la cuenta, sino contesta el ultimo valor calculado
+unsigned short GetTemp (void)
 {
+    unsigned char i;
+    unsigned int t = 0;
 
-	unsigned int temp;
-	ADC_InitTypeDef ADC_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
+    if (new_temp_sample)
+    {
+        for (i = 0; i < SIZEOF_BOARD_TEMP; i++)
+            t += board_temp[i];
 
-	// Configuracion ADC.
-	if (!RCC_GPIOA_clk)
-		RCC_GPIOA_clkEnable;
+        last_temp = t >> 3;
+        new_temp_sample = 0;
+    }
 
-	if (!RCC_GPIOC_clk)
-		RCC_GPIOC_clkEnable;
-
-	if (!RCC_ADC1_CLK)
-		RCC_ADC1_CLKEN;
-
-	//PA: 4,5,6,7
-	temp = GPIOA->CRL;
-	temp &= 0x0000FFFF;
-	temp |= 0x00000000;
-	GPIOA->CRL = temp;
-
-	//PC: 4,5
-	temp = GPIOC->CRL;
-	temp &= 0xFF00FFFF;
-	temp |= 0x00000000;
-	GPIOC->CRL = temp;
-
-	//clock for ADC (max 14MHz --> 72/6 = 12MHz)
-	RCC_ADCCLKConfig (RCC_PCLK2_Div6);
-
-	//define ADC config
-	ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
-	ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-	ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;	// we work in continuous sampling mode
-	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_NbrOfChannel = 1;
-
-	ADC_Init ( ADC1, &ADC_InitStructure);	//set config of ADC1
-
-	//Interrupcion UART.
-	NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	// enable ADC
-	ADC_Cmd (ADC1,ENABLE);	//enable ADC1
-
-	//	ADC calibration (optional, but recommended at power on)
-	ADC_ResetCalibration(ADC1);	// Reset previous calibration
-	while(ADC_GetResetCalibrationStatus(ADC1));
-	ADC_StartCalibration(ADC1);	// Start new calibration (ADC must be off at that time)
-	while(ADC_GetCalibrationStatus(ADC1));
-
-	// start conversion
-	ADC_ITConfig(ADC1,ADC_IT_EOC,ENABLE);
-	ADC_Cmd (ADC1,ENABLE);	//enable ADC1
-
-	pbuffADC_Write = &buffADC[0];
+    return ConvertTemp(last_temp);
 }
 
-unsigned char ADC1_MUESTREAR_State = 0;
-#define ADC1_MUESTREAR_TIMEOUT 2
-
-enum ADC1_MUESTREAR_ESTADOS
+void FillTempBuffer (void)
 {
-	ADC1_MUESTREAR_INICIO = 0,
-	ADC1_MUESTREAR_CONFIGURAR_CANAL,
-	ADC1_MUESTREAR_REINICIO_BUFFER,
-	ADC1_MUESTREAR_TOMAR_MUESTRA,
-	ADC1_MUESTREAR_PROMEDIAR,
-	ADC1_MUESTREAR_FIN
-};
+    unsigned char i;
+    unsigned short dummy;
 
-unsigned char ADC1_Muestrear (unsigned char canal, unsigned short * valorMedido)
-{
-	unsigned int suma = 0;
-	unsigned char i;
+    dummy = ReadADC1_SameSampleTime(ADC_CH16);
 
-	switch(ADC1_MUESTREAR_State)
-	{
-		case ADC1_MUESTREAR_INICIO:
+    for (i = 0; i < SIZEOF_BOARD_TEMP; i++)
+        board_temp[i] = dummy;
 
-			ADC1_MUESTREAR_TimeOut = ADC1_MUESTREAR_TIMEOUT;
-			ADC1_MUESTREAR_State = ADC1_MUESTREAR_CONFIGURAR_CANAL;
-			//LED3_ON;
-			break;
-
-		case ADC1_MUESTREAR_CONFIGURAR_CANAL:
-
-			switch(canal)
-			{
-				case ADC_CHANNEL1:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
-					break;
-
-				case ADC_CHANNEL2:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_5, 1,ADC_SampleTime_28Cycles5);
-					break;
-
-				case ADC_CHANNEL3:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_6, 1,ADC_SampleTime_28Cycles5);
-					break;
-
-				case ADC_CHANNEL4:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_7, 1,ADC_SampleTime_28Cycles5);
-					break;
-
-				case ADC_CHANNEL5:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_14, 1,ADC_SampleTime_28Cycles5);
-					break;
-
-				case ADC_CHANNEL6:
-					ADC_RegularChannelConfig(ADC1,ADC_Channel_15, 1,ADC_SampleTime_28Cycles5);
-					break;
-			}
-
-			ADC1_MUESTREAR_State = ADC1_MUESTREAR_REINICIO_BUFFER;
-			break;
-
-		case ADC1_MUESTREAR_REINICIO_BUFFER:
-
-			pbuffADC_Write = &buffADC[0];
-			ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-			ADC1_MUESTREAR_State = ADC1_MUESTREAR_TOMAR_MUESTRA;
-			break;
-
-		case ADC1_MUESTREAR_TOMAR_MUESTRA:
-
-			if (pbuffADC_Write == &buffADC[BUFF_ADC_DIMENSION])
-			{
-				suma = 0;
-				for (i = 0; i < BUFF_ADC_DIMENSION; i++)
-					suma += buffADC[i];
-				suma = suma >> BUFF_ADC_DIVISION;
-				* valorMedido = (unsigned short)(suma & 0xFFFF);
-				ADC1_MUESTREAR_State = ADC1_MUESTREAR_INICIO;
-				//LED3_OFF;
-				return FIN_OK;
-			}
-			break;
-
-		default:
-			ADC1_MUESTREAR_State = ADC1_MUESTREAR_INICIO;
-			break;
-	}
-
-	if (ADC1_MUESTREAR_TimeOut == 0)
-		return FIN_TIMEOUT;
-
-	return TRABAJANDO;
 }
 
-unsigned char ADC1_SCAN_State = 0;
-#define ADC1_SCAN_TIMEOUT 2
-
-enum ADC1_SCAN_ESTADOS
+short ConvertTemp (unsigned short adc_temp)
 {
-	ADC1_SCAN_INICIO = 0,
-	ADC1_SCAN_CONFIGURAR_CANAL_1,
-	ADC1_SCAN_TOMAR_MUESTRA_1,
-	ADC1_SCAN_CONFIGURAR_CANAL_2,
-	ADC1_SCAN_TOMAR_MUESTRA_2,
-	ADC1_SCAN_CONFIGURAR_CANAL_3,
-	ADC1_SCAN_TOMAR_MUESTRA_3,
-	ADC1_SCAN_CONFIGURAR_CANAL_4,
-	ADC1_SCAN_TOMAR_MUESTRA_4,
-};
+    int32_t temperature; /* will contain the temperature in degree Celsius */
+    //temperature = (((int32_t) ADC1->DR * VDD_APPLI / VDD_CALIB) - (int32_t) *TEMP30_CAL_ADDR );
+    temperature = (int32_t) *TEMP30_CAL_ADDR - adc_temp;
+    temperature *= 1000;
+    temperature = temperature / 5336;	//4.3mV / °C
+    temperature = temperature + 30;
 
-unsigned char ADC1_Scan (unsigned char canales, unsigned short * valorMedido)
-{
-	unsigned char i = 0;
-	unsigned int suma;
-
-	switch (ADC1_SCAN_State)
-	{
-		case ADC1_SCAN_INICIO:
-
-			//Inicializa el vector de salida.
-			for (i = 0; i<4; i++)
-				*(valorMedido + i) = 0xFFFF;
-
-			ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_1;
-			break;
-
-		case ADC1_SCAN_CONFIGURAR_CANAL_1:
-
-			if (canales & ADC_CHANNEL1)
-			{
-				ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
-				pbuffADC_Write = &buffADC[0];
-				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-				ADC1_SCAN_State = ADC1_SCAN_TOMAR_MUESTRA_1;
-			}
-			else
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_2;
-			break;
-
-		case ADC1_SCAN_TOMAR_MUESTRA_1:
-
-
-			if (pbuffADC_Write == &buffADC[BUFF_ADC_DIMENSION])
-			{
-				suma = 0;
-				for (i = 0; i < BUFF_ADC_DIMENSION; i++)
-					suma += buffADC[i];
-				suma = suma >> BUFF_ADC_DIVISION;
-				* valorMedido = (unsigned short)(suma & 0xFFFF);
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_2;
-			}
-			break;
-
-		case ADC1_SCAN_CONFIGURAR_CANAL_2:
-
-			if (canales & ADC_CHANNEL2)
-			{
-				ADC_RegularChannelConfig(ADC1,ADC_Channel_5, 1,ADC_SampleTime_28Cycles5);
-				pbuffADC_Write = &buffADC[0];
-				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-				ADC1_SCAN_State = ADC1_SCAN_TOMAR_MUESTRA_2;
-			}
-			else
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_3;
-			break;
-
-		case ADC1_SCAN_TOMAR_MUESTRA_2:
-
-			if (pbuffADC_Write == &buffADC[BUFF_ADC_DIMENSION])
-			{
-				suma = 0;
-				for (i = 0; i < BUFF_ADC_DIMENSION; i++)
-					suma += buffADC[i];
-				suma = suma >> BUFF_ADC_DIVISION;
-				* (valorMedido + 1) = (unsigned short)(suma & 0xFFFF);
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_3;
-
-			}
-			break;
-
-		case ADC1_SCAN_CONFIGURAR_CANAL_3:
-
-			if (canales & ADC_CHANNEL3)
-			{
-				ADC_RegularChannelConfig(ADC1,ADC_Channel_6, 1,ADC_SampleTime_28Cycles5);
-				pbuffADC_Write = &buffADC[0];
-				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-				ADC1_SCAN_State = ADC1_SCAN_TOMAR_MUESTRA_3;
-			}
-			else
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_4;
-			break;
-
-		case ADC1_SCAN_TOMAR_MUESTRA_3:
-
-			if (pbuffADC_Write == &buffADC[BUFF_ADC_DIMENSION])
-			{
-				suma = 0;
-				for (i = 0; i < BUFF_ADC_DIMENSION; i++)
-					suma += buffADC[i];
-				suma = suma >> BUFF_ADC_DIVISION;
-				* (valorMedido + 2) = (unsigned short)(suma & 0xFFFF);
-				ADC1_SCAN_State = ADC1_SCAN_CONFIGURAR_CANAL_4;
-
-			}
-			break;
-
-		case ADC1_SCAN_CONFIGURAR_CANAL_4:
-
-			if (canales & ADC_CHANNEL4)
-			{
-				ADC_RegularChannelConfig(ADC1,ADC_Channel_7, 1,ADC_SampleTime_28Cycles5);
-				pbuffADC_Write = &buffADC[0];
-				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-				ADC1_SCAN_State = ADC1_SCAN_TOMAR_MUESTRA_4;
-			}
-			else
-				ADC1_SCAN_State = ADC1_SCAN_INICIO;
-			break;
-
-		case ADC1_SCAN_TOMAR_MUESTRA_4:
-
-			if (pbuffADC_Write == &buffADC[BUFF_ADC_DIMENSION])
-			{
-				suma = 0;
-				for (i = 0; i < BUFF_ADC_DIMENSION; i++)
-					suma += buffADC[i];
-				suma = suma >> BUFF_ADC_DIVISION;
-				* (valorMedido + 3) = (unsigned short)(suma & 0xFFFF);
-				ADC1_SCAN_State = ADC1_SCAN_INICIO;
-				return FIN_OK;
-			}
-			break;
-
-		default:
-			ADC1_SCAN_State = ADC1_SCAN_INICIO;
-			break;
-	}
-
-	return TRABAJANDO;
+    return (short) temperature;
 }
+#endif //ADC_WITH_TEMP_SENSE
+
+void ConvertChannel (unsigned char ch)
+{
+    ADC1->SQR1 &= ~ADC_SQR1_L;    //convert 1 channel
+    ADC1->SQR1 |= ADC_SQR1_L_0;
+    
+    // ADC1->SMPR2 |= ADC_SMPR2_SMP4_2;    //sample time Channel 4
+    ADC1->SMPR2 |= ADC_SMPR2_SMP4_2 | ADC_SMPR2_SMP4_1 | ADC_SMPR2_SMP4_0;    //sample time Channel 4    
+    ADC1->SQR3 &= ~ADC_SQR3_SQ1;                     //Channel 4
+    ADC1->SQR3 |= ADC_SQR3_SQ1_2;
+    ADC1->CR1 |= ADC_CR2_ADON;
+    ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+}
+
+//--- end of file ---//
+
+

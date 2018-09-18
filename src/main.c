@@ -15,6 +15,9 @@
 // #include "hard.h"
 #include "startup_clocks.h"
 #include "gpio.h"
+#include "dma.h"
+
+#include <stdio.h>
 
 
 //--- Externals para enviar errores en UART
@@ -32,6 +35,7 @@ volatile unsigned short timeRun = TIME_RUN_DEF;
 //--- Externals para muestreos de corriente con el ADC
 volatile unsigned char flagMuestreo = 0;
 volatile unsigned char take_current_samples = 0;
+volatile unsigned short adc_ch [ADC_CHANNEL_QUANTITY];
 
 //--- Externals para armar se�ales y comprobar el TIM5 en el inicio del programa
 volatile unsigned int session_warming_up_channel_1_stage_time = 0;
@@ -75,6 +79,7 @@ int main (void)
 {
 	unsigned char i = 0;
 	unsigned char counter_keep_alive = 0;
+        unsigned short dummy16 = 0;
 
         //Configuracion de clock.
         // SystemInit();    //SystemInit() is called from startup_stm32f10x_hd.s before main()
@@ -112,6 +117,7 @@ int main (void)
         //TODO: luego habilitar sin libST
 	//ADC1.
 	// ADC1_Init();
+        AdcConfig();
 
 	//UART_Debug Config.
 	UART_PC_Init();
@@ -142,6 +148,57 @@ int main (void)
         PWM_CH4_TiempoMantenimiento(DUTY_NONE);
         PWM_CH4_TiempoBajada(DUTY_50_PERCENT);
 
+        //-- DMA configuration.
+        // DMAConfig();
+        // DMA1_Channel1->CCR |= DMA_CCR1_EN;
+
+        // ADC1->CR2 |= ADC_CR2_ADON;
+
+        
+        while (1)
+        {
+            // ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+            // while (ADC1->SR & !(ADC_SR_EOC));
+            // adc_ch[5] = ADC1->DR;
+            UART_PC_Send("before convertion... ");
+            do {
+                dummy16 = ADC1->DR;
+            }
+            while (ADC1->SR & ADC_SR_EOC);
+
+            UART_PC_Send("no EOC\n");
+            
+            ConvertChannel(1);    //por ahora siempre convierte el 4
+
+            while (!(ADC1->SR & ADC_SR_EOC));
+            sprintf(buffSendErr, "DR: %d dummy16: %d\n", (unsigned short) (ADC1->DR), dummy16);
+            UART_PC_Send(buffSendErr);            
+            
+            Wait_ms(1000);
+            // if (ADC1->SR & ADC_SR_EOC)
+            //     UART_PC_Send("EOC\n");
+            // else
+            //     UART_PC_Send("no EOC\n");
+
+            // if (ADC1->SR & ADC_SR_STRT)
+            //     UART_PC_Send("STRT\n");
+            // else
+            //     UART_PC_Send("no STRT\n");
+
+            // if (sequence_ready)
+            // {
+            //     sequence_ready_reset;
+            //     UART_PC_Send("seq ready\n");
+            // }
+            
+            // sprintf(buffSendErr, "IS1: %d, IS2: %d, IS3: %d, IS4: %d\n", IS1, IS2, IS3, IS4);
+            // UART_PC_Send(buffSendErr);
+            // Wait_ms(1000);
+            // sprintf(buffSendErr, "V200: %d, V40: %d\n", V200_Sense, V40_Sense);
+            // UART_PC_Send(buffSendErr);            
+        }
+                    
+            
         
         // while (1);
 	// PWM1_Init();

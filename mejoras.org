@@ -5,6 +5,8 @@
 ** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
 ** TODO Avisar de la desconexion de un canal
 ** TODO Agregar codigo de Hardware de MotherBoard
+   - pag 1073 Unique device ID
+
 ** Errores encontrados
    - arrancan 2 antenas quito 1 (no avisa) si a cambio en 5 segundos no ve la desconexion??
    - arranca con 1 la cambio de lugar y sigue
@@ -76,6 +78,16 @@
     para usar assert_params
 
 *** TODO flash_program tambien usa libST
+
+*** TODO migro modulo adc, le agrego dma
+    - GTK_Signal usa Session_Current_Limit_control que llama al adc
+    - como ahora va a ser por DMA lo debo corregir, lo dejo como pendiente
+    - comentadolo compila ok
+     
+
+*** TODO Session_Current_Limit_control
+
+
 
 ** TODO Armar nuevos modelos de archivos en modulos
    - .h .c con nuevo modelo

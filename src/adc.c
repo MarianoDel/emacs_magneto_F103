@@ -73,7 +73,7 @@ void AdcConfig (void)
     //set trigger & Continuos or Discontinuous
     // ADC1->CR1 |= ADC_CR1_SCAN;
     // ADC1->CR2 |= ADC_CR2_CONT | ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_1 | ADC_CR2_EXTSEL_0;    //soft trigger continuos
-    ADC1->CR2 |= ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_1 | ADC_CR2_EXTSEL_0;    //soft trigger discontinuos
+    // ADC1->CR2 |= ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_1 | ADC_CR2_EXTSEL_0;    //soft trigger discontinuos
     
     //set sampling time for each channel
     ADC1->SMPR2 |= ADC_SMPR2_SMP4_2 | ADC_SMPR2_SMP4_1 | ADC_SMPR2_SMP4_0;    //sample time Channel 4
@@ -129,6 +129,7 @@ void AdcConfig (void)
     
     // Enable ADC1
     ADC1->CR2 |= ADC_CR2_ADON;
+    ADC1->CR2 |= ADC_CR2_EXTTRIG;        
 }
 
 #ifdef ADC_WITH_INT
@@ -221,17 +222,54 @@ short ConvertTemp (unsigned short adc_temp)
 }
 #endif //ADC_WITH_TEMP_SENSE
 
-void ConvertChannel (unsigned char ch)
+void SetChannelSampleTime (unsigned char ADC_Channel, unsigned char ADC_SampleTime)
+{
+    uint32_t tmpreg1, tmpreg2;
+    
+    /* if ADC_Channel_10 ... ADC_Channel_17 is selected */
+    if (ADC_Channel > ADC_Channel_9)
+    {
+        /* Get the old register value */
+        tmpreg1 = ADC1->SMPR1;
+        /* Calculate the mask to clear */
+        tmpreg2 = ADC_SMPR1_SMP10 << (3 * (ADC_Channel - 10));
+        /* Clear the old channel sample time */
+        tmpreg1 &= ~tmpreg2;
+        /* Calculate the mask to set */
+        tmpreg2 = (uint32_t)ADC_SampleTime << (3 * (ADC_Channel - 10));
+        /* Set the new channel sample time */
+        tmpreg1 |= tmpreg2;
+        /* Store the new register value */
+        ADC1->SMPR1 = tmpreg1;
+    }
+    else /* ADC_Channel include in ADC_Channel_[0..9] */
+    {
+        /* Get the old register value */
+        tmpreg1 = ADC1->SMPR2;
+        /* Calculate the mask to clear */
+        tmpreg2 = ADC_SMPR2_SMP0 << (3 * ADC_Channel);
+        /* Clear the old channel sample time */
+        tmpreg1 &= ~tmpreg2;
+        /* Calculate the mask to set */
+        tmpreg2 = (uint32_t)ADC_SampleTime << (3 * ADC_Channel);
+        /* Set the new channel sample time */
+        tmpreg1 |= tmpreg2;
+        /* Store the new register value */
+        ADC1->SMPR2 = tmpreg1;
+    }
+}
+
+void ConvertChannel (unsigned char ADC_Channel)
 {
     ADC1->SQR1 &= ~ADC_SQR1_L;    //convert 1 channel
     ADC1->SQR1 |= ADC_SQR1_L_0;
     
-    // ADC1->SMPR2 |= ADC_SMPR2_SMP4_2;    //sample time Channel 4
-    ADC1->SMPR2 |= ADC_SMPR2_SMP4_2 | ADC_SMPR2_SMP4_1 | ADC_SMPR2_SMP4_0;    //sample time Channel 4    
-    ADC1->SQR3 &= ~ADC_SQR3_SQ1;                     //Channel 4
-    ADC1->SQR3 |= ADC_SQR3_SQ1_2;
+    ADC1->SQR3 &= ~ADC_SQR3_SQ1;
+    ADC1->SQR3 |= ADC_Channel;
     ADC1->CR1 |= ADC_CR2_ADON;
-    ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+    // ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+    // ADC1->CR2 |= ADC_CR2_SWSTART;
+    // ADC1->CR2 |= ADC_CR2_EXTTRIG;        
 }
 
 //--- end of file ---//

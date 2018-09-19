@@ -46,6 +46,40 @@
 #define RCC_ADC_PRESCALER_DIV_6    (RCC->CFGR |= RCC_CFGR_ADCPRE_1)
 #define RCC_ADC_PRESCALER_DIV_8    (RCC->CFGR |= RCC_CFGR_ADCPRE_1 | RCC_CFGR_ADCPRE_0)
 
+/** @defgroup ADC_channels 
+  * @{
+  */
+#define ADC_Channel_0                               ((uint8_t)0x00)
+#define ADC_Channel_1                               ((uint8_t)0x01)
+#define ADC_Channel_2                               ((uint8_t)0x02)
+#define ADC_Channel_3                               ((uint8_t)0x03)
+#define ADC_Channel_4                               ((uint8_t)0x04)
+#define ADC_Channel_5                               ((uint8_t)0x05)
+#define ADC_Channel_6                               ((uint8_t)0x06)
+#define ADC_Channel_7                               ((uint8_t)0x07)
+#define ADC_Channel_8                               ((uint8_t)0x08)
+#define ADC_Channel_9                               ((uint8_t)0x09)
+#define ADC_Channel_10                              ((uint8_t)0x0A)
+#define ADC_Channel_11                              ((uint8_t)0x0B)
+#define ADC_Channel_12                              ((uint8_t)0x0C)
+#define ADC_Channel_13                              ((uint8_t)0x0D)
+#define ADC_Channel_14                              ((uint8_t)0x0E)
+#define ADC_Channel_15                              ((uint8_t)0x0F)
+#define ADC_Channel_16                              ((uint8_t)0x10)
+#define ADC_Channel_17                              ((uint8_t)0x11)
+
+#define ADC_Channel_TempSensor                      ((uint8_t)ADC_Channel_16)
+#define ADC_Channel_Vrefint                         ((uint8_t)ADC_Channel_17)
+
+#define ADC_SampleTime_1_5Cycles                     ((uint8_t)0x00)
+#define ADC_SampleTime_7_5Cycles                     ((uint8_t)0x01)
+#define ADC_SampleTime_13_5Cycles                    ((uint8_t)0x02)
+#define ADC_SampleTime_28_5Cycles                    ((uint8_t)0x03)
+#define ADC_SampleTime_41_5Cycles                    ((uint8_t)0x04)
+#define ADC_SampleTime_55_5Cycles                    ((uint8_t)0x05)
+#define ADC_SampleTime_71_5Cycles                    ((uint8_t)0x06)
+#define ADC_SampleTime_239_5Cycles                   ((uint8_t)0x07)
+
 // /* Temperature sensor calibration value address */
 // #define TEMP110_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7C2))
 // #define TEMP30_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7B8))
@@ -90,14 +124,6 @@
 // #define ADC_Channel_Vrefint                        ((uint32_t)ADC_Channel_17)
 // #define ADC_Channel_Vbat                           ((uint32_t)ADC_Channel_18) /*!< Not available for STM32F030 devices */
 
-// #define ADC_SampleTime_1_5Cycles                     ((uint32_t)0x00000000)
-// #define ADC_SampleTime_7_5Cycles                     ((uint32_t)0x00000001)
-// #define ADC_SampleTime_13_5Cycles                    ((uint32_t)0x00000002)
-// #define ADC_SampleTime_28_5Cycles                    ((uint32_t)0x00000003)
-// #define ADC_SampleTime_41_5Cycles                    ((uint32_t)0x00000004)
-// #define ADC_SampleTime_55_5Cycles                    ((uint32_t)0x00000005)
-// #define ADC_SampleTime_71_5Cycles                    ((uint32_t)0x00000006)
-// #define ADC_SampleTime_239_5Cycles                   ((uint32_t)0x00000007)
 
 // #define ADC_Resolution_12b                         ((uint32_t)0x00000000)
 // #define ADC_Resolution_10b                         ADC_CFGR1_RES_0
@@ -159,6 +185,7 @@
 //--- Exported Module Functions ------------
 void AdcConfig (void);
 void ConvertChannel (unsigned char);
+void SetChannelSampleTime (unsigned char, unsigned char);
 
 #ifdef ADC_WITH_TEMP_SENSE
 void UpdateTemp(void);

@@ -153,7 +153,12 @@ int main (void)
         // DMA1_Channel1->CCR |= DMA_CCR1_EN;
 
         // ADC1->CR2 |= ADC_CR2_ADON;
-
+        SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
         
         while (1)
         {
@@ -168,7 +173,7 @@ int main (void)
 
             UART_PC_Send("no EOC\n");
             
-            ConvertChannel(1);    //por ahora siempre convierte el 4
+            ConvertChannel(ADC_Channel_15);
 
             while (!(ADC1->SR & ADC_SR_EOC));
             sprintf(buffSendErr, "DR: %d dummy16: %d\n", (unsigned short) (ADC1->DR), dummy16);

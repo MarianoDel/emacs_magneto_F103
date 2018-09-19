@@ -15,7 +15,7 @@
 //----------- Defines For Configuration --------------//
 //----------- Some ADC Configurations ----------------//
 // #define ADC_WITH_INT
-// #define ADC_WITH_DMA
+#define ADC_WITH_DMA
 
 #ifdef WITH_TEMP_CONTROL
 #define ADC_WITH_TEMP_SENSE
@@ -79,6 +79,24 @@
 #define ADC_SampleTime_55_5Cycles                    ((uint8_t)0x05)
 #define ADC_SampleTime_71_5Cycles                    ((uint8_t)0x06)
 #define ADC_SampleTime_239_5Cycles                   ((uint8_t)0x07)
+
+#define ADC_Channels_Qtty_1    ((uint8_t)0x00)
+#define ADC_Channels_Qtty_2    (ADC_SQR1_L_0)
+#define ADC_Channels_Qtty_3    (ADC_SQR1_L_1)
+#define ADC_Channels_Qtty_4    (ADC_SQR1_L_1 | ADC_SQR1_L_0)
+#define ADC_Channels_Qtty_5    (ADC_SQR1_L_2)                        
+#define ADC_Channels_Qtty_6    (ADC_SQR1_L_2 | ADC_SQR1_L_0)                        
+#define ADC_Channels_Qtty_7    (ADC_SQR1_L_2 | ADC_SQR1_L_1)                        
+#define ADC_Channels_Qtty_8    (ADC_SQR1_L_2 | ADC_SQR1_L_1 | ADC_SQR1_L_0)
+#define ADC_Channels_Qtty_9    (ADC_SQR1_L_3)                        
+#define ADC_Channels_Qtty_10   (ADC_SQR1_L_3 | ADC_SQR1_L_0)                        
+#define ADC_Channels_Qtty_11   (ADC_SQR1_L_3 | ADC_SQR1_L_1)
+#define ADC_Channels_Qtty_12   (ADC_SQR1_L_3 | ADC_SQR1_L_1 | ADC_SQR1_L_0)
+#define ADC_Channels_Qtty_13   (ADC_SQR1_L_3 | ADC_SQR1_L_2)
+#define ADC_Channels_Qtty_14   (ADC_SQR1_L_3 | ADC_SQR1_L_2 | ADC_SQR1_L_0)
+#define ADC_Channels_Qtty_15   (ADC_SQR1_L_3 | ADC_SQR1_L_2 | ADC_SQR1_L_1)                        
+#define ADC_Channels_Qtty_16   (ADC_SQR1_L_3 | ADC_SQR1_L_2 | ADC_SQR1_L_1 | ADC_SQR1_L_0)                        
+
 
 // /* Temperature sensor calibration value address */
 // #define TEMP110_CAL_ADDR ((uint16_t*) ((uint32_t) 0x1FFFF7C2))
@@ -186,6 +204,8 @@
 void AdcConfig (void);
 void ConvertChannel (unsigned char);
 void SetChannelSampleTime (unsigned char, unsigned char);
+void SetChannelSamplePosition (unsigned char, unsigned char);
+void SetChannelsQuantity (unsigned int);
 
 #ifdef ADC_WITH_TEMP_SENSE
 void UpdateTemp(void);

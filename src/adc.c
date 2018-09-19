@@ -122,14 +122,13 @@ void AdcConfig (void)
     ADC1->CR2 |= ADC_CR2_CAL;    // Start new calibration (ADC must be off at that time)
     while (ADC1->CR2 & ADC_CR2_CAL);
 
+    //trigger by soft
+    ADC1->CR2 |= ADC_CR2_EXTSEL;
 
 #ifdef ADC_WITH_DMA
     ADC1->CR2 |= ADC_CR2_DMA;
 #endif
     
-    // Enable ADC1
-    ADC1->CR2 |= ADC_CR2_ADON;
-    ADC1->CR2 |= ADC_CR2_EXTTRIG;        
 }
 
 #ifdef ADC_WITH_INT
@@ -257,6 +256,66 @@ void SetChannelSampleTime (unsigned char ADC_Channel, unsigned char ADC_SampleTi
         /* Store the new register value */
         ADC1->SMPR2 = tmpreg1;
     }
+}
+
+void SetChannelSamplePosition (unsigned char ADC_Channel, unsigned char Rank)
+{
+    uint32_t tmpreg1, tmpreg2;
+
+    /* For Rank 1 to 6 */
+    if (Rank < 7)
+    {
+        /* Get the old register value */
+        tmpreg1 = ADC1->SQR3;
+        /* Calculate the mask to clear */
+        tmpreg2 = ADC_SQR3_SQ1 << (5 * (Rank - 1));
+        /* Clear the old SQx bits for the selected rank */
+        tmpreg1 &= ~tmpreg2;
+        /* Calculate the mask to set */
+        tmpreg2 = (uint32_t)ADC_Channel << (5 * (Rank - 1));
+        /* Set the SQx bits for the selected rank */
+        tmpreg1 |= tmpreg2;
+        /* Store the new register value */
+        ADC1->SQR3 = tmpreg1;
+    }
+    /* For Rank 7 to 12 */
+    else if (Rank < 13)
+    {
+        /* Get the old register value */
+        tmpreg1 = ADC1->SQR2;
+        /* Calculate the mask to clear */
+        tmpreg2 = ADC_SQR2_SQ7 << (5 * (Rank - 7));
+        /* Clear the old SQx bits for the selected rank */
+        tmpreg1 &= ~tmpreg2;
+        /* Calculate the mask to set */
+        tmpreg2 = (uint32_t)ADC_Channel << (5 * (Rank - 7));
+        /* Set the SQx bits for the selected rank */
+        tmpreg1 |= tmpreg2;
+        /* Store the new register value */
+        ADC1->SQR2 = tmpreg1;
+    }
+    /* For Rank 13 to 16 */
+    else
+    {
+        /* Get the old register value */
+        tmpreg1 = ADC1->SQR1;
+        /* Calculate the mask to clear */
+        tmpreg2 = ADC_SQR1_SQ13 << (5 * (Rank - 13));
+        /* Clear the old SQx bits for the selected rank */
+        tmpreg1 &= ~tmpreg2;
+        /* Calculate the mask to set */
+        tmpreg2 = (uint32_t)ADC_Channel << (5 * (Rank - 13));
+        /* Set the SQx bits for the selected rank */
+        tmpreg1 |= tmpreg2;
+        /* Store the new register value */
+        ADC1->SQR1 = tmpreg1;
+    }
+}
+
+void SetChannelsQuantity (unsigned int qtty)
+{
+    ADC1->SQR1 &= ~ADC_SQR1_L;
+    ADC1->SQR1 |= qtty;
 }
 
 void ConvertChannel (unsigned char ADC_Channel)

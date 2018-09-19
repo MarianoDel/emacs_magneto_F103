@@ -18,7 +18,8 @@
    text    data     bss     dec     hex filename
   74984     112   25620  100716   1896c Magneto_GTK_rom.elf
    
-** TODO Utilizar nuevo Makefile
+** DONE Utilizar nuevo Makefile
+   CLOSED: [2018-09-19 Wed 18:02]
    - usar global
    - cargar todos los archivos para flash de micro
    - utilizar configuracion del README de blue pill
@@ -67,19 +68,27 @@
     - quito Tamper_Config del GTK_Hard.c
     - quito stm32gpio del makefile OK
 
-
 *** DONE No funciona nada!!!!
     CLOSED: [2018-09-17 Mon 15:13]
     - aparentemente se esta llamando dos veces a SystemInit() una desde el startup assembler
       y otra dentro de main
 
-*** no sale la libST
+*** DONE no sale la libST
+    CLOSED: [2018-09-19 Wed 18:00]
     stm32f10x_conf.h la pide stm32f10x.h con el STD_PERIPH_DRIVER desde el Makefile 
     para usar assert_params
+    - la logre sacar, hay que probar todo
 
-*** TODO flash_program tambien usa libST
+*** DONE flash_program tambien usa libST
+    CLOSED: [2018-09-19 Wed 18:00]
+    - la unica funcion de flash_program es FLASH_Program (se usa en el cmd save,)
+    - el resto son funciones de GTK_Estructura (Channel_Load)
+    - el comando load, llama a Session_Load de GTK_Estructura que a su vez llama readDataFromFlash
 
-*** TODO migro modulo adc, le agrego dma
+*** TODO Probar lo anterior - FLASH - !!!!
+
+*** DONE migro modulo adc, le agrego dma
+    CLOSED: [2018-09-19 Wed 17:08]
     - GTK_Signal usa Session_Current_Limit_control que llama al adc
     - como ahora va a ser por DMA lo debo corregir, lo dejo como pendiente
     - comentadolo compila ok

@@ -11,6 +11,7 @@
    - arrancan 2 antenas quito 1 (no avisa) si a cambio en 5 segundos no ve la desconexion??
    - arranca con 1 la cambio de lugar y sigue
 
+
 * Migrar a emacs y repositorio github atom -> emacs
 ** DONE Crear primero bin y revisar tamanios
    CLOSED: [2018-09-14 Fri 08:39]
@@ -85,16 +86,29 @@
     - el resto son funciones de GTK_Estructura (Channel_Load)
     - el comando load, llama a Session_Load de GTK_Estructura que a su vez llama readDataFromFlash
 
-*** TODO Probar lo anterior - FLASH - !!!!
+*** DONE Probar lo anterior - FLASH - !!!!
+    CLOSED: [2018-09-20 Thu 13:02]
+    - pruebo enviando comandos, pido grabar apago y prendo equipo y reviso si esta todo ok
+    - parece que graba ok, pero cuando lee...
+    - 3 duration OK
+    - 2 signal NOK
+    - 2 state_of_stage NOK
 
+      PUEDE SER POR TAMANIO DEL BUFFER A LA PC???
+**** graba bien muestra mal, aumento el tamanio del buffer de la PC
+     - cambio tamanio de buffer a SIZEOF_PC_TXDATA y SIZEOF_PC_RXDATA
+       en el envio de Usart1SendUnsigned y en USART1_IRQHandler
+     - Ahora esta OK!
+      
 *** DONE migro modulo adc, le agrego dma
     CLOSED: [2018-09-19 Wed 17:08]
     - GTK_Signal usa Session_Current_Limit_control que llama al adc
     - como ahora va a ser por DMA lo debo corregir, lo dejo como pendiente
     - comentadolo compila ok
      
-
-*** TODO Session_Current_Limit_control
+*** DONE Session_Current_Limit_control
+    CLOSED: [2018-09-20 Thu 15:39]
+    - le armo funciones de muestreo adc que se activan con USE_ADC_SAMPLE_BY_SAMPLE
 
 
 
@@ -103,6 +117,10 @@
 ** TODO Upgrade del repositorio remoto GitHub
    - pasar a emacs...
 
+** TODO Nuevo modulo para antenas
+*** las antenas se revisan por un timer que depende de TIM7 (1ms)
+    - Signal_TIM1MS ()
+      solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
 
 * Respecto del hardware Raspberry
 ** perdio el RTC
@@ -115,6 +133,114 @@
 ** Barra desplazamiento frecuencia un poco mas grande (por el touch)
 ** Quitar entradas setup adicionales si no va a tener pantalla
 *** Se frizo el boton de setup
-*** Un para de veces entra a una pantalla blanca y queda ah�
+*** Un para de veces entra a una pantalla blanca y queda ahí
 
 ** Necesitaria alguna pantalla de configuracion de red si no va a bootear
+
+* Comunicaciones en general hasta hoy
+** Preparar el tratamiento
+   Terminar cada línea con "\r\n"
+   incluir después de cada linea un timer de 100ms
+
+*** Formato de paquete
+    Duration (Duración de tratamiento)
+    Timer 100ms
+    Signal (Parámetros de forma de onda y frecuencia)
+    Timer 100ms
+    state_of_stage,1,1
+    Timer 100ms
+    save,01
+    Timer 100ms
+
+**** Ejemplo
+    Tratamiento 15 minutos, onda cuadrada al 70%, 10Hz
+    duration,00,15,00,1
+    timer 100ms                                                                                                                   
+    signal,070,070,0000,0001,0049,0001,0049,0000,0000,1
+    timer 100ms
+    state_of_stage,1,1
+    timer 100ms
+    save,01
+    timer 100ms
+
+*** #### luego de la carga un par de segundos (20s) y manda
+    load,01                                                                                                                               
+    start,
+
+*** Duración del tratamiento
+    Duraciones de tratamiento validas entre 5 y 120 minutos (2 horas)
+
+    duration,hh,mm,00,1
+
+    hh = horas (valido 00,01,02)
+    mm = minutos (valido de 00 a 59)
+    00 = Fijo (para futuras versiones)
+    1 = Fijo (para futuras versiones)
+
+**** Ejemplos 
+    duration,00,15,00,1 – Duración 15 minutos
+    duration,01,10,00,1 – Duración 70 minutos
+
+*** Parámetros de forma de onda y potencia
+    Actualmente disponibles triangular y cuadrada, senoidal por ahora tendría que estar gris (no disponible)
+    signal,001,002,0003,0004,0005,0006,0007,0008,0009,1
+    001 = Potencia en %1 (válido de 10 a 100)
+    002 = Potencia en %2  (válido de 10 a 100) para futuras versiones, ahora repite el valor 001
+    0003 = enviar todo en 0 “0000”
+    0004 = Tiempo rampa ascendente en ms (válido de 0 a 100)
+    0005 = Tiempo meseta en ms (válido de 0 a 100)
+    0006 = Tiempo rampa descendente en ms (válido de 0 a 100)
+    0007 = Tiempo de espera en ms (válido de 0 a 100)
+    0008 = enviar todo en 0 “0000”
+    0009 = enviar todo en 0 “0000”
+    1 = Fijo (para futuras versiones)
+
+**** Ejemplos
+     signal,070,070,0000,0049,0001,0001,0049,0000,0000,1 - #Triangular 70% 10Hz
+     signal,090,090,0000,0023,0001,0001,0025,0000,0000,1 - #Triangular 90% 20Hz
+     signal,070,070,0000,0016,0001,0001,0015,0000,0000,1 - #Triangular 70% 30Hz
+     signal,100,100,0000,0011,0001,0001,0013,0000,0000,1 - #Triangular 100% 40Hz
+     signal,080,080,0000,0008,0001,0001,0010,0000,0000,1 - #Triangular 80% 50Hz
+     signal,070,070,0000,0007,0001,0001,0007,0000,0000,1 - #Triangular 70% 60Hz
+
+     signal,070,070,0000,0001,0049,0001,0049,0000,0000,1 - #Cuadrada 70% 10Hz
+     signal,070,070,0000,0001,0023,0001,0025,0000,0000,1 - #Cuadrada 70% 20Hz
+     signal,070,070,0000,0001,0016,0001,0015,0000,0000,1 - #Cuadrada 70% 30Hz 
+     signal,070,070,0000,0001,0011,0001,0013,0000,0000,1 - #Cuadrada 70% 40Hz
+     signal,070,070,0000,0001,0008,0001,0010,0000,0000,1 - #Cuadrada 70% 50Hz
+     signal,070,070,0000,0001,0007,0001,0007,0000,0000,1 - #Cuadrada 70% 60Hz
+
+*** ##### para pedir el número de serie de la placa generadora #####
+    serial num
+    #va a responder con un string de 12 caracteres
+
+*** #### la locación levantarla de un txt que se pueda editar dentro de la raspberry #####
+
+
+** ##### durante el tratamiento la raspberry puede enviar:
+  pause,1                 ;;pone el equipo en pausa debe detener el timer
+  pause,0                 ;;continua el tratamiento
+  
+  stop,                      ;;detiene el tratamiento (lo termina) a 
+  través del botón stop
+  finish_ok,              ;;termina el tratamiento luego de pasado el 
+  tiempo activa el buzzer interno
+
+** Durante el tratamiento puede reportar uno o mas de los siguientes errores:
+
+    //reporta errores como "ERROR(0xNNN)\r\n"
+    //0x01N antena desconectada
+    //0x02N antena perdida
+    //0x04N sobre temperatura
+    //0x05N sobre corriente
+    //N num de canal 1-4
+
+*** Pueden existir otros tipos de errores pero los previos son los mensajes importantes
+    //errores adicionales "ERROR(0xNNN)\r\n"
+    //0x11N error en la sesión
+    //0x12N error en los parámetros de antena
+
+    ##### errores con las antenas permiten seguir el tratamiento hasta que se produzcan errores en las 4 antenas.
+    ##### Luego de cualquiera de lo errores por corriente termina el tratamiento por error #####
+    cuando decide cortar por error, envía hacia la raspberry como mínimo dos mensajes de stop
+    "STOP\r\n"

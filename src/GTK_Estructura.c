@@ -865,26 +865,35 @@ void Session_Save (session_typedef * ptr_session, unsigned char slot)
 }
 */
 
-#define delay_session_send 150
 void SessionSend(session_typedef * ptr_session)
 {
-	char buffChar[64];
+	char buffChar[128];
 
 	//Status off channel.
 	sprintf(&buffChar[0],"status,%d\r\n", ptr_session->status);
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
 
 	//Duration.
-	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,1\r\n", ptr_session->stage_1_time_hours,ptr_session->stage_1_time_minutes, ptr_session->stage_1_time_seconds);
+	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,1\r\n",
+                ptr_session->stage_1_time_hours,
+                ptr_session->stage_1_time_minutes,
+                ptr_session->stage_1_time_seconds);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
-	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,2\r\n", ptr_session->stage_2_time_hours,ptr_session->stage_2_time_minutes, ptr_session->stage_2_time_seconds);
+
+	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,2\r\n",
+                ptr_session->stage_2_time_hours,
+                ptr_session->stage_2_time_minutes,
+                ptr_session->stage_2_time_seconds);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
-	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,3\r\n", ptr_session->stage_3_time_hours,ptr_session->stage_3_time_minutes, ptr_session->stage_3_time_seconds);
+
+	sprintf(&buffChar[0],"duration,%02d,%02d,%02d,3\r\n",
+                ptr_session->stage_3_time_hours,
+                ptr_session->stage_3_time_minutes,
+                ptr_session->stage_3_time_seconds);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
 
 	//Antenna.
 /*	sprintf(&buffChar[0],"antenna,%03d,%02d,%03d,%02d,%02d,%02d,1\r\n", ptr_session->stage_1_resistance_int, ptr_session->stage_1_resistance_dec, ptr_session->stage_1_inductance_int, ptr_session->stage_1_inductance_dec, ptr_session->stage_1_current_limit_int, ptr_session->stage_1_current_limit_dec);
@@ -899,26 +908,55 @@ void SessionSend(session_typedef * ptr_session)
 */
 	//Signal.
 	//signal,050,050,0000,0010,0030,0010,0030,0000,0000,3
-	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n", ptr_session->stage_1_initial_power, ptr_session->stage_1_final_power, ptr_session->sync_on, ptr_session->stage_1_rising_time, ptr_session->stage_1_maintenance_time, ptr_session->stage_1_falling_time, ptr_session->stage_1_low_time, ptr_session->stage_1_burst_mode_on, ptr_session->stage_1_burst_mode_off);
+	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n",
+                ptr_session->stage_1_initial_power,
+                ptr_session->stage_1_final_power,
+                ptr_session->sync_on,
+                ptr_session->stage_1_rising_time,
+                ptr_session->stage_1_maintenance_time,
+                ptr_session->stage_1_falling_time,
+                ptr_session->stage_1_low_time,
+                ptr_session->stage_1_burst_mode_on,
+                ptr_session->stage_1_burst_mode_off);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
-	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,2\r\n", ptr_session->stage_2_initial_power, ptr_session->stage_2_final_power, ptr_session->sync_on, ptr_session->stage_2_rising_time, ptr_session->stage_2_maintenance_time, ptr_session->stage_2_falling_time, ptr_session->stage_2_low_time, ptr_session->stage_2_burst_mode_on, ptr_session->stage_2_burst_mode_off);
+
+	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,2\r\n",
+                ptr_session->stage_2_initial_power,
+                ptr_session->stage_2_final_power,
+                ptr_session->sync_on,
+                ptr_session->stage_2_rising_time,
+                ptr_session->stage_2_maintenance_time,
+                ptr_session->stage_2_falling_time,
+                ptr_session->stage_2_low_time,
+                ptr_session->stage_2_burst_mode_on,
+                ptr_session->stage_2_burst_mode_off);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
-	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,3\r\n", ptr_session->stage_3_initial_power, ptr_session->stage_3_final_power, ptr_session->sync_on, ptr_session->stage_3_rising_time, ptr_session->stage_3_maintenance_time, ptr_session->stage_3_falling_time, ptr_session->stage_3_low_time, ptr_session->stage_3_burst_mode_on, ptr_session->stage_3_burst_mode_off);
+
+	sprintf(&buffChar[0],"signal,%03d,%03d,000%d,%04d,%04d,%04d,%04d,%04d,%04d,3\r\n",
+                ptr_session->stage_3_initial_power,
+                ptr_session->stage_3_final_power,
+                ptr_session->sync_on,
+                ptr_session->stage_3_rising_time,
+                ptr_session->stage_3_maintenance_time,
+                ptr_session->stage_3_falling_time,
+                ptr_session->stage_3_low_time,
+                ptr_session->stage_3_burst_mode_on,
+                ptr_session->stage_3_burst_mode_off);
+        
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
 
 	//state of stage.
 	sprintf(&buffChar[0],"state_of_stage,%01d,1\r\n", ptr_session->stage_1_status);
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
+
 	sprintf(&buffChar[0],"state_of_stage,%01d,2\r\n", ptr_session->stage_2_status);
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
+
 	sprintf(&buffChar[0],"state_of_stage,%01d,3\r\n", ptr_session->stage_3_status);
 	UART_PC_Send(&buffChar[0]);
-	//Wait_ms(delay_session_send);
+
 }
 
 void Channel_Load (session_typedef * ptr_session, unsigned char channel)

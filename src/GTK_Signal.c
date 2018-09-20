@@ -218,7 +218,7 @@ unsigned short session_cooling_down_channel_4_burst_cnt = 0;
 unsigned char session_plateau_channel_4_state = 0;
 
 //--- Current limit Externals ---//
-extern volatile unsigned char flagMuestreo;
+// extern volatile unsigned char flagMuestreo;
 extern volatile unsigned char take_current_samples;
 
 //--- Current limit Globals ---//
@@ -550,7 +550,7 @@ void Session_Channel_1 (void)
 				ch1_sync_state = SYNC_RESET;
 				SetBitGlobalErrors (CH1, BIT_ERROR_CHECK);
 
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 				//Buzzer empezar tratamiento USO ESTE PARA TODOS LOS CANALES
 				BuzzerCommands(BUZZER_MULTIPLE_HALF, 1);
 #endif
@@ -690,7 +690,7 @@ void Session_Channel_1 (void)
 
 						UART_PC_Send("End_Cooling_Down,1\r\n");
 						UART_PC_Send("finish,1\r\n");
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
 					}
@@ -5356,7 +5356,7 @@ void Session_Channel_2 (void)
 
 						UART_PC_Send("End_Cooling_Down,2\r\n");
 						UART_PC_Send("finish,2\r\n");
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
 					}
@@ -5724,7 +5724,7 @@ void Session_Channel_3 (void)
 
 						UART_PC_Send("End_Cooling_Down,3\r\n");
 						UART_PC_Send("finish,3\r\n");
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
 					}
@@ -6113,7 +6113,7 @@ void Session_Channel_4 (void)
 
 						UART_PC_Send("End_Cooling_Down,4\r\n");
 						UART_PC_Send("finish,4\r\n");
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
 					}
@@ -6225,182 +6225,195 @@ unsigned char new_current_sample_ch4 = 0;
 //cargo en un vector las muestras corriente de cada canal
 void Session_Current_Limit_control (void)
 {
+#ifdef USE_ADC_SAMPLE_BY_SAMPLE
+    switch (current_limit_state)
+    {
+    case CURRENT_INIT_CHECK:
+        if (take_current_samples)    //synchro 1ms with TIM7
+        {
+            take_current_samples = 0;
+            current_limit_state++;
+        }
+        break;
 
-// 	switch (current_limit_state)
-// 	{
-// 		case CURRENT_INIT_CHECK:
-// 			if (take_current_samples)
-// 			{
-// 				take_current_samples = 0;
-// 				current_limit_state++;
-// 			}
-// 			break;
+    case CURRENT_CH1:
+        if (session_ch_1.status)
+        {
+            // flagMuestreo = 0;
+            // //ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
+            // ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_239Cycles5);
+            // ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
-// 		case CURRENT_CH1:
-// 			if (session_ch_1.status)
-// 			{
-// 				flagMuestreo = 0;
-// 				//ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_28Cycles5);
-// 				ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_239Cycles5);
-// 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-// 				current_limit_state = CURRENT_CH1_WAIT_SAMPLE;
-// 			}
-// 			else
-// 				current_limit_state = CURRENT_CH2;
-
-
-// 			break;
-
-// 		case CURRENT_CH1_WAIT_SAMPLE:
-// 			if (flagMuestreo)
-// 			{
-// 				actual_current[CH1] = ADC1->DR;
-// 				current_limit_state = CURRENT_CH1_CHECK;
-// 			}
-// 			break;
-
-// 		case CURRENT_CH1_CHECK:
-// //			if (session_ch_1.peak_current_limit < actual_current[CH1])
-// //			{
-// //				Session_Channel_1_Stop();
-// //
-// //				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
-// //				UART_PC_Send(&buffSendErr[0]);
-// //				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH1]);
-// //				UART_PC_Send(&buffSendErr[0]);
-// //			}
-
-// 			//se chequea en cada canal
-// 			new_current_sample_ch1 = 1;
-// 			current_limit_state++;
-
-// 			break;
-
-// 		case CURRENT_CH2:
-// 			if (session_ch_2.status)
-// 			{
-// 				flagMuestreo = 0;
-// 				//ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
-// 				ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_239Cycles5);
-// 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-// 				current_limit_state = CURRENT_CH2_WAIT_SAMPLE;
-// 			}
-// 			else
-// 				current_limit_state = CURRENT_CH3;
+            ConvertChannel(ADC_Channel_4);
+            current_limit_state = CURRENT_CH1_WAIT_SAMPLE;
+        }
+        else
+            current_limit_state = CURRENT_CH2;
 
 
-// 			break;
+        break;
 
-// 		case CURRENT_CH2_WAIT_SAMPLE:
-// 			if (flagMuestreo)
-// 			{
-// 				actual_current[CH2] = ADC1->DR;
-// 				current_limit_state = CURRENT_CH2_CHECK;
-// 			}
-// 			break;
+    case CURRENT_CH1_WAIT_SAMPLE:
+        // if (flagMuestreo)
+        if (ConvertSingleChannelFinishFlag())
+        {
+            actual_current[CH1] = ADC1->DR;
+            current_limit_state = CURRENT_CH1_CHECK;
+        }
+        break;
 
-// 		case CURRENT_CH2_CHECK:
-// //			if (session_ch_2.peak_current_limit < actual_current[CH2])
-// //			{
-// //				Session_Channel_2_Stop();
-// //
-// //				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
-// //				UART_PC_Send(&buffSendErr[0]);
-// //				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH2]);
-// //				UART_PC_Send(&buffSendErr[0]);
-// //			}
+    case CURRENT_CH1_CHECK:
+//			if (session_ch_1.peak_current_limit < actual_current[CH1])
+//			{
+//				Session_Channel_1_Stop();
+//
+//				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(1));
+//				UART_PC_Send(&buffSendErr[0]);
+//				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH1]);
+//				UART_PC_Send(&buffSendErr[0]);
+//			}
 
-// 			//se chequea en cada canal
-// 			new_current_sample_ch2 = 1;
-// 			current_limit_state++;
+        //se chequea en cada canal
+        new_current_sample_ch1 = 1;
+        current_limit_state++;
 
-// 			break;
+        break;
 
-// 		case CURRENT_CH3:
-// 			if (session_ch_3.status)
-// 			{
-// 				flagMuestreo = 0;
-// 				//ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_28Cycles5);
-// 				ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_239Cycles5);
-// 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-// 				current_limit_state = CURRENT_CH3_WAIT_SAMPLE;
-// 			}
-// 			else
-// 				current_limit_state = CURRENT_CH4;
+    case CURRENT_CH2:
+        if (session_ch_2.status)
+        {
+            // flagMuestreo = 0;
+            // //ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_28Cycles5);
+            // ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 1, ADC_SampleTime_239Cycles5);
+            // ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 
-
-// 			break;
-
-// 		case CURRENT_CH3_WAIT_SAMPLE:
-// 			if (flagMuestreo)
-// 			{
-// 				actual_current[CH3] = ADC1->DR;
-// 				current_limit_state = CURRENT_CH3_CHECK;
-// 			}
-// 			break;
-
-// 		case CURRENT_CH3_CHECK:
-// //			if (session_ch_3.peak_current_limit < actual_current[CH3])
-// //			{
-// //				Session_Channel_3_Stop();
-// //
-// //				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
-// //				UART_PC_Send(&buffSendErr[0]);
-// //				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH3]);
-// //				UART_PC_Send(&buffSendErr[0]);
-// //			}
-
-// 			//se chequea en cada canal
-// 			new_current_sample_ch3 = 1;
-// 			current_limit_state++;
-
-// 			break;
-
-// 		case CURRENT_CH4:
-// 			if (session_ch_4.status)
-// 			{
-// 				flagMuestreo = 0;
-// 				ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_28Cycles5);
-// 				ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_239Cycles5);
-// 				ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-// 				current_limit_state = CURRENT_CH4_WAIT_SAMPLE;
-// 			}
-// 			else
-// 				current_limit_state = CURRENT_INIT_CHECK;
+            ConvertChannel(ADC_Channel_5);
+            current_limit_state = CURRENT_CH2_WAIT_SAMPLE;
+        }
+        else
+            current_limit_state = CURRENT_CH3;
 
 
-// 			break;
+        break;
 
-// 		case CURRENT_CH4_WAIT_SAMPLE:
-// 			if (flagMuestreo)
-// 			{
-// 				actual_current[CH4] = ADC1->DR;
-// 				current_limit_state = CURRENT_CH4_CHECK;
-// 			}
-// 			break;
+    case CURRENT_CH2_WAIT_SAMPLE:
+        // if (flagMuestreo)
+        if (ConvertSingleChannelFinishFlag())
+        {
+            actual_current[CH2] = ADC1->DR;
+            current_limit_state = CURRENT_CH2_CHECK;
+        }
+        break;
 
-// 		case CURRENT_CH4_CHECK:
-// //			if (session_ch_4.peak_current_limit < actual_current[CH4])
-// //			{
-// //				Session_Channel_4_Stop();
-// //
-// //				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
-// //				UART_PC_Send(&buffSendErr[0]);
-// //				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH4]);
-// //				UART_PC_Send(&buffSendErr[0]);
-// //			}
+    case CURRENT_CH2_CHECK:
+//			if (session_ch_2.peak_current_limit < actual_current[CH2])
+//			{
+//				Session_Channel_2_Stop();
+//
+//				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(2));
+//				UART_PC_Send(&buffSendErr[0]);
+//				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH2]);
+//				UART_PC_Send(&buffSendErr[0]);
+//			}
 
-// 			//se chequea en cada canal
-// 			new_current_sample_ch4 = 1;
-// 			current_limit_state = CURRENT_INIT_CHECK;
+        //se chequea en cada canal
+        new_current_sample_ch2 = 1;
+        current_limit_state++;
 
-// 			break;
+        break;
 
-// 		default:
-// 			current_limit_state = CURRENT_INIT_CHECK;
-// 			break;
+    case CURRENT_CH3:
+        if (session_ch_3.status)
+        {
+            // flagMuestreo = 0;
+            // //ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_28Cycles5);
+            // ADC_RegularChannelConfig(ADC1, ADC_Channel_6, 1, ADC_SampleTime_239Cycles5);
+            // ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+            
+            ConvertChannel(ADC_Channel_6);
+            current_limit_state = CURRENT_CH3_WAIT_SAMPLE;
+        }
+        else
+            current_limit_state = CURRENT_CH4;
 
-// 	}
+
+        break;
+
+    case CURRENT_CH3_WAIT_SAMPLE:
+        // if (flagMuestreo)
+        if (ConvertSingleChannelFinishFlag())
+        {
+            actual_current[CH3] = ADC1->DR;
+            current_limit_state = CURRENT_CH3_CHECK;
+        }
+        break;
+
+    case CURRENT_CH3_CHECK:
+//			if (session_ch_3.peak_current_limit < actual_current[CH3])
+//			{
+//				Session_Channel_3_Stop();
+//
+//				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(3));
+//				UART_PC_Send(&buffSendErr[0]);
+//				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH3]);
+//				UART_PC_Send(&buffSendErr[0]);
+//			}
+
+        //se chequea en cada canal
+        new_current_sample_ch3 = 1;
+        current_limit_state++;
+
+        break;
+
+    case CURRENT_CH4:
+        if (session_ch_4.status)
+        {
+            // flagMuestreo = 0;
+            // ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_28Cycles5);
+            // ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_239Cycles5);
+            // ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+            ConvertChannel(ADC_Channel_7);
+            current_limit_state = CURRENT_CH4_WAIT_SAMPLE;
+        }
+        else
+            current_limit_state = CURRENT_INIT_CHECK;
+
+
+        break;
+
+    case CURRENT_CH4_WAIT_SAMPLE:
+        // if (flagMuestreo)
+        if (ConvertSingleChannelFinishFlag())
+        {
+            actual_current[CH4] = ADC1->DR;
+            current_limit_state = CURRENT_CH4_CHECK;
+        }
+        break;
+
+    case CURRENT_CH4_CHECK:
+//			if (session_ch_4.peak_current_limit < actual_current[CH4])
+//			{
+//				Session_Channel_4_Stop();
+//
+//				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(4));
+//				UART_PC_Send(&buffSendErr[0]);
+//				sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH4]);
+//				UART_PC_Send(&buffSendErr[0]);
+//			}
+
+        //se chequea en cada canal
+        new_current_sample_ch4 = 1;
+        current_limit_state = CURRENT_INIT_CHECK;
+
+        break;
+
+    default:
+        current_limit_state = CURRENT_INIT_CHECK;
+        break;
+
+    }
+#endif    //USE_ADC_SAMPLE_BY_SAMPLE
+    
 }
 
 unsigned char Current_Limit_CheckCh1 (void)
@@ -6553,7 +6566,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch1 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 #endif
 			Wait_ms(100);
@@ -6571,7 +6584,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch2 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 #endif
 			Wait_ms(100);
@@ -6589,7 +6602,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch3 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 #endif
 			Wait_ms(100);
@@ -6607,7 +6620,7 @@ void CheckforGlobalErrors (void)
 		if (global_error_ch4 & BIT_ERROR_CURRENT)
 		{
 			StopAllChannels ();
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 			BuzzerCommands(BUZZER_MULTIPLE_SHORT, 5);
 #endif
 			Wait_ms(100);
@@ -6631,7 +6644,7 @@ void CheckforGlobalErrors (void)
 					{
 						//tengo errores en todos los canales que no son por corriente
 						StopAllChannels ();
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 						BuzzerCommands(BUZZER_MULTIPLE_LONG, 1);
 #endif						
 						Wait_ms(100);

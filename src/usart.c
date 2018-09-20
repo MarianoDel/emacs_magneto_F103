@@ -31,8 +31,8 @@ extern volatile unsigned char usart5_have_data;
 volatile unsigned char * ptx1;
 volatile unsigned char * ptx1_pckt_index;
 volatile unsigned char * prx1;
-volatile unsigned char tx1buff[SIZEOF_TXDATA];
-volatile unsigned char rx1buff[SIZEOF_RXDATA];
+volatile unsigned char tx1buff[SIZEOF_PC_TXDATA];
+volatile unsigned char rx1buff[SIZEOF_PC_RXDATA];
 
 //--- USART2 ---//
 volatile unsigned char * ptx2;
@@ -112,7 +112,7 @@ void Usart1Send (char * send)
 
 void Usart1SendUnsigned (unsigned char * send, unsigned char size)
 {
-    if ((ptx1_pckt_index + size) < &tx1buff[SIZEOF_TXDATA])
+    if ((ptx1_pckt_index + size) < &tx1buff[SIZEOF_PC_TXDATA])
     {
         memcpy((unsigned char *)ptx1_pckt_index, send, size);
         ptx1_pckt_index += size;
@@ -155,7 +155,7 @@ void USART1_IRQHandler (void)
     {
         dummy = USART1->DR & 0x0FF;
 
-        if (prx1 < &rx1buff[SIZEOF_RXDATA - 1])
+        if (prx1 < &rx1buff[SIZEOF_PC_RXDATA - 1])
         {
             if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
             {
@@ -182,7 +182,7 @@ void USART1_IRQHandler (void)
     {
         if (USART1->SR & USART_SR_TXE)
         {
-            if ((ptx1 < &tx1buff[SIZEOF_TXDATA]) && (ptx1 < ptx1_pckt_index))
+            if ((ptx1 < &tx1buff[SIZEOF_PC_TXDATA]) && (ptx1 < ptx1_pckt_index))
             {
                 USART1->DR = *ptx1;
                 ptx1++;

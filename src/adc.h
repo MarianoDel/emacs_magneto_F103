@@ -15,7 +15,9 @@
 //----------- Defines For Configuration --------------//
 //----------- Some ADC Configurations ----------------//
 // #define ADC_WITH_INT
+#ifndef USE_ADC_SAMPLE_BY_SAMPLE
 #define ADC_WITH_DMA
+#endif
 
 #ifdef WITH_TEMP_CONTROL
 #define ADC_WITH_TEMP_SENSE
@@ -202,10 +204,13 @@
 
 //--- Exported Module Functions ------------
 void AdcConfig (void);
-void ConvertChannel (unsigned char);
+
 void SetChannelSampleTime (unsigned char, unsigned char);
 void SetChannelSamplePosition (unsigned char, unsigned char);
 void SetChannelsQuantity (unsigned int);
+
+void ConvertChannel (unsigned char);
+unsigned char ConvertSingleChannelFinishFlag (void);
 
 #ifdef ADC_WITH_TEMP_SENSE
 void UpdateTemp(void);

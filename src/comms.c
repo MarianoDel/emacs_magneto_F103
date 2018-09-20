@@ -75,16 +75,6 @@ void UART1_Receive (void)
     antenna_typedef 	antenna;
     signal_typedef 		signal;
     duration_typedef 	duration;
-    //char buf[10];
-
-    // if (msUART1rxTimeOut == 0)
-    // {
-
-    // 	MSUART1RXTIMEOUT;
-
-    // 	pBuffUART1rxW = &buffUART1rx[0];
-    // 	pBuffUART1rxR = &buffUART1rx[0];
-    // }
 
     if (usart1_have_data)
     {

@@ -33,16 +33,17 @@ volatile unsigned char usart5_have_data = 0;
 volatile unsigned short timeRun = TIME_RUN_DEF;
 
 //--- Externals para muestreos de corriente con el ADC
-volatile unsigned char flagMuestreo = 0;
+// volatile unsigned char flagMuestreo = 0;
 volatile unsigned char take_current_samples = 0;
 volatile unsigned short adc_ch [ADC_CHANNEL_QUANTITY];
 
-//--- Externals para armar se�ales y comprobar el TIM5 en el inicio del programa
+//--- Externals para armar seniales y comprobar el TIM5 en el inicio del programa
 volatile unsigned int session_warming_up_channel_1_stage_time = 0;
 
 //--- Externals para el BUZZER
+#ifdef USE_BUZZER_ON_BOARD
 unsigned short buzzer_timeout = 0;
-
+#endif
 
 //Estructuras.
 session_typedef session_slot_aux;
@@ -119,6 +120,16 @@ int main (void)
 	// ADC1_Init();
         AdcConfig();
 
+#ifdef USE_ADC_SAMPLE_BY_SAMPLE
+        SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
+        SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
+
+        //nothing more use ConvertChannel(chnum) from now onwards
+#endif
 	//UART_Debug Config.
 	UART_PC_Init();
 	UART_CH1_Init();
@@ -134,19 +145,19 @@ int main (void)
 
         PWM_CH1_TiempoSubida(DUTY_NONE);
         PWM_CH1_TiempoMantenimiento(DUTY_NONE);
-        PWM_CH1_TiempoBajada(DUTY_50_PERCENT);
+        PWM_CH1_TiempoBajada(DUTY_100_PERCENT);
         
         PWM_CH2_TiempoSubida(DUTY_NONE);
         PWM_CH2_TiempoMantenimiento(DUTY_NONE);
-        PWM_CH2_TiempoBajada(DUTY_50_PERCENT);
+        PWM_CH2_TiempoBajada(DUTY_100_PERCENT);
         
         PWM_CH3_TiempoSubida(DUTY_NONE);
         PWM_CH3_TiempoMantenimiento(DUTY_NONE);
-        PWM_CH3_TiempoBajada(DUTY_50_PERCENT);
+        PWM_CH3_TiempoBajada(DUTY_100_PERCENT);
 
         PWM_CH4_TiempoSubida(DUTY_NONE);
         PWM_CH4_TiempoMantenimiento(DUTY_NONE);
-        PWM_CH4_TiempoBajada(DUTY_50_PERCENT);
+        PWM_CH4_TiempoBajada(DUTY_100_PERCENT);
 
 
 
@@ -280,46 +291,46 @@ int main (void)
         //--- End Test ADC Multiple conversion Scanning Mode and DMA --------------------------//        
 
         //--- Test ADC Multiple conversion Scanning Continuous Mode and DMA -------------------//
-        //-- DMA configuration.
-        DMAConfig();
-        DMA1_Channel1->CCR |= DMA_CCR1_EN;
+        // //-- DMA configuration.
+        // DMAConfig();
+        // DMA1_Channel1->CCR |= DMA_CCR1_EN;
         
-        SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
-        SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
-        SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
-        SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
-        SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
-        SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
+        // SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
 
-        SetChannelSamplePosition(ADC_Channel_4, 1);
-        SetChannelSamplePosition(ADC_Channel_5, 2);
-        SetChannelSamplePosition(ADC_Channel_6, 3);
-        SetChannelSamplePosition(ADC_Channel_7, 4);
-        SetChannelSamplePosition(ADC_Channel_14, 5);
-        SetChannelSamplePosition(ADC_Channel_15, 6);
+        // SetChannelSamplePosition(ADC_Channel_4, 1);
+        // SetChannelSamplePosition(ADC_Channel_5, 2);
+        // SetChannelSamplePosition(ADC_Channel_6, 3);
+        // SetChannelSamplePosition(ADC_Channel_7, 4);
+        // SetChannelSamplePosition(ADC_Channel_14, 5);
+        // SetChannelSamplePosition(ADC_Channel_15, 6);
 
-        SetChannelsQuantity(ADC_Channels_Qtty_6);
+        // SetChannelsQuantity(ADC_Channels_Qtty_6);
 
-        ADC1->CR1 |= ADC_CR1_SCAN;    //convertir toda la secuencia de canales
-        ADC1->CR2 |= ADC_CR2_CONT;    //convertir en forma continua
+        // ADC1->CR1 |= ADC_CR1_SCAN;    //convertir toda la secuencia de canales
+        // ADC1->CR2 |= ADC_CR2_CONT;    //convertir en forma continua
         
-        //activo primera conversion por las dudas        
-        if (ADC1->CR2 & ADC_CR2_ADON)
-        {
-            UART_PC_Send("Adon is on\n");
-            //activo una primera conversion
-            ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-        }
+        // //activo primera conversion por las dudas        
+        // if (ADC1->CR2 & ADC_CR2_ADON)
+        // {
+        //     UART_PC_Send("Adon is on\n");
+        //     //activo una primera conversion
+        //     ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
+        // }
 
-        while (1)
-        {
-            Wait_ms(1000);
-            sprintf(buffSendErr, "IS1: %d, IS2: %d, IS3: %d, IS4: %d\n", IS1, IS2, IS3, IS4);
-            UART_PC_Send(buffSendErr);
-            Wait_ms(1000);
-            sprintf(buffSendErr, "V200: %d, V40: %d\n", V200_Sense, V40_Sense);
-            UART_PC_Send(buffSendErr);            
-        }
+        // while (1)
+        // {
+        //     Wait_ms(1000);
+        //     sprintf(buffSendErr, "IS1: %d, IS2: %d, IS3: %d, IS4: %d\n", IS1, IS2, IS3, IS4);
+        //     UART_PC_Send(buffSendErr);
+        //     Wait_ms(1000);
+        //     sprintf(buffSendErr, "V200: %d, V40: %d\n", V200_Sense, V40_Sense);
+        //     UART_PC_Send(buffSendErr);            
+        // }
         //--- End Test ADC Multiple conversion Scanning Continuous Mode and DMA ----------------//        
         
         
@@ -430,7 +441,7 @@ int main (void)
 		//Chequeo de errores globales
 		CheckforGlobalErrors();
 
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 		//Funciones del Buzzer
 		UpdateBuzzer();
 #endif

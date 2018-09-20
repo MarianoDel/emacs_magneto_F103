@@ -321,7 +321,6 @@ void SetChannelsQuantity (unsigned int qtty)
 void ConvertChannel (unsigned char ADC_Channel)
 {
     ADC1->SQR1 &= ~ADC_SQR1_L;    //convert 1 channel
-    ADC1->SQR1 |= ADC_SQR1_L_0;
     
     ADC1->SQR3 &= ~ADC_SQR3_SQ1;
     ADC1->SQR3 |= ADC_Channel;
@@ -329,6 +328,11 @@ void ConvertChannel (unsigned char ADC_Channel)
     // ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
     // ADC1->CR2 |= ADC_CR2_SWSTART;
     // ADC1->CR2 |= ADC_CR2_EXTTRIG;        
+}
+
+unsigned char ConvertSingleChannelFinishFlag (void)
+{
+    return (ADC1->SR & ADC_SR_EOC);
 }
 
 //--- end of file ---//

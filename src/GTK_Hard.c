@@ -2,12 +2,12 @@
 #include "GTK_Hard.h"
 
 //--- Module Externals ---------------
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 extern unsigned short buzzer_timeout;
 #endif
 
 //--- Module Globals ---------------
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 tBuzzer buzzer_state = BUZZER_INIT;
 unsigned char buzz_multiple = 0;
 #endif
@@ -15,7 +15,7 @@ unsigned char buzz_multiple = 0;
 //************************************************************************************//
 
 
-#ifdef SOFTWARE_VERSION_1_2
+#ifdef USE_BUZZER_ON_BOARD
 void BuzzerCommands(unsigned char command, unsigned char multiple)
 {
     buzzer_state = command;

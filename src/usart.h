@@ -16,9 +16,11 @@
 
 
 //---- Configurations Defines --------------------
+#define SIZEOF_PC_TXDATA        512
+#define SIZEOF_PC_RXDATA        512
+
 #define SIZEOF_TXDATA        256
 #define SIZEOF_RXDATA        256
-
 //se pueden colocar ifdef para cada usart y habilitar o no cada una
 //reduciria el codigo generado por el compilador
 

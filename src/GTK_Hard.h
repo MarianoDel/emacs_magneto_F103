@@ -7,20 +7,33 @@
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio
+// #define SOFTWARE_VERSION_1_3        //sin libST, adc con dma
 #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
 // #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
 // #define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
 
-#ifdef HARDWARE_VERSION_2_0
-#define HARD "Hardware Version: 2.0\r\n"
+//---- Internal configs depending on the prevous versions -------------//
+#if (defined SOFTWARE_VERSION_1_2) || (defined SOFTWARE_VERSION_1_3)
+#define USE_BUZZER_ON_BOARD
 #endif
+
+#ifdef SOFTWARE_VERSION_1_2
+#define USE_ADC_SAMPLE_BY_SAMPLE
+#endif
+//---- end of Inernals configs ----------------------------------------//
 #ifdef HARDWARE_VERSION_2_1
 #define HARD "Hardware Version: 2.1\r\n"
 #endif
+#ifdef HARDWARE_VERSION_2_0
+#define HARD "Hardware Version: 2.0\r\n"
+#endif
 
 //--- Software ------------------//
+#ifdef SOFTWARE_VERSION_1_3
+#define SOFT "Software Version: 1.3\r\n"
+#endif
 #ifdef SOFTWARE_VERSION_1_2
 #define SOFT "Software Version: 1.2\r\n"
 #endif

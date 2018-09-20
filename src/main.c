@@ -33,7 +33,6 @@ volatile unsigned char usart5_have_data = 0;
 volatile unsigned short timeRun = TIME_RUN_DEF;
 
 //--- Externals para muestreos de corriente con el ADC
-// volatile unsigned char flagMuestreo = 0;
 volatile unsigned char take_current_samples = 0;
 volatile unsigned short adc_ch [ADC_CHANNEL_QUANTITY];
 
@@ -128,7 +127,7 @@ int main (void)
         SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
         SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
 
-        //nothing more use ConvertChannel(chnum) from now onwards
+        //nothing more use ConvertChannel(chnum) from now on
 #endif
 	//UART_Debug Config.
 	UART_PC_Init();
@@ -160,6 +159,15 @@ int main (void)
         PWM_CH4_TiempoBajada(DUTY_100_PERCENT);
 
 
+        while (1)
+        {
+            session_ch_1.status = 1;
+            session_ch_2.status = 1;
+            session_ch_3.status = 1;
+            session_ch_4.status = 1;
+
+            Session_Current_Limit_control();
+        }
 
 
         //--- Test ADC Single conversion ----------------------------------//

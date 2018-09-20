@@ -324,10 +324,7 @@ void ConvertChannel (unsigned char ADC_Channel)
     
     ADC1->SQR3 &= ~ADC_SQR3_SQ1;
     ADC1->SQR3 |= ADC_Channel;
-    ADC1->CR1 |= ADC_CR2_ADON;
-    // ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    // ADC1->CR2 |= ADC_CR2_SWSTART;
-    // ADC1->CR2 |= ADC_CR2_EXTTRIG;        
+    ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;    
 }
 
 unsigned char ConvertSingleChannelFinishFlag (void)

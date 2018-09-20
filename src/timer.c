@@ -250,30 +250,31 @@ void TIM_4_Init (void)
 void TIM7_IRQHandler (void)	//1mS
 {
 
-	Signal_TIM1MS ();
+    Signal_TIM1MS ();
 
-	//Led3Toggle();
-	// flagMuestreo = 1;
-	take_current_samples = 1;
+    //Led3Toggle();
+    // flagMuestreo = 1;
+    if (take_current_samples)
+        take_current_samples--;
 
-	// ADC_TIM7_ISR();
-	//GTK_SIGNAL_TIME_1MS ();
+    // ADC_TIM7_ISR();
+    //GTK_SIGNAL_TIME_1MS ();
 
-	if (timeRun)
-		timeRun--;
+    if (timeRun)
+        timeRun--;
 
-	//Wait_ms
-	if (timer_wait)
-		timer_wait--;
+    //Wait_ms
+    if (timer_wait)
+        timer_wait--;
 
 #ifdef USE_BUZZER_ON_BOARD
-	if (buzzer_timeout)
-		buzzer_timeout--;
+    if (buzzer_timeout)
+        buzzer_timeout--;
 #endif
         
-	//bajar flag
-	if (TIM7->SR & 0x01)	
-		TIM7->SR = 0x00;
+    //bajar flag
+    if (TIM7->SR & 0x01)	
+        TIM7->SR = 0x00;
 }
 
 void TIM5_Init (void)

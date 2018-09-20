@@ -6406,14 +6406,14 @@ void Session_Current_Limit_control (void)
         current_limit_state = CURRENT_INIT_CHECK;
 
         //prueba envio a la PC
-        sprintf(buffSendErr, "IS1: %d IS2: %d IS3: %d IS4: %d\n",
-                actual_current[CH1],
-                actual_current[CH2],
-                actual_current[CH3],
-                actual_current[CH4]);
+        // sprintf(buffSendErr, "IS1: %d IS2: %d IS3: %d IS4: %d\n",
+        //         actual_current[CH1],
+        //         actual_current[CH2],
+        //         actual_current[CH3],
+        //         actual_current[CH4]);
 
-        UART_PC_Send(buffSendErr);
-        Wait_ms(2000);
+        // UART_PC_Send(buffSendErr);
+        // Wait_ms(2000);
         //fin prueba envio a la PC                
 
         break;

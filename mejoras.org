@@ -1,6 +1,7 @@
 * Mejoras al Soft del MotherBoard principal para nuevo soft Raspberry
 ** DONE Empiezo docs de cambios
    CLOSED: [2018-09-13 Thu 18:28]
+** TODO Enviar 4 strings al booteo del equipo
 ** TODO Enviar con cada nueva conexion de antena los 4 strings de canales
 ** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
 ** TODO Avisar de la desconexion de un canal
@@ -39,7 +40,8 @@
     - con el cambio uart -> usart mejoro algo de codigo
 
 *** con modulo usart ver los pines alternativos, son distintos segun hardware
-*** TODO FALTA PROBAR ANTERIOR
+*** DONE FALTA PROBAR ANTERIOR
+    CLOSED: [2018-09-20 Thu 17:01]
 
 *** DONE migro modulo timer
     CLOSED: [2018-09-17 Mon 19:42]

@@ -159,15 +159,15 @@ int main (void)
         PWM_CH4_TiempoBajada(DUTY_100_PERCENT);
 
 
-        while (1)
-        {
-            session_ch_1.status = 1;
-            session_ch_2.status = 1;
-            session_ch_3.status = 1;
-            session_ch_4.status = 1;
+        // while (1)
+        // {
+        //     session_ch_1.status = 1;
+        //     session_ch_2.status = 1;
+        //     session_ch_3.status = 1;
+        //     session_ch_4.status = 1;
 
-            Session_Current_Limit_control();
-        }
+        //     Session_Current_Limit_control();
+        // }
 
 
         //--- Test ADC Single conversion ----------------------------------//

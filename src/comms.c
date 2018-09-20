@@ -80,7 +80,7 @@ void UART1_Receive (void)
     {
         ReadUsart1Buffer(localbuff, sizeof(localbuff));
         //--- Introduce your code here ---//
-        UART_PC_Send((char *)&localbuff[0]);
+        // UART_PC_Send((char *)&localbuff[0]);
 
         if (!strncmp((const char *)&localbuff[0], (const char *)"get_temp,", (sizeof("get_temp,") - 1)))
         {
@@ -527,21 +527,13 @@ void UART2_Receive (void)
     unsigned short aux;
     antenna_typedef antenna_aux;
 
-    // if (msUART2rxTimeOut == 0)
-    // {
-
-    // 	MSUART2RXTIMEOUT;
-
-    // 	pBuffUART2rxW = &buffUART2rx[0];
-    // 	pBuffUART2rxR = &buffUART2rx[0];
-    // }
-
     if (usart2_have_data)
     {
-
+        ReadUsart2Buffer(localbuff, sizeof(localbuff));
 
         //--- Introduce your code here ---//
-        //UART1Send((char *)&localbuff[0]);
+        // if (session_ch_2.status)
+        //     UART_PC_Send((char *) localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))
@@ -644,19 +636,12 @@ void UART3_Receive (void)
     unsigned short aux;
     antenna_typedef antenna_aux;
 
-    // if (msUART3rxTimeOut == 0)
-    // {
-
-    // 	MSUART3RXTIMEOUT;
-
-    // 	pBuffUART3rxW = &buffUART3rx[0];
-    // 	pBuffUART3rxR = &buffUART3rx[0];
-    // }
-
     if (usart3_have_data)
     {
+        ReadUsart3Buffer(localbuff, sizeof(localbuff));
+
         //--- Introduce your code here ---//
-        //UART2Send((char *)&localbuff[0]);
+        // UART_PC_Send(localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))
@@ -752,19 +737,12 @@ void UART4_Receive (void)
     unsigned short aux;
     antenna_typedef antenna_aux;
 
-    // if (msUART4rxTimeOut == 0)
-    // {
-
-    // 	MSUART4RXTIMEOUT;
-
-    // 	pBuffUART4rxW = &buffUART4rx[0];
-    // 	pBuffUART4rxR = &buffUART4rx[0];
-    // }
-
     if (usart4_have_data)
     {
+        ReadUart4Buffer(localbuff, sizeof(localbuff));
+
         //--- Introduce your code here ---//
-        //UART4Send((char *)&buffUART4rx2[0]);
+        // UART_PC_Send(localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))
@@ -870,9 +848,10 @@ void UART5_Receive (void)
 
     if (usart5_have_data)
     {
+        ReadUart5Buffer(localbuff, sizeof(localbuff));
 
         //--- Introduce your code here ---//
-        //UART5Send((char *)&buffUART5rx2[0]);
+        // UART_PC_Send(localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))

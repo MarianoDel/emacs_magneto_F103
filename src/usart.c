@@ -157,7 +157,8 @@ void USART1_IRQHandler (void)
 
         if (prx1 < &rx1buff[SIZEOF_PC_RXDATA - 1])
         {
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
             {
                 *prx1 = '\0';
                 usart1_have_data = 1;
@@ -292,7 +293,8 @@ void USART2_IRQHandler (void)
 
         if (prx2 < &rx2buff[SIZEOF_RXDATA - 1])
         {
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
             {
                 *prx2 = '\0';
                 usart2_have_data = 1;
@@ -429,7 +431,8 @@ void USART3_IRQHandler (void)
         {
             // USART3->DR = (unsigned char) dummy;    //para debug
 
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
             {
                 *prx3 = '\0';
                 usart3_have_data = 1;
@@ -565,7 +568,8 @@ void UART4_IRQHandler (void)
 
         if (prx4 < &rx4buff[SIZEOF_RXDATA - 1])
         {
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
             {
                 *prx4 = '\0';
                 usart4_have_data = 1;
@@ -706,7 +710,8 @@ void UART5_IRQHandler (void)
 
         if (prx5 < &rx5buff[SIZEOF_RXDATA - 1])
         {
-            if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
             {
                 *prx5 = '\0';
                 usart5_have_data = 1;

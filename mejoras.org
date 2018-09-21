@@ -1,12 +1,27 @@
 * Mejoras al Soft del MotherBoard principal para nuevo soft Raspberry
 ** DONE Empiezo docs de cambios
    CLOSED: [2018-09-13 Thu 18:28]
+** DONE Empiezo nuevas funcionalidades
+   CLOSED: [2018-09-21 Fri 16:12]
+
+
 ** TODO Enviar 4 strings al booteo del equipo
 ** TODO Enviar con cada nueva conexion de antena los 4 strings de canales
 ** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
 ** TODO Avisar de la desconexion de un canal
 ** TODO Agregar codigo de Hardware de MotherBoard
    - pag 1073 Unique device ID
+
+** TODO Nuevo modulo para antenas
+*** las antenas se revisan por un timer que depende de TIM7 (1ms)
+    - Signal_TIM1MS ()
+      solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
+
+*** si en el tratamiento se usa la pausa la comunicacion se cae
+    - tiene que ver con que Signal_TIM1MS () no descuenta el timer si esta en pausa
+    - el canal Session_Channel_1() debe estar corriendo pero pausado con (session_ch_1.status == 1)
+      la pausa hace que no se genere en ningun de los tres estados WMUP PLATEAU CDWN
+
 
 ** Errores encontrados
    - arrancan 2 antenas quito 1 (no avisa) si a cambio en 5 segundos no ve la desconexion??
@@ -27,7 +42,6 @@
    - utilizar configuracion del README de blue pill
    - revisar diferencias .gitignore
    - cambie cmsis_core OK
-
 
 ** DONE Quitar LibST de donde se pueda
    CLOSED: [2018-09-21 Fri 09:33]
@@ -113,8 +127,6 @@
     CLOSED: [2018-09-20 Thu 15:39]
     - le armo funciones de muestreo adc que se activan con USE_ADC_SAMPLE_BY_SAMPLE
 
-
-
 ** DONE Armar nuevos modelos de archivos en modulos
    CLOSED: [2018-09-21 Fri 11:32]
    - .h .c con nuevo modelo
@@ -126,19 +138,10 @@
    - pasar a emacs...
 
 
-** TODO Nuevo modulo para antenas
-*** las antenas se revisan por un timer que depende de TIM7 (1ms)
-    - Signal_TIM1MS ()
-      solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
-
-*** si en el tratamiento se usa la pausa la comunicacion se cae
-    - tiene que ver con que Signal_TIM1MS () no descuenta el timer si esta en pausa
-    - el canal Session_Channel_1() debe estar corriendo pero pausado con (session_ch_1.status == 1)
-      la pausa hace que no se genere en ningun de los tres estados WMUP PLATEAU CDWN
-
 * Respecto del hardware Raspberry
 ** perdio el RTC
    - podria traer problemas de conexion original
+
 
 
 * Respecto del software Raspberry
@@ -150,6 +153,11 @@
 *** Un para de veces entra a una pantalla blanca y queda ahí
 
 ** Necesitaria alguna pantalla de configuracion de red si no va a bootear
+
+** Tocar varias veces la pantalla en la potencia pasa a pantalla blanca
+*** DONE se filmo y envio video del problema
+    CLOSED: [2018-09-21 Fri 16:11]
+
 
 * Comunicaciones en general hasta hoy
 ** Preparar el tratamiento

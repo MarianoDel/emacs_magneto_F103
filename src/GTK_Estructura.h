@@ -247,8 +247,6 @@ void Save_Antenna_Name(unsigned char channel, char * p_buff);
 void Session_Set_Status (session_typedef * ptr_session, unsigned char stage , unsigned char new_state);
 void Session_Set_Special_Function (session_typedef * ptr_session, unsigned char stage , unsigned char value);
 void Session_Set_Duration (session_typedef * ptr_session, unsigned char stage , duration_typedef * ptr_duration);
-void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
-void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage);
 void Session_Set_Signal (session_typedef * ptr_session, unsigned char stage, signal_typedef * ptr_signal);
 //--- end ---//
 
@@ -256,7 +254,6 @@ void Session_Set_Signal (session_typedef * ptr_session, unsigned char stage, sig
 void Session_Get_Status (session_typedef * ptr_session, unsigned char stage , unsigned char *new_state);
 void Session_Get_Special_Function (session_typedef * ptr_session, unsigned char stage , unsigned char *value);
 void Session_Get_Duration (session_typedef * ptr_session, unsigned char stage , duration_typedef * ptr_duration);
-void Session_Get_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
 void Session_Get_Signal (session_typedef * ptr_session, unsigned char stage, signal_typedef * ptr_signal);
 //--- end ---//
 

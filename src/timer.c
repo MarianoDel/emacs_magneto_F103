@@ -19,7 +19,7 @@
 
 
 /* Externals -------------------------------------------------------------------*/
-extern volatile unsigned short timeRun;
+extern volatile unsigned short antenna_timer;
 extern volatile unsigned char take_current_samples;
 #ifdef USE_BUZZER_ON_BOARD
 extern unsigned short buzzer_timeout;
@@ -260,8 +260,8 @@ void TIM7_IRQHandler (void)	//1mS
     // ADC_TIM7_ISR();
     //GTK_SIGNAL_TIME_1MS ();
 
-    if (timeRun)
-        timeRun--;
+    if (antenna_timer)
+        antenna_timer--;
 
     //Wait_ms
     if (timer_wait)

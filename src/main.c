@@ -1,10 +1,19 @@
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### COMMS.C ###########################################
+//---------------------------------------------------------
 
+/* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
 #include "GTK_Hard.h"
 #include "timer.h"
-// #include "uart.h"
 #include "usart.h"
-// #include "pwm.h"
 #include "adc.h"
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
@@ -16,10 +25,11 @@
 #include "startup_clocks.h"
 #include "gpio.h"
 #include "dma.h"
+#include "antennas.h"
 
 #include <stdio.h>
 
-
+/* Externals ------------------------------------------------------------------*/
 //--- Externals para enviar errores en UART
 char buffSendErr[64];
 volatile unsigned char usart1_have_data = 0;
@@ -28,9 +38,8 @@ volatile unsigned char usart3_have_data = 0;
 volatile unsigned char usart4_have_data = 0;
 volatile unsigned char usart5_have_data = 0;
 
-//--- Externals para enviar keepalive por UART
-#define TIME_RUN_DEF 250
-volatile unsigned short timeRun = TIME_RUN_DEF;
+//--- Externals para enviar keepalive por UART (nuevo en modulo antenna)
+volatile unsigned short antenna_timer = 0;
 
 //--- Externals para muestreos de corriente con el ADC
 volatile unsigned char take_current_samples = 0;
@@ -72,13 +81,13 @@ unsigned char channel_2_pause = 0;
 unsigned char channel_3_pause = 0;
 unsigned char channel_4_pause = 0;
 
+/* Globals --------------------------------------------------------------------*/
 
-// void SystemInit (void);		//dumb function en otro momento inicializaba clock aca
 
+/* Module Functions -----------------------------------------------------------*/
 int main (void)
 {
     unsigned char i = 0;
-    unsigned char counter_keep_alive = 0;
     unsigned short dummy16 = 0;
 
     //Configuracion de clock.
@@ -393,39 +402,12 @@ int main (void)
     ENA_CH3_OFF;
     ENA_CH4_OFF;
 
-    while (TRUE)
+    while (1)
     {
-        if (timeRun == 0)	//decrece cada 1ms
-        {
-
-            if (counter_keep_alive > 10)
-            {
-                counter_keep_alive = 0;
-
-                //sprintf(&buffSendErr[0], (const char *) "keepalive,%d,%d,%d,%d\r\n", session_ch_1.status, session_ch_2.status, session_ch_3.status, session_ch_4.status);
-                //UART_PC_Send(&buffSendErr[0]);
-
-                //UART_PC_Send("ant0,010.60,078.20,002.00,065.00,4\r\n");
-
-                if (session_ch_1.status == 0)
-                    UART_CH1_Send("keepalive\r\n");
-                if (session_ch_2.status == 0)
-                    UART_CH2_Send("keepalive\r\n");
-                if (session_ch_3.status == 0)
-                    UART_CH3_Send("keepalive\r\n");
-                if (session_ch_4.status == 0)
-                    UART_CH4_Send("keepalive\r\n");
-            }
-            else
-                counter_keep_alive++;
-
-            //Led3Toggle();
-
-            timeRun = TIME_RUN_DEF;
-        }
+        AntennaUpdateStates ();
 
         //ADC control.
-        Session_Current_Limit_control();
+        Session_Current_Limit_control ();
 
         //Channel 1.
         Session_Channel_1 ();
@@ -440,7 +422,7 @@ int main (void)
         UART_CH3_Receive();
 
         //Channel 4.
-        Session_Channel_4 ();	//si comento esto se cuelga saltando siempre TIM1_1MS pero parece solo con el debugger puesto PROBR QUITNDO TODOS LOS BREAKS
+        Session_Channel_4 ();
         UART_CH4_Receive();
 
         //Recepcion de la configuracion por PC.
@@ -457,8 +439,5 @@ int main (void)
     }
 }
 
-// //Dumb Function for compativility
-// void SystemInit (void)
-// {
 
-// }
+//--- end of file ---//

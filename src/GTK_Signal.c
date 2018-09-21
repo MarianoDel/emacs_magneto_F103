@@ -43,14 +43,6 @@
 
 #define WITH_SYNC
 
-//--- Used for Antenna Sync - Time base ---//
-#define SESSION_CHANNEL_ASK_TEMP 2500 //2.5 segundos
-#define SESSION_CHANNEL_ANSWER_TEMP 10000 //10segundos.
-
-#define SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME 5000			//ms
 
 
 //--- Used for Signal Pwm Tables ---//
@@ -109,37 +101,6 @@ enum states_channel_4 {
 	SESSION_CHANNEL_4_END
 };
 
-enum Session_Channel_1_Verify_Antenna_states
-{
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR
-};
-
-enum Session_Channel_2_Verify_Antenna_states
-{
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR
-};
-
-enum Session_Channel_3_Verify_Antenna_states
-{
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR
-};
-
-enum Session_Channel_4_Verify_Antenna_states
-{
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR
-};
 
 enum session_warming_up_channel_states {
 
@@ -256,11 +217,7 @@ unsigned char session_channel_3_state;
 unsigned char session_channel_4_state;
 
 //--- Channel 1 ---//
-unsigned char Session_Channel_1_Verify_Antenna_state = 0;
-unsigned short Session_Channel_1_Verify_Antenna_time = 0;
 
-unsigned short session_channel_1_ask_temp = 0;
-unsigned short session_channel_1_answer_temp = 0;
 
 unsigned char session_warming_up_channel_1_state = 0;
 unsigned char session_warming_up_channel_1_step = 0;
@@ -287,11 +244,7 @@ float pwm_slope_channel_1;
 float pwm_channel_1;
 
 //--- Channel 2 ---//
-unsigned char Session_Channel_2_Verify_Antenna_state = 0;
-unsigned short Session_Channel_2_Verify_Antenna_time = 0;
 
-unsigned short session_channel_2_ask_temp = 0;
-unsigned short session_channel_2_answer_temp = 0;
 
 unsigned char session_warming_up_channel_2_state = 0;
 unsigned char session_warming_up_channel_2_step = 0;
@@ -319,11 +272,7 @@ float pwm_slope_channel_2;
 float pwm_channel_2;
 
 //--- Channel 3 ---//
-unsigned char Session_Channel_3_Verify_Antenna_state = 0;
-unsigned short Session_Channel_3_Verify_Antenna_time = 0;
 
-unsigned short session_channel_3_ask_temp = 0;
-unsigned short session_channel_3_answer_temp = 0;
 
 unsigned char session_warming_up_channel_3_state = 0;
 unsigned char session_warming_up_channel_3_step = 0;
@@ -351,11 +300,7 @@ float pwm_slope_channel_3;
 float pwm_channel_3;
 
 //--- Channel 4 ---//
-unsigned char Session_Channel_4_Verify_Antenna_state = 0;
-unsigned short Session_Channel_4_Verify_Antenna_time = 0;
 
-unsigned short session_channel_4_ask_temp = 0;
-unsigned short session_channel_4_answer_temp = 0;
 
 unsigned char session_warming_up_channel_4_state = 0;
 unsigned char session_warming_up_channel_4_step = 0;
@@ -533,68 +478,6 @@ void Session_Channel_1_Stop(void)
 	session_ch_1.status = 0;
 }
 
-unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session)
-{
-	switch (Session_Channel_1_Verify_Antenna_state)
-	{
-		case SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT:
-
-			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-//			//Resistance.
-//			ptr_session->stage_1_resistance_int = 0;
-//			ptr_session->stage_1_resistance_dec = 0;
-//
-//			//Inductance.
-//			ptr_session->stage_1_inductance_int = 0;
-//			ptr_session->stage_1_inductance_dec = 0;
-//
-//			//Current limit.
-//			ptr_session->stage_1_current_limit_int = 0;
-//			ptr_session->stage_1_current_limit_dec = 0;
-
-
-			UART_PC_Send("Getting antenna parameters of channel 1\r\n");
-			UART_CH1_Send("get_params\r\n");
-
-			Session_Channel_1_Verify_Antenna_time = SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME;
-			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS;
-			break;
-
-		case SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS:
-
-			if (Session_Channel_1_Verify_Antenna_time == 0)
-				Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR;
-			else
-			{
-				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-				{
-					Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK;
-				}
-			}
-			break;
-
-		case SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK:
-
-			UART_PC_Send("Antenna detected on CH1\r\n");
-			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-			return FIN_OK;
-			break;
-
-		case SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR:
-
-			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-			return FIN_ERROR;
-			break;
-
-		default:
-			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-			break;
-	}
-
-	return TRABAJANDO;
-}
 
 void Session_Channel_1 (void)
 {
@@ -5194,58 +5077,6 @@ void Session_Channel_2_Stop(void)
 	session_ch_2.status = 0;
 }
 
-unsigned char Session_Channel_2_Verify_Antenna (session_typedef * ptr_session)
-{
-	switch (Session_Channel_2_Verify_Antenna_state)
-	{
-		case SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT:
-
-			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-			UART_PC_Send("Getting antenna parameters of channel 2\r\n");
-			UART_CH2_Send("get_params\r\n");
-
-			Session_Channel_2_Verify_Antenna_time = SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME;
-			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS;
-			break;
-
-		case SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS:
-
-			if (Session_Channel_2_Verify_Antenna_time == 0)
-				Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR;
-			else
-			{
-				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-				{
-					Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK;
-				}
-			}
-			break;
-
-		case SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK:
-
-			UART_PC_Send("Antenna detected on CH2\r\n");
-			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-			return FIN_OK;
-			break;
-
-		case SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR:
-
-			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-			return FIN_ERROR;
-			break;
-
-		default:
-			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-			break;
-	}
-
-	return TRABAJANDO;
-}
 
 void Session_Channel_2 (void)
 {
@@ -5535,58 +5366,6 @@ void Session_Channel_3_Stop(void)
 	session_ch_3.status = 0;
 }
     
-unsigned char Session_Channel_3_Verify_Antenna (session_typedef * ptr_session)
-{
-	switch (Session_Channel_3_Verify_Antenna_state)
-	{
-		case SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT:
-
-			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-			UART_PC_Send("Getting antenna parameters of channel 3\r\n");
-			UART_CH3_Send("get_params\r\n");
-
-			Session_Channel_3_Verify_Antenna_time = SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME;
-			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS;
-			break;
-
-		case SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS:
-
-			if (Session_Channel_3_Verify_Antenna_time == 0)
-				Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR;
-			else
-			{
-				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-				{
-					Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK;
-				}
-			}
-			break;
-
-		case SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK:
-
-			UART_PC_Send("Antenna detected on CH3\r\n");
-			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-			return FIN_OK;
-			break;
-
-		case SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR:
-
-			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-			return FIN_ERROR;
-			break;
-
-		default:
-			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-			break;
-	}
-
-	return TRABAJANDO;
-}
 
 void Session_Channel_3 (void)
 {
@@ -5877,57 +5656,6 @@ void Session_Channel_4_Stop(void)
 	session_ch_4.status = 0;
 }
 
-unsigned char Session_Channel_4_Verify_Antenna (session_typedef * ptr_session)
-{
-	switch (Session_Channel_4_Verify_Antenna_state)
-	{
-		case SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT:
-
-			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-			UART_PC_Send("Getting antenna parameters of channel 4\r\n");
-			UART_CH4_Send("get_params\r\n");
-
-			Session_Channel_4_Verify_Antenna_time = SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME;
-			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS;
-			break;
-
-		case SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS:
-
-			if (Session_Channel_4_Verify_Antenna_time == 0)
-				Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR;
-			else
-			{
-				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-				{
-					Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK;
-				}
-			}
-			break;
-
-		case SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK:
-
-			UART_PC_Send("Antenna detected on CH4\r\n");
-			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT;
-			return FIN_OK;
-			break;
-
-		case SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR:
-			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT;
-			return FIN_ERROR;
-			break;
-
-		default:
-			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-			break;
-	}
-
-	return TRABAJANDO;
-}
 
 void Session_Channel_4 (void)
 {
@@ -6775,61 +6503,6 @@ void SetBitGlobalErrors (unsigned char channel, unsigned char bit_err)
 	}
 }
 
-void Signal_TIM1MS (void)
-{
-
-	if (channel_1_pause == 0)
-	{
-		if (Session_Channel_1_Verify_Antenna_time)
-			Session_Channel_1_Verify_Antenna_time--;
-
-		if (session_channel_1_ask_temp)
-			session_channel_1_ask_temp--;
-
-		if (session_channel_1_answer_temp)
-			session_channel_1_answer_temp--;
-	}
-
-	if (channel_2_pause == 0)
-	{
-
-		if (Session_Channel_2_Verify_Antenna_time)
-			Session_Channel_2_Verify_Antenna_time--;
-
-		if (session_channel_2_ask_temp)
-			session_channel_2_ask_temp--;
-
-		if (session_channel_2_answer_temp)
-			session_channel_2_answer_temp--;
-	}
-
-	if (channel_3_pause == 0)
-	{
-
-		if (Session_Channel_3_Verify_Antenna_time)
-			Session_Channel_3_Verify_Antenna_time--;
-
-		if (session_channel_3_ask_temp)
-			session_channel_3_ask_temp--;
-
-		if (session_channel_3_answer_temp)
-			session_channel_3_answer_temp--;
-
-	}
-
-	if (channel_4_pause == 0)
-	{
-
-		if (Session_Channel_4_Verify_Antenna_time)
-			Session_Channel_4_Verify_Antenna_time--;
-
-		if (session_channel_4_ask_temp)
-			session_channel_4_ask_temp--;
-
-		if (session_channel_4_answer_temp)
-			session_channel_4_answer_temp--;
-	}
-}
 
 //--- Fin de carga de seniales ---//
 

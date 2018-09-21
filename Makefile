@@ -77,6 +77,7 @@ SRC += ./src/adc.c
 SRC += ./src/comms.c
 SRC += ./src/gpio.c
 SRC += ./src/dma.c
+SRC += ./src/antennas.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c

@@ -13,6 +13,21 @@
    - pag 1073 Unique device ID
 
 ** TODO Nuevo modulo para antenas
+*** En arranque
+    - en el arranque las antenas se revisan con la nueva funcion UpdateAntennaState()
+    - pero no da bola a las respuestas mas que cargar el string de antX
+    - 
+    
+*** Antes de empezar un tratamiento
+    - se revisa nuevamente las antenas conectadas justo antes de calcular seniales
+    - se pregunta por el string desde Session_Channel_X con el comando get_params de la funcion
+      Session_Channel_1_Verify_Antenna(* session)    
+    - luego arranca Warming_Up Plateau Cooling_Down
+    - el estado de la antena lo sigue preguntando Session_Channel_X independiente del estado en que se encuentre
+    
+      
+
+
 *** las antenas se revisan por un timer que depende de TIM7 (1ms)
     - Signal_TIM1MS ()
       solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal

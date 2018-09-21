@@ -7,7 +7,6 @@
 // ##
 // #### COMMS.H ################################
 //---------------------------------------------
-
 #ifndef _COMMS_H_
 #define _COMMS_H_
 
@@ -37,6 +36,7 @@ void UART4_Receive (void);
 void UART5_Receive (void);
 
 
+#endif    /* _COMMS_H_ */
 
+//--- end of file ---//
 
-#endif

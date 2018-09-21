@@ -1,8 +1,20 @@
-#ifndef GTK_HARD_H_
-#define GTK_HARD_H_
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_HARD.H ########################################
+//---------------------------------------------------------
+#ifndef _GTK_HARD_H_
+#define _GTK_HARD_H_
 
+//---- Includes to help the Defines ----------
 #include "stm32f10x.h"
 
+//---- Configurations Defines --------------------
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
@@ -278,4 +290,7 @@ typedef enum
 void UpdateBuzzer (void);
 void BuzzerCommands(unsigned char , unsigned char );
 
-#endif
+#endif    /* _GTK_HARD_H_ */
+
+//--- end of file ---//
+

@@ -1,5 +1,25 @@
-#ifndef ERRORS_H_
-#define ERRORS_H_
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### ERRORS.H ##########################################
+//---------------------------------------------------------
+#ifndef _ERRORS_H_
+#define _ERRORS_H_
+
+//---- Includes to help the Defines ----------
+
+
+
+//---- Configurations Defines --------------------
+
+
+
+//---- Common Defines --------------------
 
 //Antenna conection errors.
 #define ERR_CHANNEL_ANTENNA_DISCONNECTED(err_channel)	0x10 + err_channel //The equipment can't find antenna. Antenna doesn't response.
@@ -23,4 +43,7 @@
 
 
 
-#endif
+#endif    /* _ERRORS_H_ */
+
+//--- end of file ---//
+

@@ -10,12 +10,8 @@
 //---------------------------------------------------------
 
 /* Includes ------------------------------------------------------------------*/
-// #include "stm32f10x.h"
-// #include "hard.h"
-
 #include "comms.h"
 #include "usart.h"
-// #include "uart.h"
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
 #include "flash_program.h"

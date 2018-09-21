@@ -1,20 +1,31 @@
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_HARD.C ########################################
+//---------------------------------------------------------
+
+/* Includes ------------------------------------------------------------------*/
 #include <stm32f10x.h>
 #include "GTK_Hard.h"
 
-//--- Module Externals ---------------
+/* Externals -----------------------------------------------------------------*/
 #ifdef USE_BUZZER_ON_BOARD
 extern unsigned short buzzer_timeout;
 #endif
 
-//--- Module Globals ---------------
+/* Globals -------------------------------------------------------------------*/
 #ifdef USE_BUZZER_ON_BOARD
 tBuzzer buzzer_state = BUZZER_INIT;
 unsigned char buzz_multiple = 0;
 #endif
 
-//************************************************************************************//
 
-
+/* Module Exported Functions -------------------------------------------------*/
 #ifdef USE_BUZZER_ON_BOARD
 void BuzzerCommands(unsigned char command, unsigned char multiple)
 {
@@ -128,3 +139,6 @@ void UpdateBuzzer (void)
 }
 
 #endif
+
+//--- end of file ---//
+

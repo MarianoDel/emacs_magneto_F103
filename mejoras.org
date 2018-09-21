@@ -29,7 +29,8 @@
    - cambie cmsis_core OK
 
 
-** TODO Quitar LibST de donde se pueda
+** DONE Quitar LibST de donde se pueda
+   CLOSED: [2018-09-21 Fri 09:33]
    - usar emacs_arduino y emacs_stretcher_F103
 
 *** para usar usart.c usart.h desde emacs_stretcher_F103
@@ -114,10 +115,16 @@
 
 
 
-** TODO Armar nuevos modelos de archivos en modulos
+** DONE Armar nuevos modelos de archivos en modulos
+   CLOSED: [2018-09-21 Fri 11:32]
    - .h .c con nuevo modelo
-** TODO Upgrade del repositorio remoto GitHub
+   - arme modulo comms, mejore usart, de modulos base gpio y dma, mejore adc
+   - falta ver si finalmente hago algo para antenas
+
+** DONE Upgrade del repositorio remoto GitHub
+   CLOSED: [2018-09-21 Fri 09:33]
    - pasar a emacs...
+
 
 ** TODO Nuevo modulo para antenas
 *** las antenas se revisan por un timer que depende de TIM7 (1ms)

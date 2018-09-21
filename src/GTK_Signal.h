@@ -1,9 +1,59 @@
-#ifndef SIGNAL_H_
-#define SIGNAL_H_
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_SIGNAL.H ######################################
+//---------------------------------------------------------
+#ifndef _GTK_SIGNAL_H_
+#define _GTK_SIGNAL_H_
 
+
+//---- Includes to help the Defines ----------
 #include "GTK_Estructura.h"
 
-//--- New code ---//
+
+//-- Exported Typedefs --------------------
+enum falling_type
+{
+	FALLING_SLOW_DISCHARGE = 1,
+	FALLING_LR,
+	FALLING_FAST_DISCHARGE
+};
+
+
+//-- Exported Defines --------------------
+//estados de session_stage
+#define WARMING_UP	1
+#define PLATEAU		2
+#define COOLING_DOWN	3
+
+//canales
+#define CH0		0
+#define CH1		1
+#define CH2		2
+#define CH3		3
+#define CH4		4
+
+//estados de las bajadas fall_type_step_chX
+#define FALL_START	0
+#define FALL_MED	1
+#define FALL_FAST	2
+
+//--- Para errores globales de antena
+#define BIT_ERROR_CHECK				0x01
+#define BIT_ERROR_PARAMS_FINISH		0x02
+#define BIT_ERROR_CHECK_MASK		0xF0
+
+#define BIT_ERROR_ANTENNA			0x10
+#define BIT_ERROR_WARMING_UP		0x20
+#define BIT_ERROR_CURRENT			0x40
+
+
+//-- Exported Module Functions --------------------
 void Signal_TIM1MS (void);
 void TIM5_IRQ_Callback (void);
 
@@ -100,16 +150,6 @@ unsigned char Current_Limit_CheckCh4 (void);
 void Current_Limit_Counter_Reset (void);
 void StopAllChannels (void);
 
-//--- Para errores globales de antena
-//
-#define BIT_ERROR_CHECK				0x01
-#define BIT_ERROR_PARAMS_FINISH		0x02
-#define BIT_ERROR_CHECK_MASK		0xF0
-
-#define BIT_ERROR_ANTENNA			0x10
-#define BIT_ERROR_WARMING_UP		0x20
-#define BIT_ERROR_CURRENT			0x40
-//
 void CheckforGlobalErrors (void);
 void SetCheckGlobalErrors (unsigned char );
 void ResetCheckGlobalErrors (void);
@@ -117,32 +157,10 @@ void SetBitGlobalErrors (unsigned char, unsigned char);
 
 //--- end ---//
 
-//--- New code ---//
-enum falling_type
-{
-	FALLING_SLOW_DISCHARGE = 1,
-	FALLING_LR,
-	FALLING_FAST_DISCHARGE
-};
-
-//estados de session_stage
-#define WARMING_UP	1
-#define PLATEAU		2
-#define COOLING_DOWN	3
-
-//canales
-#define CH0		0
-#define CH1		1
-#define CH2		2
-#define CH3		3
-#define CH4		4
-
-//estados de las bajadas fall_type_step_chX
-#define FALL_START	0
-#define FALL_MED	1
-#define FALL_FAST	2
 
 
 
-//--- end ---//
-#endif
+#endif    /* _GTK_SIGNAL_H_ */
+
+//--- end of file ---//
+

@@ -1,7 +1,16 @@
-//#include "GTK_Header.h"
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_ESTRUCTURA.C ##################################
+//---------------------------------------------------------
 
+/* Includes ------------------------------------------------------------------*/
 #include "GTK_Estructura.h"
-// #include "uart.h"
 #include "usart.h"
 #include "flash_program.h"
 #include "GTK_Signal.h"
@@ -13,12 +22,15 @@
 //stage 2: 	plateau.
 //stage 3:	cooling down.
 
+/* Externals ------------------------------------------------------------------*/
 //Channels.
 extern session_typedef session_ch_1;
 extern session_typedef session_ch_2;
 extern session_typedef session_ch_3;
 extern session_typedef session_ch_4;
 
+
+/* Module Exported Functions --------------------------------------------------*/
 unsigned char Get_Antenna_Name(unsigned char channel, char * p_buff)
 {
 	unsigned char name_finded = 0;
@@ -1456,4 +1468,4 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 	}
 }
 
-//--- end ---//
+//--- end of file ---//

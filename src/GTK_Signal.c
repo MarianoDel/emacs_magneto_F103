@@ -1,43 +1,33 @@
-#include <stm32f10x.h>
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_SIGNAL.C ######################################
+//---------------------------------------------------------
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-
-//#include "string.h"
-//#include "stdio.h"
+/* Includes ------------------------------------------------------------------*/
 #include "GTK_Hard.h"
 #include "timer.h"
 #include "usart.h"
-// #include "uart.h"
-
-#include "float.h"
-
-// #include "pwm.h"
+#include "stm32f10x.h"
 #include "adc.h"
-// #include "stm32f10x_adc.h"
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
 #include "flash_program.h"
 #include "GTK_Errors.h"
 
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
-//--- New code ---//
-extern char buffSendErr[64];
 
-extern unsigned char channel_1_pause;
-extern unsigned char channel_2_pause;
-extern unsigned char channel_3_pause;
-extern unsigned char channel_4_pause;
-
-//External variables.
-extern session_typedef session_ch_1;
-extern session_typedef session_ch_2;
-extern session_typedef session_ch_3;
-extern session_typedef session_ch_4;
-
-// Global for Sync
-unsigned char ch1_sync_state = 0;
+/* Private Defines ------------------------------------------------------------*/
+//--- Used for Signal Sync ---//
 #define SYNC_REQUIRED	0x80
 #define NO_SYNC_REQUIRED_MASK	0x7F
 
@@ -53,24 +43,103 @@ unsigned char ch1_sync_state = 0;
 
 #define WITH_SYNC
 
-//--- Time base ---//
+//--- Used for Antenna Sync - Time base ---//
 #define SESSION_CHANNEL_ASK_TEMP 2500 //2.5 segundos
 #define SESSION_CHANNEL_ANSWER_TEMP 10000 //10segundos.
-//--- Channel 1 ---//
-unsigned short session_channel_1_ask_temp = 0;
-unsigned short session_channel_1_answer_temp = 0;
-unsigned short session_plateau_channel_1_time;
-unsigned int session_plateau_channel_1_stage_time = 0;
 
-unsigned short session_warming_up_channel_1_time;
-unsigned short session_warming_up_channel_1_time_2;
-extern volatile unsigned int session_warming_up_channel_1_stage_time;
+#define SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME 5000			//ms
+#define SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME 5000			//ms
+#define SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME 5000			//ms
+#define SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME 5000			//ms
 
-unsigned short session_cooling_down_channel_1_time;
-unsigned short session_cooling_down_channel_1_time_2;
-unsigned int session_cooling_down_channel_1_stage_time = 0;
 
-unsigned char session_warming_up_channel_1_state = 0;
+//--- Used for Signal Pwm Tables ---//
+#define SESSION_WUP_CH1_BUFF_DIM 50
+#define SESSION_WUP_CH2_BUFF_DIM 50
+#define SESSION_WUP_CH3_BUFF_DIM 50
+#define SESSION_WUP_CH4_BUFF_DIM 50
+
+#define SESSION_CDWN_CH1_BUFF_DIM 50
+#define SESSION_CDWN_CH2_BUFF_DIM 50
+#define SESSION_CDWN_CH3_BUFF_DIM 50
+#define SESSION_CDWN_CH4_BUFF_DIM 50
+
+//--- Used for Antenna Overcurrent ---//
+#define MAX_CURRENT_COUNTER        5
+
+
+/* Private Typedefs -----------------------------------------------------------*/
+enum states_channel_1 {
+
+	SESSION_CHANNEL_1_INIT = 0,
+	SESSION_CHANNEL_1_VERIFY_ANTENNA,
+	SESSION_CHANNEL_1_WARMING_UP,
+	SESSION_CHANNEL_1_PLATEAU,
+	SESSION_CHANNEL_1_COOLING_DOWN,
+	SESSION_CHANNEL_1_END
+};
+
+enum states_channel_2 {
+
+	SESSION_CHANNEL_2_INIT = 0,
+	SESSION_CHANNEL_2_VERIFY_ANTENNA,
+	SESSION_CHANNEL_2_WARMING_UP,
+	SESSION_CHANNEL_2_PLATEAU,
+	SESSION_CHANNEL_2_COOLING_DOWN,
+	SESSION_CHANNEL_2_END
+};
+
+enum states_channel_3 {
+
+	SESSION_CHANNEL_3_INIT = 0,
+	SESSION_CHANNEL_3_VERIFY_ANTENNA,
+	SESSION_CHANNEL_3_WARMING_UP,
+	SESSION_CHANNEL_3_PLATEAU,
+	SESSION_CHANNEL_3_COOLING_DOWN,
+	SESSION_CHANNEL_3_END
+};
+
+enum states_channel_4 {
+
+	SESSION_CHANNEL_4_INIT = 0,
+	SESSION_CHANNEL_4_VERIFY_ANTENNA,
+	SESSION_CHANNEL_4_WARMING_UP,
+	SESSION_CHANNEL_4_PLATEAU,
+	SESSION_CHANNEL_4_COOLING_DOWN,
+	SESSION_CHANNEL_4_END
+};
+
+enum Session_Channel_1_Verify_Antenna_states
+{
+	SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT = 0,
+	SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS,
+	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK,
+	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR
+};
+
+enum Session_Channel_2_Verify_Antenna_states
+{
+	SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT = 0,
+	SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS,
+	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK,
+	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR
+};
+
+enum Session_Channel_3_Verify_Antenna_states
+{
+	SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT = 0,
+	SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS,
+	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK,
+	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR
+};
+
+enum Session_Channel_4_Verify_Antenna_states
+{
+	SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT = 0,
+	SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS,
+	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK,
+	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR
+};
 
 enum session_warming_up_channel_states {
 
@@ -85,16 +154,16 @@ enum session_warming_up_channel_states {
 	SESSION_WARMING_UP_CHANNEL_END_ERROR
 };
 
-unsigned char session_warming_up_channel_1_step = 0;
-unsigned short session_warming_up_channel_1_burst_cnt = 0;
-unsigned char fall_type_step_ch1 = 0;
+enum session_plateau_channel_states {
 
-float pwm_slope_channel_1;
-float pwm_channel_1;
-unsigned short session_plateau_channel_1_time_2;
-unsigned short session_plateau_channel_1_burst_cnt = 0;
-
-unsigned char session_cooling_down_channel_1_state = 0;
+	SESSION_PLATEAU_CHANNEL_INIT = 0,
+	SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE,
+	SESSION_PLATEAU_CHANNEL_RISING_EDGE,
+	SESSION_PLATEAU_CHANNEL_MAINTENANCE,
+	SESSION_PLATEAU_CHANNEL_FALLING_EDGE,
+	SESSION_PLATEAU_CHANNEL_LOW,
+	SESSION_PLATEAU_CHANNEL_END_ERROR
+};
 
 enum session_cooling_down_channel_states {
 
@@ -108,120 +177,7 @@ enum session_cooling_down_channel_states {
 	SESSION_COOLING_DOWN_CHANNEL_END_ERROR
 };
 
-unsigned char session_cooling_down_channel_1_step = 0;
-unsigned short session_cooling_down_channel_1_burst_cnt = 0;
-
-unsigned char session_plateau_channel_1_state = 0;
-
-enum session_plateau_channel_states {
-
-	SESSION_PLATEAU_CHANNEL_INIT = 0,
-	SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE,
-	SESSION_PLATEAU_CHANNEL_RISING_EDGE,
-	SESSION_PLATEAU_CHANNEL_MAINTENANCE,
-	SESSION_PLATEAU_CHANNEL_FALLING_EDGE,
-	SESSION_PLATEAU_CHANNEL_LOW,
-	SESSION_PLATEAU_CHANNEL_END_ERROR
-};
-
-//--- Channel 2 ---//
-unsigned short session_channel_2_ask_temp = 0;
-unsigned short session_channel_2_answer_temp = 0;
-unsigned short session_plateau_channel_2_time;
-unsigned int session_plateau_channel_2_stage_time = 0;
-
-unsigned short session_warming_up_channel_2_time;
-unsigned short session_warming_up_channel_2_time_2;
-unsigned int session_warming_up_channel_2_stage_time = 0;
-
-unsigned short session_cooling_down_channel_2_time;
-unsigned short session_cooling_down_channel_2_time_2;
-unsigned int session_cooling_down_channel_2_stage_time = 0;
-
-unsigned char session_warming_up_channel_2_state = 0;
-unsigned char session_warming_up_channel_2_step = 0;
-unsigned short session_warming_up_channel_2_burst_cnt = 0;
-
-unsigned char fall_type_step_ch2 = 0;
-
-float pwm_slope_channel_2;
-float pwm_channel_2;
-unsigned short session_plateau_channel_2_time_2;
-unsigned short session_plateau_channel_2_burst_cnt = 0;
-unsigned char session_plateau_channel_2_state = 0;
-
-unsigned char session_cooling_down_channel_2_state = 0;
-unsigned char session_cooling_down_channel_2_step = 0;
-unsigned short session_cooling_down_channel_2_burst_cnt = 0;
-
-
-//--- Channel 3 ---//
-unsigned short session_channel_3_ask_temp = 0;
-unsigned short session_channel_3_answer_temp = 0;
-unsigned short session_plateau_channel_3_time;
-unsigned int session_plateau_channel_3_stage_time = 0;
-
-unsigned short session_warming_up_channel_3_time;
-unsigned short session_warming_up_channel_3_time_2;
-unsigned int session_warming_up_channel_3_stage_time = 0;
-
-unsigned short session_cooling_down_channel_3_time;
-unsigned short session_cooling_down_channel_3_time_2;
-unsigned int session_cooling_down_channel_3_stage_time = 0;
-
-unsigned char session_warming_up_channel_3_state = 0;
-unsigned char fall_type_step_ch3 = 0;
-
-float pwm_slope_channel_3;
-float pwm_channel_3;
-unsigned short session_plateau_channel_3_time_2;
-unsigned short session_plateau_channel_3_burst_cnt = 0;
-
-unsigned char session_warming_up_channel_3_step = 0;
-unsigned short session_warming_up_channel_3_burst_cnt = 0;
-
-unsigned char session_cooling_down_channel_3_state = 0;
-unsigned char session_cooling_down_channel_3_step = 0;
-unsigned short session_cooling_down_channel_3_burst_cnt = 0;
-unsigned char session_plateau_channel_3_state = 0;
-
-//--- Channel 4 ---//
-unsigned short session_channel_4_ask_temp = 0;
-unsigned short session_channel_4_answer_temp = 0;
-unsigned short session_plateau_channel_4_time;
-unsigned int session_plateau_channel_4_stage_time = 0;
-
-unsigned short session_warming_up_channel_4_time;
-unsigned short session_warming_up_channel_4_time_2;
-unsigned int session_warming_up_channel_4_stage_time = 0;
-
-unsigned short session_cooling_down_channel_4_time;
-unsigned short session_cooling_down_channel_4_time_2;
-unsigned int session_cooling_down_channel_4_stage_time = 0;
-
-unsigned char session_warming_up_channel_4_state = 0;
-unsigned char fall_type_step_ch4 = 0;
-
-float pwm_slope_channel_4;
-float pwm_channel_4;
-unsigned short session_plateau_channel_4_time_2;
-unsigned short session_plateau_channel_4_burst_cnt = 0;
-
-unsigned char session_warming_up_channel_4_step = 0;
-unsigned short session_warming_up_channel_4_burst_cnt = 0;
-
-unsigned char session_cooling_down_channel_4_state = 0;
-unsigned char session_cooling_down_channel_4_step = 0;
-unsigned short session_cooling_down_channel_4_burst_cnt = 0;
-
-
-unsigned char session_plateau_channel_4_state = 0;
-
-//--- Current limit Externals ---//
-// extern volatile unsigned char flagMuestreo;
-extern volatile unsigned char take_current_samples;
-
-//--- Current limit Globals ---//
+//--- Current limit Enum ---//
 enum CurrState {
 	CURRENT_INIT_CHECK = 0,
 	CURRENT_CH1,
@@ -238,6 +194,196 @@ enum CurrState {
 	CURRENT_CH4_CHECK
 
 };
+
+
+
+/* Externals ------------------------------------------------------------------*/
+extern char buffSendErr[64];
+
+extern unsigned char channel_1_pause;
+extern unsigned char channel_2_pause;
+extern unsigned char channel_3_pause;
+extern unsigned char channel_4_pause;
+
+extern session_typedef session_ch_1;
+extern session_typedef session_ch_2;
+extern session_typedef session_ch_3;
+extern session_typedef session_ch_4;
+
+//la uso externa para comprobar el funcionamiento de TIM5 desde el main
+extern volatile unsigned int session_warming_up_channel_1_stage_time;
+
+//--- Current limit Externals ---//
+extern volatile unsigned char take_current_samples;
+
+extern unsigned char temp_actual_channel_1_int;
+extern unsigned char temp_actual_channel_1_dec;
+extern unsigned char temp_actual_channel_2_int;
+extern unsigned char temp_actual_channel_2_dec;
+extern unsigned char temp_actual_channel_3_int;
+extern unsigned char temp_actual_channel_3_dec;
+extern unsigned char temp_actual_channel_4_int;
+extern unsigned char temp_actual_channel_4_dec;
+
+
+/* Globals ---------------------------------------------------------------------*/
+//--- Signals PWM tables ---//
+//--- Warming-Up ---//
+warmingup_coolingdown_typedef table_warming_up_channel_1[SESSION_WUP_CH1_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_2[SESSION_WUP_CH2_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_3[SESSION_WUP_CH3_BUFF_DIM];
+warmingup_coolingdown_typedef table_warming_up_channel_4[SESSION_WUP_CH4_BUFF_DIM];
+//--- Plateau ---//
+warmingup_coolingdown_typedef table_plateau_channel_1[1];
+warmingup_coolingdown_typedef table_plateau_channel_2[1];
+warmingup_coolingdown_typedef table_plateau_channel_3[1];
+warmingup_coolingdown_typedef table_plateau_channel_4[1];
+//--- Cooling down ---//
+warmingup_coolingdown_typedef table_cooling_down_channel_1[SESSION_CDWN_CH1_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_2[SESSION_CDWN_CH2_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_3[SESSION_CDWN_CH3_BUFF_DIM];
+warmingup_coolingdown_typedef table_cooling_down_channel_4[SESSION_CDWN_CH4_BUFF_DIM];
+//--- end ---//
+
+// Global for Sync
+unsigned char ch1_sync_state = 0;
+unsigned char sync_in_waiting = 0;
+
+//--- States of each channel ---//
+unsigned char session_channel_1_state;
+unsigned char session_channel_2_state;
+unsigned char session_channel_3_state;
+unsigned char session_channel_4_state;
+
+//--- Channel 1 ---//
+unsigned char Session_Channel_1_Verify_Antenna_state = 0;
+unsigned short Session_Channel_1_Verify_Antenna_time = 0;
+
+unsigned short session_channel_1_ask_temp = 0;
+unsigned short session_channel_1_answer_temp = 0;
+
+unsigned char session_warming_up_channel_1_state = 0;
+unsigned char session_warming_up_channel_1_step = 0;
+unsigned short session_warming_up_channel_1_burst_cnt = 0;
+unsigned short session_warming_up_channel_1_time;
+unsigned short session_warming_up_channel_1_time_2;
+
+unsigned char session_plateau_channel_1_state = 0;
+unsigned short session_plateau_channel_1_burst_cnt = 0;
+unsigned short session_plateau_channel_1_time;
+unsigned short session_plateau_channel_1_time_2;
+unsigned int session_plateau_channel_1_stage_time = 0;
+
+unsigned int session_cooling_down_channel_1_stage_time = 0;
+unsigned char session_cooling_down_channel_1_state = 0;
+unsigned char session_cooling_down_channel_1_step = 0;
+unsigned short session_cooling_down_channel_1_burst_cnt = 0;
+unsigned short session_cooling_down_channel_1_time;
+unsigned short session_cooling_down_channel_1_time_2;
+
+unsigned char fall_type_step_ch1 = 0;
+
+float pwm_slope_channel_1;
+float pwm_channel_1;
+
+//--- Channel 2 ---//
+unsigned char Session_Channel_2_Verify_Antenna_state = 0;
+unsigned short Session_Channel_2_Verify_Antenna_time = 0;
+
+unsigned short session_channel_2_ask_temp = 0;
+unsigned short session_channel_2_answer_temp = 0;
+
+unsigned char session_warming_up_channel_2_state = 0;
+unsigned char session_warming_up_channel_2_step = 0;
+unsigned short session_warming_up_channel_2_burst_cnt = 0;
+unsigned short session_warming_up_channel_2_time;
+unsigned short session_warming_up_channel_2_time_2;
+unsigned int session_warming_up_channel_2_stage_time = 0;
+
+unsigned char session_plateau_channel_2_state = 0;
+unsigned short session_plateau_channel_2_burst_cnt = 0;
+unsigned short session_plateau_channel_2_time;
+unsigned short session_plateau_channel_2_time_2;
+unsigned int session_plateau_channel_2_stage_time = 0;
+
+unsigned char session_cooling_down_channel_2_state = 0;
+unsigned char session_cooling_down_channel_2_step = 0;
+unsigned short session_cooling_down_channel_2_burst_cnt = 0;
+unsigned short session_cooling_down_channel_2_time;
+unsigned short session_cooling_down_channel_2_time_2;
+unsigned int session_cooling_down_channel_2_stage_time = 0;
+
+unsigned char fall_type_step_ch2 = 0;
+
+float pwm_slope_channel_2;
+float pwm_channel_2;
+
+//--- Channel 3 ---//
+unsigned char Session_Channel_3_Verify_Antenna_state = 0;
+unsigned short Session_Channel_3_Verify_Antenna_time = 0;
+
+unsigned short session_channel_3_ask_temp = 0;
+unsigned short session_channel_3_answer_temp = 0;
+
+unsigned char session_warming_up_channel_3_state = 0;
+unsigned char session_warming_up_channel_3_step = 0;
+unsigned short session_warming_up_channel_3_burst_cnt = 0;
+unsigned short session_warming_up_channel_3_time;
+unsigned short session_warming_up_channel_3_time_2;
+unsigned int session_warming_up_channel_3_stage_time = 0;
+
+unsigned char session_plateau_channel_3_state = 0;
+unsigned short session_plateau_channel_3_burst_cnt = 0;
+unsigned short session_plateau_channel_3_time;
+unsigned short session_plateau_channel_3_time_2;
+unsigned int session_plateau_channel_3_stage_time = 0;
+
+unsigned char session_cooling_down_channel_3_state = 0;
+unsigned char session_cooling_down_channel_3_step = 0;
+unsigned short session_cooling_down_channel_3_burst_cnt = 0;
+unsigned short session_cooling_down_channel_3_time;
+unsigned short session_cooling_down_channel_3_time_2;
+unsigned int session_cooling_down_channel_3_stage_time = 0;
+
+unsigned char fall_type_step_ch3 = 0;
+
+float pwm_slope_channel_3;
+float pwm_channel_3;
+
+//--- Channel 4 ---//
+unsigned char Session_Channel_4_Verify_Antenna_state = 0;
+unsigned short Session_Channel_4_Verify_Antenna_time = 0;
+
+unsigned short session_channel_4_ask_temp = 0;
+unsigned short session_channel_4_answer_temp = 0;
+
+unsigned char session_warming_up_channel_4_state = 0;
+unsigned char session_warming_up_channel_4_step = 0;
+unsigned short session_warming_up_channel_4_burst_cnt = 0;
+unsigned short session_warming_up_channel_4_time;
+unsigned short session_warming_up_channel_4_time_2;
+unsigned int session_warming_up_channel_4_stage_time = 0;
+
+unsigned char session_plateau_channel_4_state = 0;
+unsigned short session_plateau_channel_4_burst_cnt = 0;
+unsigned short session_plateau_channel_4_time;
+unsigned short session_plateau_channel_4_time_2;
+unsigned int session_plateau_channel_4_stage_time = 0;
+
+unsigned char session_cooling_down_channel_4_state = 0;
+unsigned char session_cooling_down_channel_4_step = 0;
+unsigned short session_cooling_down_channel_4_burst_cnt = 0;
+unsigned short session_cooling_down_channel_4_time;
+unsigned short session_cooling_down_channel_4_time_2;
+unsigned int session_cooling_down_channel_4_stage_time = 0;
+
+unsigned char fall_type_step_ch4 = 0;
+
+float pwm_slope_channel_4;
+float pwm_channel_4;
+
+
+//--- Current limit Globals ---//
 enum CurrState current_limit_state = CURRENT_CH1;
 unsigned short actual_current [5] = { 0, 0, 0, 0, 0};	//CH0 es un dummy
 
@@ -246,7 +392,20 @@ unsigned char global_error_ch2 = 0;
 unsigned char global_error_ch3 = 0;
 unsigned char global_error_ch4 = 0;
 
+//--- Relativo al exceso de corriente en los canales
+unsigned char current_limit_cnt_ch1 = 0;
+unsigned char current_limit_cnt_ch2 = 0;
+unsigned char current_limit_cnt_ch3 = 0;
+unsigned char current_limit_cnt_ch4 = 0;
 
+unsigned char new_current_sample_ch1 = 0;
+unsigned char new_current_sample_ch2 = 0;
+unsigned char new_current_sample_ch3 = 0;
+unsigned char new_current_sample_ch4 = 0;
+
+
+
+/* Module Exported Functions --------------------------------------------------*/
 //--- Timer 5 Callback ---//
 void TIM5_IRQ_Callback (void)
 {
@@ -330,67 +489,11 @@ void TIM5_IRQ_Callback (void)
     }
 
 }
-
 //--- end ---//
 
-//--- Channel 1 ---//
-unsigned char session_channel_1_state;
-unsigned char session_channel_2_state;
-unsigned char session_channel_3_state;
-unsigned char session_channel_4_state;
 
-//--- warming up ---//
-//--- Channel 1 ---//
-#define SESSION_WUP_CH1_BUFF_DIM 50
-warmingup_coolingdown_typedef table_warming_up_channel_1[SESSION_WUP_CH1_BUFF_DIM];
-
-//--- Channel 2 ---//
-#define SESSION_WUP_CH2_BUFF_DIM 50
-warmingup_coolingdown_typedef table_warming_up_channel_2[SESSION_WUP_CH2_BUFF_DIM];
-
-//--- Channel 3 ---//
-#define SESSION_WUP_CH3_BUFF_DIM 50
-warmingup_coolingdown_typedef table_warming_up_channel_3[SESSION_WUP_CH3_BUFF_DIM];
-
-//--- Channel 4 ---//
-#define SESSION_WUP_CH4_BUFF_DIM 50
-warmingup_coolingdown_typedef table_warming_up_channel_4[SESSION_WUP_CH4_BUFF_DIM];
-
-
-//--- Plateau ---//
-//--- Channel 1 ---//
-warmingup_coolingdown_typedef table_plateau_channel_1[1];
-
-//--- Channel 2 ---//
-warmingup_coolingdown_typedef table_plateau_channel_2[1];
-
-//--- Channel 3 ---//
-warmingup_coolingdown_typedef table_plateau_channel_3[1];
-
-//--- Channel 4 ---//
-warmingup_coolingdown_typedef table_plateau_channel_4[1];
-
-//--- Cooling down ---//
-//--- Channel 1 ---//
-#define SESSION_CDWN_CH1_BUFF_DIM 50
-warmingup_coolingdown_typedef table_cooling_down_channel_1[SESSION_CDWN_CH1_BUFF_DIM];
-
-//--- Channel 2 ---//
-#define SESSION_CDWN_CH2_BUFF_DIM 50
-warmingup_coolingdown_typedef table_cooling_down_channel_2[SESSION_CDWN_CH2_BUFF_DIM];
-
-//--- Channel 3 ---//
-#define SESSION_CDWN_CH3_BUFF_DIM 50
-warmingup_coolingdown_typedef table_cooling_down_channel_3[SESSION_CDWN_CH3_BUFF_DIM];
-
-//--- Channel 4 ---//
-#define SESSION_CDWN_CH4_BUFF_DIM 50
-warmingup_coolingdown_typedef table_cooling_down_channel_4[SESSION_CDWN_CH4_BUFF_DIM];
-
-//--- end ---//
 
 //--- Channel 1 ---//
-
 void Channel_1_Init(void)
 {
 	channel_1_pause = 0;
@@ -419,38 +522,17 @@ void Channel_1_Init(void)
 
 }
 
-enum states_channel_1 {
-
-	SESSION_CHANNEL_1_INIT = 0,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA,
-	SESSION_CHANNEL_1_WARMING_UP,
-	SESSION_CHANNEL_1_PLATEAU,
-	SESSION_CHANNEL_1_COOLING_DOWN,
-	SESSION_CHANNEL_1_END
-};
-
 void Session_Channel_1_Start(void)
 {
 	session_channel_1_state = SESSION_CHANNEL_1_INIT;
 	session_ch_1.status = 1;
 }
+
 void Session_Channel_1_Stop(void)
 {
 	session_ch_1.status = 0;
 }
 
-unsigned char Session_Channel_1_Verify_Antenna_state = 0;
-
-#define SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME 5000			//ms
-unsigned short Session_Channel_1_Verify_Antenna_time = 0;
-
-enum Session_Channel_1_Verify_Antenna_states
-{
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR
-};
 unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session)
 {
 	switch (Session_Channel_1_Verify_Antenna_state)
@@ -513,10 +595,6 @@ unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session)
 
 	return TRABAJANDO;
 }
-
-extern unsigned char temp_actual_channel_1_int;
-extern unsigned char temp_actual_channel_1_dec;
-
 
 void Session_Channel_1 (void)
 {
@@ -777,8 +855,6 @@ void Session_Channel_1 (void)
 }
 
 
-unsigned char sync_in_waiting = 0;
-
 void Session_warming_Up_Channel_1_Restart(void)
 {
 	ch1_sync_state = 0;
@@ -847,7 +923,7 @@ void Session_Cooling_Down_Channel_4_Restart(void)
 
 //Funcion que carga la tabla de PWM con parametros fijos para pruebas de bobinas
 //utilizar con cuidado, no verifica maximos
-//También incluye una breve explicación del funcionamiento del programa / sesion / tratamiento
+//Tambien incluye una breve explicacion del funcionamiento del programa / sesion / tratamiento
 unsigned char Session_Channels_Fixed_Parameters (unsigned char channel, unsigned char session_stage)
 {
 	unsigned char i;
@@ -5107,38 +5183,17 @@ void Channel_2_Init(void)
 
 }
 
-enum states_channel_2 {
-
-	SESSION_CHANNEL_2_INIT = 0,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA,
-	SESSION_CHANNEL_2_WARMING_UP,
-	SESSION_CHANNEL_2_PLATEAU,
-	SESSION_CHANNEL_2_COOLING_DOWN,
-	SESSION_CHANNEL_2_END
-};
-
 void Session_Channel_2_Start(void)
 {
 	session_channel_2_state = SESSION_CHANNEL_2_INIT;
 	session_ch_2.status = 1;
 }
+
 void Session_Channel_2_Stop(void)
 {
 	session_ch_2.status = 0;
 }
 
-unsigned char Session_Channel_2_Verify_Antenna_state = 0;
-
-#define SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME 5000			//ms
-unsigned short Session_Channel_2_Verify_Antenna_time = 0;
-
-enum Session_Channel_2_Verify_Antenna_states
-{
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR
-};
 unsigned char Session_Channel_2_Verify_Antenna (session_typedef * ptr_session)
 {
 	switch (Session_Channel_2_Verify_Antenna_state)
@@ -5191,9 +5246,6 @@ unsigned char Session_Channel_2_Verify_Antenna (session_typedef * ptr_session)
 
 	return TRABAJANDO;
 }
-
-extern unsigned char temp_actual_channel_2_int;
-extern unsigned char temp_actual_channel_2_dec;
 
 void Session_Channel_2 (void)
 {
@@ -5444,9 +5496,6 @@ void Session_Channel_2 (void)
 
 
 
-
-
-
 //--- Channel 3 ---//
 void Channel_3_Init(void)
 {
@@ -5475,39 +5524,17 @@ void Channel_3_Init(void)
 	memset(&table_cooling_down_channel_3[0], '\0', sizeof(table_cooling_down_channel_3));
 }
 
-enum states_channel_3 {
-
-	SESSION_CHANNEL_3_INIT = 0,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA,
-	SESSION_CHANNEL_3_WARMING_UP,
-	SESSION_CHANNEL_3_PLATEAU,
-	SESSION_CHANNEL_3_COOLING_DOWN,
-	SESSION_CHANNEL_3_END
-};
-
 void Session_Channel_3_Start(void)
 {
 	session_channel_3_state = SESSION_CHANNEL_3_INIT;
 	session_ch_3.status = 1;
 }
+
 void Session_Channel_3_Stop(void)
 {
 	session_ch_3.status = 0;
 }
-
-unsigned char Session_Channel_3_Verify_Antenna_state = 0;
-
-#define SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME 5000			//ms
-unsigned short Session_Channel_3_Verify_Antenna_time = 0;
-
-enum Session_Channel_3_Verify_Antenna_states
-{
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR
-};
-
+    
 unsigned char Session_Channel_3_Verify_Antenna (session_typedef * ptr_session)
 {
 	switch (Session_Channel_3_Verify_Antenna_state)
@@ -5560,9 +5587,6 @@ unsigned char Session_Channel_3_Verify_Antenna (session_typedef * ptr_session)
 
 	return TRABAJANDO;
 }
-
-extern unsigned char temp_actual_channel_3_int;
-extern unsigned char temp_actual_channel_3_dec;
 
 void Session_Channel_3 (void)
 {
@@ -5842,37 +5866,17 @@ void Channel_4_Init(void)
 	memset(&table_cooling_down_channel_4[0], '\0', sizeof(table_cooling_down_channel_4));
 }
 
-enum states_channel_4 {
-
-	SESSION_CHANNEL_4_INIT = 0,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA,
-	SESSION_CHANNEL_4_WARMING_UP,
-	SESSION_CHANNEL_4_PLATEAU,
-	SESSION_CHANNEL_4_COOLING_DOWN,
-	SESSION_CHANNEL_4_END
-};
-
 void Session_Channel_4_Start(void)
 {
 	session_channel_4_state = SESSION_CHANNEL_4_INIT;
 	session_ch_4.status = 1;
 }
+
 void Session_Channel_4_Stop(void)
 {
 	session_ch_4.status = 0;
 }
-unsigned char Session_Channel_4_Verify_Antenna_state = 0;
 
-#define SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME 5000			//ms
-unsigned short Session_Channel_4_Verify_Antenna_time = 0;
-
-enum Session_Channel_4_Verify_Antenna_states
-{
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT = 0,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK,
-	SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR
-};
 unsigned char Session_Channel_4_Verify_Antenna (session_typedef * ptr_session)
 {
 	switch (Session_Channel_4_Verify_Antenna_state)
@@ -5924,9 +5928,6 @@ unsigned char Session_Channel_4_Verify_Antenna (session_typedef * ptr_session)
 
 	return TRABAJANDO;
 }
-
-extern unsigned char temp_actual_channel_4_int;
-extern unsigned char temp_actual_channel_4_dec;
 
 void Session_Channel_4 (void)
 {
@@ -6208,18 +6209,6 @@ void Session_Channel_4 (void)
 
 
 
-//--- Relativo al exceso de corriente en los canales
-#define MAX_CURRENT_COUNTER		5
-
-unsigned char current_limit_cnt_ch1 = 0;
-unsigned char current_limit_cnt_ch2 = 0;
-unsigned char current_limit_cnt_ch3 = 0;
-unsigned char current_limit_cnt_ch4 = 0;
-
-unsigned char new_current_sample_ch1 = 0;
-unsigned char new_current_sample_ch2 = 0;
-unsigned char new_current_sample_ch3 = 0;
-unsigned char new_current_sample_ch4 = 0;
 
 //si el canal se encuentra activo
 //cargo en un vector las muestras corriente de cada canal

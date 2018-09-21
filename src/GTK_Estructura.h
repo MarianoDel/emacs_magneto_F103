@@ -1,6 +1,18 @@
-#ifndef ESTRUCTURA_H_
-#define ESTRUCTURA_H_
+//---------------------------------------------------------
+// #### PROYECTO MAGNETO GAUSSTEK - MotherBoard ###########
+// ##
+// ## @Author: Med
+// ## @Editor: Emacs - ggtags
+// ## @TAGS:   Global
+// ## @CPU:    STM32F103
+// ##
+// #### GTK_ESTRUCTURA.H ##################################
+//---------------------------------------------------------
+#ifndef _ESTRUCTURA_H_
+#define _ESTRUCTURA_H_
 
+
+//-- Exported Typedefs --------------------
 //---- Nuevas estructuras ---//
 //--- Sesion ---//
 typedef struct
@@ -227,16 +239,17 @@ typedef struct session_plateau_channel_low_typedef{
 
 //--- end ---//
 
+//-- Exported Module Functions --------------------
 unsigned char Get_Antenna_Name(unsigned char channel, char * p_buff);
 void Save_Antenna_Name(unsigned char channel, char * p_buff);
 
 //--- Set functions ---//
-void Session_Set_Status 			(session_typedef * ptr_session, unsigned char stage , unsigned char new_state);
-void Session_Set_Special_Function 	(session_typedef * ptr_session, unsigned char stage , unsigned char value);
-void Session_Set_Duration 			(session_typedef * ptr_session, unsigned char stage , duration_typedef * ptr_duration);
-void Session_Set_Antenna 			(session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
-void Session_Clear_Antenna			(session_typedef * ptr_session, unsigned char stage);
-void Session_Set_Signal 			(session_typedef * ptr_session, unsigned char stage, signal_typedef * ptr_signal);
+void Session_Set_Status (session_typedef * ptr_session, unsigned char stage , unsigned char new_state);
+void Session_Set_Special_Function (session_typedef * ptr_session, unsigned char stage , unsigned char value);
+void Session_Set_Duration (session_typedef * ptr_session, unsigned char stage , duration_typedef * ptr_duration);
+void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
+void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage);
+void Session_Set_Signal (session_typedef * ptr_session, unsigned char stage, signal_typedef * ptr_signal);
 //--- end ---//
 
 //--- Get functions ---//
@@ -253,4 +266,8 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel);
 void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned char channel);
 void Session_Save (session_typedef * ptr_session, unsigned char slot);
 //--- end ---//
-#endif
+
+#endif    /* _ESTRUCTURA_H_ */
+
+//--- end of file ---//
+

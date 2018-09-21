@@ -124,6 +124,11 @@
     - Signal_TIM1MS ()
       solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
 
+*** si en el tratamiento se usa la pausa la comunicacion se cae
+    - tiene que ver con que Signal_TIM1MS () no descuenta el timer si esta en pausa
+    - el canal Session_Channel_1() debe estar corriendo pero pausado con (session_ch_1.status == 1)
+      la pausa hace que no se genere en ningun de los tres estados WMUP PLATEAU CDWN
+
 * Respecto del hardware Raspberry
 ** perdio el RTC
    - podria traer problemas de conexion original

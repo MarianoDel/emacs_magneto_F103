@@ -25,9 +25,20 @@
     - luego arranca Warming_Up Plateau Cooling_Down
     - el estado de la antena lo sigue preguntando Session_Channel_X independiente del estado en que se encuentre
     
-      
+*** con el modulo nuevo
+    arm-none-eabi-size Magneto_GTK_rom.elf
+    text    data     bss     dec     hex filename
+    68992     112   24820   93924   16ee4 Magneto_GTK_rom.elf      
+
+*** comunicacion desde la placa de antena 
+    - manda el mensaje de conexion 1 ves por segundo hasta estar conectada
+    - despues si no recibe nada a los 10 segs aprox lo vuelve a mandar
+    - en el medio si esta en conexion no manda nada solo contesta lo que se le pregunta
+
+    - en el codigo actual contesta a get_params get_temp keepalive
 
 
+    
 *** las antenas se revisan por un timer que depende de TIM7 (1ms)
     - Signal_TIM1MS ()
       solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal

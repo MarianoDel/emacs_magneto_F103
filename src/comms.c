@@ -336,6 +336,13 @@ void UART1_Receive (void)
                 signal.burst_mode_off = 	(localbuff[45] - 48) * 1000 + (localbuff[46] - 48) * 100 + (localbuff[47] - 48) * 10 + (localbuff[48] - 48);
                 Session_Set_Signal (&session_slot_aux, (localbuff[50] - 48), &signal);
 
+#ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
+                Session_Set_Signal (&session_ch_1, (localbuff[50] - 48), &signal);
+                Session_Set_Signal (&session_ch_2, (localbuff[50] - 48), &signal);
+                Session_Set_Signal (&session_ch_3, (localbuff[50] - 48), &signal);
+                Session_Set_Signal (&session_ch_4, (localbuff[50] - 48), &signal);
+#endif
+                
                 UART_PC_Send((char *)"OK\r\n");
             }
             else
@@ -353,7 +360,12 @@ void UART1_Receive (void)
                 duration.seconds =	(localbuff[15] - 48) * 10 + (localbuff[16] - 48);
 
                 Session_Set_Duration (&session_slot_aux, (localbuff[18] - 48), &duration);
-
+#ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
+                Session_Set_Duration (&session_ch_1, (localbuff[18] - 48), &duration);
+                Session_Set_Duration (&session_ch_2, (localbuff[18] - 48), &duration);
+                Session_Set_Duration (&session_ch_3, (localbuff[18] - 48), &duration);
+                Session_Set_Duration (&session_ch_4, (localbuff[18] - 48), &duration);
+#endif
                 UART_PC_Send((char *)"OK\r\n");
             }
             else
@@ -483,7 +495,12 @@ void UART1_Receive (void)
             {
 
                 Session_Set_Status (&session_slot_aux, (localbuff[17] - 48),(localbuff[15] - 48));
-
+#ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
+                Session_Set_Status (&session_ch_1, (localbuff[17] - 48), (localbuff[15] - 48));
+                Session_Set_Status (&session_ch_2, (localbuff[17] - 48), (localbuff[15] - 48));
+                Session_Set_Status (&session_ch_3, (localbuff[17] - 48), (localbuff[15] - 48));
+                Session_Set_Status (&session_ch_4, (localbuff[17] - 48), (localbuff[15] - 48));
+#endif
                 UART_PC_Send((char *)"OK\r\n");
             }
             else
@@ -602,7 +619,7 @@ void UART2_Receive (void)
 
         //--- Introduce your code here ---//
         // if (session_ch_2.status)
-        //     UART_PC_Send((char *) localbuff);
+            // UART_PC_Send((char *) localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))
@@ -702,12 +719,19 @@ void UART2_Receive (void)
                 UART_CH1_Send((char *) "ERROR\r\n");
 
         }
+
+        //respuesta al keepalive
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
+            AntennaIsAnswering(CH1);
+        
+        
         //--- end ---//
 
         usart2_have_data = 0;
     }
 }
 
+//channel 2
 void UART3_Receive (void)
 {
     unsigned short aux, aux2;
@@ -814,12 +838,18 @@ void UART3_Receive (void)
             else
                 UART_CH2_Send((char *) "ERROR\r\n");
         }
+
+        //respuesta al keepalive
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
+            AntennaIsAnswering(CH2);
+        
         //--- end ---//
 
         usart3_have_data = 0;
     }
 }
 
+//channel 3
 void UART4_Receive (void)
 {
     unsigned short aux, aux2;
@@ -927,10 +957,16 @@ void UART4_Receive (void)
                 UART_CH3_Send((char *) "ERROR\r\n");
         }
         //--- end ---//
+
+        //respuesta al keepalive
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
+            AntennaIsAnswering(CH3);
+        
         usart4_have_data = 0;
     }
 }
 
+//channel 4
 void UART5_Receive (void)
 {
     unsigned short aux, aux2;
@@ -1036,6 +1072,11 @@ void UART5_Receive (void)
             else
                 UART_CH4_Send((char *) "ERROR\r\n");
         }
+
+        //respuesta al keepalive
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
+            AntennaIsAnswering(CH4);
+        
         //--- end ---//
 
         usart5_have_data = 0;

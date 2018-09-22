@@ -523,17 +523,16 @@ void Session_Channel_1 (void)
 
             UART_PC_Send("Antenna hardcoded on CH1\r\n");
             session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
-#else
-            i = Session_Channel_1_Verify_Antenna(&session_ch_1);
-
+#else            
+            // i = Session_Channel_1_Verify_Antenna(&session_ch_1);
+            i = AntennaVerifyForTreatment(CH1);
 
             if (i == FIN_OK)
                 session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
 
             else if (i == FIN_ERROR)
             {
-                session_ch_1.status = 0;
-
+                session_channel_1_state = SESSION_CHANNEL_1_END;
                 SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(1));
                 UART_PC_Send(&buffSendErr[0]);
@@ -546,7 +545,6 @@ void Session_Channel_1 (void)
             //Warming up.
             if (channel_1_pause == 0)
             {
-
                 //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
                 i = Session_Warming_Up_Channels(CH1);
 
@@ -569,11 +567,10 @@ void Session_Channel_1 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_1.status = 0;
                     SetBitGlobalErrors (CH1, BIT_ERROR_WARMING_UP);
-
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(1));
                     UART_PC_Send(&buffSendErr[0]);
+                    session_channel_1_state = SESSION_CHANNEL_1_END;
                 }
             }
             else
@@ -588,8 +585,6 @@ void Session_Channel_1 (void)
             //Plateau.
             if (channel_1_pause == 0)
             {
-
-                //i = Session_Plateau_Channel_1();
                 i = Session_Plateau_Channels(CH1);
 
                 if (i == FIN_OK)
@@ -609,10 +604,9 @@ void Session_Channel_1 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_1.status = 0;
-
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(1));
                     UART_PC_Send(&buffSendErr[0]);
+                    session_channel_1_state = SESSION_CHANNEL_1_END;                    
                 }
             }
             else
@@ -627,8 +621,6 @@ void Session_Channel_1 (void)
             //Cooling dawn.
             if (channel_1_pause == 0)
             {
-
-                //i = Session_Cooling_Down_Channel_1();
                 i = Session_Cooling_Down_Channels(CH1);
 
                 if (i == FIN_OK)
@@ -653,10 +645,9 @@ void Session_Channel_1 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_1.status = 0;
-
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(1));
                     UART_PC_Send(&buffSendErr[0]);
+                    session_channel_1_state = SESSION_CHANNEL_1_END;
                 }
             }
             else
@@ -668,8 +659,8 @@ void Session_Channel_1 (void)
             break;
 
         case SESSION_CHANNEL_1_END:
-
             session_ch_1.status = 0;
+            AntennaEndTreatment(CH1);
             break;
 
         default:
@@ -678,13 +669,14 @@ void Session_Channel_1 (void)
         }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH1
-        if (session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP)
+        if ((session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP) &&
+            (session_channel_1_state != SESSION_CHANNEL_1_END))
         {
             //reviso que la temperatura actual no sea mayor que la seteada
             actual_antenna_temp = AntennaGetCurrentTemp (CH1);
             if (actual_antenna_temp > session_ch_1.ant_temp_max_int)
             {
-                session_ch_1.status = 0;
+                session_channel_1_state = SESSION_CHANNEL_1_END;
                 SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
@@ -695,7 +687,7 @@ void Session_Channel_1 (void)
             //reviso no haber tenido una perdida de antena
             if (!AntennaGetConnection (CH1))
             {
-                session_ch_1.status = 0;
+                session_channel_1_state = SESSION_CHANNEL_1_END;
                 SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_LOST(1));
@@ -5134,16 +5126,16 @@ void Session_Channel_2 (void)
             UART_PC_Send("Antenna hardcoded on CH2\r\n");
             session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
 #else
-            i = Session_Channel_2_Verify_Antenna(&session_ch_2);
+            // i = Session_Channel_2_Verify_Antenna(&session_ch_2);
+            i = AntennaVerifyForTreatment(CH2);
 
             if (i == FIN_OK)
                 session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
 
             else if (i == FIN_ERROR)
             {
-                session_ch_2.status = 0;
                 SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
-
+                session_channel_2_state = SESSION_CHANNEL_2_END;
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(2));
                 UART_PC_Send(&buffSendErr[0]);
             }
@@ -5176,9 +5168,8 @@ void Session_Channel_2 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_2.status = 0;
                     SetBitGlobalErrors (CH2, BIT_ERROR_WARMING_UP);
-
+                    session_channel_2_state = SESSION_CHANNEL_2_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(2));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5195,8 +5186,6 @@ void Session_Channel_2 (void)
             //Plateau.
             if (channel_2_pause == 0)
             {
-
-                //i = Session_Plateau_Channel_2();
                 i = Session_Plateau_Channels(CH2);
 
                 if (i == FIN_OK)
@@ -5216,8 +5205,7 @@ void Session_Channel_2 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_2.status = 0;
-
+                    session_channel_2_state = SESSION_CHANNEL_2_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(2));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5234,8 +5222,6 @@ void Session_Channel_2 (void)
             //Cooling dawn.
             if (channel_2_pause == 0)
             {
-
-                //i = Session_Cooling_Down_Channel_2();
                 i = Session_Cooling_Down_Channels(CH2);
 
                 if (i == FIN_OK)
@@ -5259,8 +5245,7 @@ void Session_Channel_2 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_2.status = 0;
-
+                    session_channel_2_state = SESSION_CHANNEL_2_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(2));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5275,6 +5260,7 @@ void Session_Channel_2 (void)
 
         case SESSION_CHANNEL_2_END:
             session_ch_2.status = 0;
+            AntennaEndTreatment(CH2);
             break;
 
         default:
@@ -5283,13 +5269,14 @@ void Session_Channel_2 (void)
         }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH2
-        if (session_channel_2_state >= SESSION_CHANNEL_2_WARMING_UP)
+        if ((session_channel_2_state >= SESSION_CHANNEL_2_WARMING_UP) &&
+            (session_channel_2_state != SESSION_CHANNEL_2_END))
         {
             //reviso que la temperatura actual no sea mayor que la seteada
             actual_antenna_temp = AntennaGetCurrentTemp (CH2);
             if (actual_antenna_temp > session_ch_2.ant_temp_max_int)
             {
-                session_ch_2.status = 0;
+                session_channel_2_state = SESSION_CHANNEL_2_END;
                 SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(2));
@@ -5300,7 +5287,7 @@ void Session_Channel_2 (void)
             //reviso no haber tenido una perdida de antena
             if (!AntennaGetConnection (CH2))
             {
-                session_ch_2.status = 0;
+                session_channel_2_state = SESSION_CHANNEL_2_END;                
                 SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_LOST(2));
@@ -5411,16 +5398,16 @@ void Session_Channel_3 (void)
             UART_PC_Send("Antenna hardcoded on CH3\r\n");
             session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
 #else
-            i = Session_Channel_3_Verify_Antenna(&session_ch_3);
+            // i = Session_Channel_3_Verify_Antenna(&session_ch_3);
+            i = AntennaVerifyForTreatment(CH3);
 
             if (i == FIN_OK)
                 session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
 
             else if (i == FIN_ERROR)
             {
-                session_ch_3.status = 0;
                 SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
-
+                session_channel_3_state = SESSION_CHANNEL_3_END;
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(3));
                 UART_PC_Send(&buffSendErr[0]);
             }
@@ -5453,9 +5440,8 @@ void Session_Channel_3 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_3.status = 0;
                     SetBitGlobalErrors (CH3, BIT_ERROR_WARMING_UP);
-
+                    session_channel_3_state = SESSION_CHANNEL_3_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(3));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5472,8 +5458,6 @@ void Session_Channel_3 (void)
             //Plateau.
             if (channel_3_pause == 0)
             {
-
-                //i = Session_Plateau_Channel_3();
                 i = Session_Plateau_Channels(CH3);
 
                 if (i == FIN_OK)
@@ -5493,8 +5477,7 @@ void Session_Channel_3 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_3.status = 0;
-
+                    session_channel_3_state = SESSION_CHANNEL_3_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(3));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5511,8 +5494,6 @@ void Session_Channel_3 (void)
             //Cooling dawn.
             if (channel_3_pause == 0)
             {
-
-                //i = Session_Cooling_Down_Channel_3();
                 i = Session_Cooling_Down_Channels(CH3);
 
                 if (i == FIN_OK)
@@ -5536,8 +5517,7 @@ void Session_Channel_3 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_3.status = 0;
-
+                    session_channel_3_state = SESSION_CHANNEL_3_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(3));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5552,7 +5532,7 @@ void Session_Channel_3 (void)
 
         case SESSION_CHANNEL_3_END:
             session_ch_3.status = 0;
-
+            AntennaEndTreatment(CH3);
             break;
 
         default:
@@ -5561,13 +5541,14 @@ void Session_Channel_3 (void)
         }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH3
-        if (session_channel_3_state >= SESSION_CHANNEL_3_WARMING_UP)
+        if ((session_channel_3_state >= SESSION_CHANNEL_3_WARMING_UP) &&
+            (session_channel_3_state != SESSION_CHANNEL_3_END))
         {
             //reviso que la temperatura actual no sea mayor que la seteada
             actual_antenna_temp = AntennaGetCurrentTemp (CH3);
             if (actual_antenna_temp > session_ch_3.ant_temp_max_int)
             {
-                session_ch_3.status = 0;
+                session_channel_3_state = SESSION_CHANNEL_3_END;
                 SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(3));
@@ -5578,7 +5559,7 @@ void Session_Channel_3 (void)
             //reviso no haber tenido una perdida de antena
             if (!AntennaGetConnection (CH3))
             {
-                session_ch_3.status = 0;
+                session_channel_3_state = SESSION_CHANNEL_3_END;
                 SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_LOST(3));
@@ -5692,16 +5673,16 @@ void Session_Channel_4 (void)
             UART_PC_Send("Antenna hardcoded on CH4\r\n");
             session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
 #else
-            i = Session_Channel_4_Verify_Antenna(&session_ch_4);
+            // i = Session_Channel_4_Verify_Antenna(&session_ch_4);
+            i = AntennaVerifyForTreatment(CH4);
 
             if (i == FIN_OK)
                 session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
 
             else if (i == FIN_ERROR)
             {
-                session_ch_4.status = 0;
                 SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
-
+                session_channel_4_state = SESSION_CHANNEL_4_END;
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(4));
                 UART_PC_Send(&buffSendErr[0]);
             }
@@ -5712,10 +5693,8 @@ void Session_Channel_4 (void)
             //warming up.
             if (channel_4_pause == 0)
             {
-
                 LED1_ON;
                 LED2_OFF;
-                //LED3_OFF;
 
                 //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
                 i = Session_Warming_Up_Channels(CH4);
@@ -5738,17 +5717,10 @@ void Session_Channel_4 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_4.status = 0;
                     SetBitGlobalErrors (CH4, BIT_ERROR_WARMING_UP);
-
-                    PWM_CH4_TiempoSubida(0); //pwm 200V.
-                    PWM_CH4_TiempoMantenimiento(0);
-                    PWM_CH4_TiempoBajada(0);
-
+                    session_channel_4_state = SESSION_CHANNEL_4_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(4));
                     UART_PC_Send(&buffSendErr[0]);
-
-
                 }
             }
             else
@@ -5766,9 +5738,7 @@ void Session_Channel_4 (void)
 
                 LED1_OFF;
                 LED2_ON;
-                //LED3_OFF;
 
-                //i = Session_Plateau_Channel_4();
                 i = Session_Plateau_Channels(CH4);
 
                 if (i == FIN_OK)
@@ -5788,12 +5758,7 @@ void Session_Channel_4 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_4.status = 0;
-
-                    PWM_CH4_TiempoSubida(0); //pwm 200V.
-                    PWM_CH4_TiempoMantenimiento(0);
-                    PWM_CH4_TiempoBajada(0);
-
+                    session_channel_4_state = SESSION_CHANNEL_4_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(4));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5813,9 +5778,7 @@ void Session_Channel_4 (void)
 
                 LED1_OFF;
                 LED2_OFF;
-                //LED3_ON;
 
-                //i = Session_Cooling_Down_Channel_4();
                 i = Session_Cooling_Down_Channels(CH4);
 
                 if (i == FIN_OK)
@@ -5839,12 +5802,7 @@ void Session_Channel_4 (void)
 
                 if (i == FIN_ERROR)
                 {
-                    session_ch_4.status = 0;
-
-                    PWM_CH4_TiempoSubida(0); //pwm 200V.
-                    PWM_CH4_TiempoMantenimiento(0);
-                    PWM_CH4_TiempoBajada(0);
-
+                    session_channel_4_state = SESSION_CHANNEL_4_END;
                     sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(4));
                     UART_PC_Send(&buffSendErr[0]);
                 }
@@ -5859,6 +5817,7 @@ void Session_Channel_4 (void)
 
         case SESSION_CHANNEL_4_END:
             session_ch_4.status = 0;
+            AntennaEndTreatment(CH4);
             break;
 
         default:
@@ -5867,13 +5826,14 @@ void Session_Channel_4 (void)
         }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH4
-        if (session_channel_4_state >= SESSION_CHANNEL_4_WARMING_UP)
+        if ((session_channel_4_state >= SESSION_CHANNEL_4_WARMING_UP) &&
+            (session_channel_4_state != SESSION_CHANNEL_4_END))
         {
             //reviso que la temperatura actual no sea mayor que la seteada
             actual_antenna_temp = AntennaGetCurrentTemp (CH4);
             if (actual_antenna_temp > session_ch_4.ant_temp_max_int)
             {
-                session_ch_4.status = 0;
+                session_channel_4_state = SESSION_CHANNEL_4_END;
                 SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(4));
@@ -5884,7 +5844,7 @@ void Session_Channel_4 (void)
             //reviso no haber tenido una perdida de antena
             if (!AntennaGetConnection (CH4))
             {
-                session_ch_4.status = 0;
+                session_channel_4_state = SESSION_CHANNEL_4_END;
                 SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
                 sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
                         ERR_CHANNEL_ANTENNA_LOST(4));
@@ -6397,28 +6357,34 @@ void CheckforGlobalErrors (void)
 
 void StopAllChannels (void)
 {
-	Session_Channel_1_Stop();
-	Session_Channel_2_Stop();
-	Session_Channel_3_Stop();
-	Session_Channel_4_Stop();
+    Session_Channel_1_Stop();
+    Session_Channel_2_Stop();
+    Session_Channel_3_Stop();
+    Session_Channel_4_Stop();
 
-	//por las dudas antes de la demora apago todos los PWM
-	PWM_CH1_TiempoSubida(0); //pwm 200V.
-	PWM_CH1_TiempoMantenimiento(0);
-	PWM_CH1_TiempoBajada(0);
+    //por las dudas antes de la demora apago todos los PWM
+    PWM_CH1_TiempoSubida(0); //pwm 200V.
+    PWM_CH1_TiempoMantenimiento(0);
+    PWM_CH1_TiempoBajada(0);
 
-	PWM_CH2_TiempoSubida(0); //pwm 200V.
-	PWM_CH2_TiempoMantenimiento(0);
-	PWM_CH2_TiempoBajada(0);
+    PWM_CH2_TiempoSubida(0); //pwm 200V.
+    PWM_CH2_TiempoMantenimiento(0);
+    PWM_CH2_TiempoBajada(0);
 
-	PWM_CH3_TiempoSubida(0); //pwm 200V.
-	PWM_CH3_TiempoMantenimiento(0);
-	PWM_CH3_TiempoBajada(0);
+    PWM_CH3_TiempoSubida(0); //pwm 200V.
+    PWM_CH3_TiempoMantenimiento(0);
+    PWM_CH3_TiempoBajada(0);
 
-	PWM_CH4_TiempoSubida(0); //pwm 200V.
-	PWM_CH4_TiempoMantenimiento(0);
-	PWM_CH4_TiempoBajada(0);
+    PWM_CH4_TiempoSubida(0); //pwm 200V.
+    PWM_CH4_TiempoMantenimiento(0);
+    PWM_CH4_TiempoBajada(0);
 
+    //esto es terminar por error todos los canales
+    AntennaEndTreatment(CH1);
+    AntennaEndTreatment(CH2);
+    AntennaEndTreatment(CH3);
+    AntennaEndTreatment(CH4);
+        
 }
 
 void SetCheckGlobalErrors (unsigned char channel)

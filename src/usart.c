@@ -291,27 +291,31 @@ void USART2_IRQHandler (void)
     {
         dummy = USART2->DR & 0x0FF;
 
-        if (prx2 < &rx2buff[SIZEOF_RXDATA - 1])
+        //para usar solo one-wire reviso si no estoy transmitiendo yo
+        if (USART2->SR & USART_SR_TC)
         {
-            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
-            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+            if (prx2 < &rx2buff[SIZEOF_RXDATA - 1])
             {
-                *prx2 = '\0';
-                usart2_have_data = 1;
-                // if (LED)
-                // 	LED_OFF;
-                // else
-                // 	LED_ON;
+                // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+                if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+                {
+                    *prx2 = '\0';
+                    usart2_have_data = 1;
+                    // if (LED)
+                    // 	LED_OFF;
+                    // else
+                    // 	LED_ON;
 
+                }
+                else
+                {
+                    *prx2 = dummy;
+                    prx2++;
+                }
             }
             else
-            {
-                *prx2 = dummy;
-                prx2++;
-            }
+                prx2 = rx2buff;    //soluciona problema bloqueo con garbage
         }
-        else
-            prx2 = rx2buff;    //soluciona problema bloqueo con garbage
     }
 
     /* USART in Transmit mode -------------------------------------------------*/
@@ -425,26 +429,30 @@ void USART3_IRQHandler (void)
     /* USART in Receive mode --------------------------------------------------*/
     if (USART3->SR & USART_SR_RXNE)
     {
-        dummy = (unsigned short) USART3->DR & 0x01FF;
+        dummy = (unsigned short) USART3->DR & 0x00FF;
 
-        if (prx3 < &rx3buff[SIZEOF_RXDATA - 1])
-        {
-            // USART3->DR = (unsigned char) dummy;    //para debug
-
-            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
-            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+        //para usar solo one-wire reviso si no estoy transmitiendo yo
+        if (USART3->SR & USART_SR_TC)
+        {        
+            if (prx3 < &rx3buff[SIZEOF_RXDATA - 1])
             {
-                *prx3 = '\0';
-                usart3_have_data = 1;
+                // USART3->DR = (unsigned char) dummy;    //para debug
+
+                // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+                if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+                {
+                    *prx3 = '\0';
+                    usart3_have_data = 1;
+                }
+                else
+                {
+                    *prx3 = dummy;
+                    prx3++;
+                }
             }
             else
-            {
-                *prx3 = dummy;
-                prx3++;
-            }
+                prx3 = rx3buff;    //soluciona problema bloqueo con garbage
         }
-        else
-            prx3 = rx3buff;    //soluciona problema bloqueo con garbage
     }
 
     /* USART in Transmit mode -------------------------------------------------*/
@@ -566,27 +574,31 @@ void UART4_IRQHandler (void)
     {
         dummy = UART4->DR & 0x0FF;
 
-        if (prx4 < &rx4buff[SIZEOF_RXDATA - 1])
+        //para usar solo one-wire reviso si no estoy transmitiendo yo
+        if (UART4->SR & USART_SR_TC)
         {
-            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
-            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+            if (prx4 < &rx4buff[SIZEOF_RXDATA - 1])
             {
-                *prx4 = '\0';
-                usart4_have_data = 1;
-                // if (LED)
-                // 	LED_OFF;
-                // else
-                // 	LED_ON;
+                // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+                if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+                {
+                    *prx4 = '\0';
+                    usart4_have_data = 1;
+                    // if (LED)
+                    // 	LED_OFF;
+                    // else
+                    // 	LED_ON;
 
+                }
+                else
+                {
+                    *prx4 = dummy;
+                    prx4++;
+                }
             }
             else
-            {
-                *prx4 = dummy;
-                prx4++;
-            }
+                prx4 = rx4buff;    //soluciona problema bloqueo con garbage
         }
-        else
-            prx4 = rx4buff;    //soluciona problema bloqueo con garbage
     }
 
     /* USART in Transmit mode -------------------------------------------------*/
@@ -708,27 +720,31 @@ void UART5_IRQHandler (void)
     {
         dummy = UART5->DR & 0x0FF;
 
-        if (prx5 < &rx5buff[SIZEOF_RXDATA - 1])
+        //para usar solo one-wire reviso si no estoy transmitiendo yo
+        if (UART5->SR & USART_SR_TC)
         {
-            // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
-            if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+            if (prx5 < &rx5buff[SIZEOF_RXDATA - 1])
             {
-                *prx5 = '\0';
-                usart5_have_data = 1;
-                // if (LED)
-                // 	LED_OFF;
-                // else
-                // 	LED_ON;
+                // if ((dummy == '\n') || (dummy == '\r') || (dummy == 26))		//26 es CTRL-Z
+                if ((dummy == '\n') || (dummy == 26))		//26 es CTRL-Z                
+                {
+                    *prx5 = '\0';
+                    usart5_have_data = 1;
+                    // if (LED)
+                    // 	LED_OFF;
+                    // else
+                    // 	LED_ON;
 
+                }
+                else
+                {
+                    *prx5 = dummy;
+                    prx5++;
+                }
             }
             else
-            {
-                *prx5 = dummy;
-                prx5++;
-            }
+                prx5 = rx5buff;    //soluciona problema bloqueo con garbage
         }
-        else
-            prx5 = rx5buff;    //soluciona problema bloqueo con garbage
     }
 
     /* USART in Transmit mode -------------------------------------------------*/

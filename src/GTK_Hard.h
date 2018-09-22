@@ -18,7 +18,7 @@
 //----- Board Configuration -------------------//
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
-// #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio
+// #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio SIN BUZZER
 // #define SOFTWARE_VERSION_1_3        //sin libST, adc con dma
 #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
@@ -26,9 +26,10 @@
 
 // #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
 // #define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
+#define USE_CURRENT_SLOT_WITHOUT_LOAD_CMD    //se puede dar start, sin hacer el load previo
 
 //---- Internal configs depending on the prevous versions -------------//
-#if (defined SOFTWARE_VERSION_1_2) || (defined SOFTWARE_VERSION_1_3)
+#ifdef HARDWARE_VERSION_2_1
 #define USE_BUZZER_ON_BOARD
 #endif
 

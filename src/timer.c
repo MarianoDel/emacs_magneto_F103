@@ -14,8 +14,7 @@
 #include "GTK_Signal.h"
 #include "GTK_Hard.h"
 #include "adc.h"
-// #include "uart.h"
-// #include "misc.h"
+#include "antennas.h"        //por Signal_TIM1MS()
 
 
 /* Externals -------------------------------------------------------------------*/

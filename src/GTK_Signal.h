@@ -31,13 +31,6 @@ enum falling_type
 #define PLATEAU		2
 #define COOLING_DOWN	3
 
-//canales
-#define CH0		0
-#define CH1		1
-#define CH2		2
-#define CH3		3
-#define CH4		4
-
 //estados de las bajadas fall_type_step_chX
 #define FALL_START	0
 #define FALL_MED	1
@@ -54,7 +47,6 @@ enum falling_type
 
 
 //-- Exported Module Functions --------------------
-void Signal_TIM1MS (void);
 void TIM5_IRQ_Callback (void);
 
 unsigned char Session_Channels_Fixed_Parameters (unsigned char, unsigned char);

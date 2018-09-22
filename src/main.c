@@ -61,15 +61,6 @@ session_typedef session_ch_2;
 session_typedef session_ch_3;
 session_typedef session_ch_4;
 
-unsigned char temp_actual_channel_1_int = 0;
-unsigned char temp_actual_channel_1_dec = 0;
-unsigned char temp_actual_channel_2_int = 0;
-unsigned char temp_actual_channel_2_dec = 0;
-unsigned char temp_actual_channel_3_int = 0;
-unsigned char temp_actual_channel_3_dec = 0;
-unsigned char temp_actual_channel_4_int = 0;
-unsigned char temp_actual_channel_4_dec = 0;
-
 //session_typedef session_slot_1;
 //session_typedef session_slot_2;
 //session_typedef session_slot_3;

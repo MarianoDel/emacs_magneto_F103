@@ -19,6 +19,7 @@
 #include "GTK_Signal.h"
 #include "flash_program.h"
 #include "GTK_Errors.h"
+#include "antennas.h"
 
 #include <float.h>
 #include <math.h>
@@ -177,14 +178,6 @@ extern volatile unsigned int session_warming_up_channel_1_stage_time;
 //--- Current limit Externals ---//
 extern volatile unsigned char take_current_samples;
 
-extern unsigned char temp_actual_channel_1_int;
-extern unsigned char temp_actual_channel_1_dec;
-extern unsigned char temp_actual_channel_2_int;
-extern unsigned char temp_actual_channel_2_dec;
-extern unsigned char temp_actual_channel_3_int;
-extern unsigned char temp_actual_channel_3_dec;
-extern unsigned char temp_actual_channel_4_int;
-extern unsigned char temp_actual_channel_4_dec;
 
 
 /* Globals ---------------------------------------------------------------------*/
@@ -481,260 +474,249 @@ void Session_Channel_1_Stop(void)
 
 void Session_Channel_1 (void)
 {
+    unsigned char i;
 
-	unsigned char i;
-
-	//if the channel is enabled the session occurs.
-	//Else the program will wait with the channel turned off.
-	if (session_ch_1.status)
-	{
-
-		switch (session_channel_1_state)
-		{
-			case SESSION_CHANNEL_1_INIT:
-
-				temp_actual_channel_1_int = 0;
-				temp_actual_channel_1_dec = 0;
-
-				session_channel_1_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-				session_channel_1_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-
-				PWM_CH1_TiempoSubida(0); //pwm 200V.
-				PWM_CH1_TiempoMantenimiento(0);
-				PWM_CH1_TiempoBajada(0);
-
-				//Restart stages.
-				Session_warming_Up_Channel_1_Restart();
-				Session_Plateau_Channel_1_Restart();
-				Session_Cooling_Down_Channel_1_Restart();
-
-				ch1_sync_state = SYNC_RESET;
-				SetBitGlobalErrors (CH1, BIT_ERROR_CHECK);
-
-#ifdef USE_BUZZER_ON_BOARD
-				//Buzzer empezar tratamiento USO ESTE PARA TODOS LOS CANALES
-				BuzzerCommands(BUZZER_MULTIPLE_HALF, 1);
+#ifndef WITHOUT_ANTENNA_BOARD_CH1    
+    unsigned char actual_antenna_temp;
 #endif
 
-				session_channel_1_state = SESSION_CHANNEL_1_VERIFY_ANTENNA;
-				break;
+    //if the channel is enabled the session occurs.
+    //Else the program will wait with the channel turned off.
+    if (session_ch_1.status)
+    {
 
-			case SESSION_CHANNEL_1_VERIFY_ANTENNA:
+        switch (session_channel_1_state)
+        {
+        case SESSION_CHANNEL_1_INIT:
+
+            PWM_CH1_TiempoSubida(0); //pwm 200V.
+            PWM_CH1_TiempoMantenimiento(0);
+            PWM_CH1_TiempoBajada(0);
+
+            //Restart stages.
+            Session_warming_Up_Channel_1_Restart();
+            Session_Plateau_Channel_1_Restart();
+            Session_Cooling_Down_Channel_1_Restart();
+
+            ch1_sync_state = SYNC_RESET;
+            SetBitGlobalErrors (CH1, BIT_ERROR_CHECK);
+
+#ifdef USE_BUZZER_ON_BOARD
+            //Buzzer empezar tratamiento USO ESTE PARA TODOS LOS CANALES
+            BuzzerCommands(BUZZER_MULTIPLE_HALF, 1);
+#endif
+
+            session_channel_1_state = SESSION_CHANNEL_1_VERIFY_ANTENNA;
+            break;
+
+        case SESSION_CHANNEL_1_VERIFY_ANTENNA:
 
 #ifdef WITHOUT_ANTENNA_BOARD_CH1
-				//aviso que encontre la antenna y hago un hardcode de parametros
-				//--- Antenna parameters ---//
-				session_ch_1.stage_1_resistance_int = HARDCODE_R_INT_CH1;
-				session_ch_1.stage_1_resistance_dec = HARDCODE_R_DEC_CH1;
-				session_ch_1.stage_1_inductance_int = HARDCODE_L_INT_CH1;
-				session_ch_1.stage_1_inductance_dec = HARDCODE_L_DEC_CH1;
-				session_ch_1.stage_1_current_limit_int = HARDCODE_I_INT_CH1;
-				session_ch_1.stage_1_current_limit_dec = HARDCODE_I_DEC_CH1;
+            //aviso que encontre la antenna y hago un hardcode de parametros
+            //--- Antenna parameters ---//
+            session_ch_1.stage_1_resistance_int = HARDCODE_R_INT_CH1;
+            session_ch_1.stage_1_resistance_dec = HARDCODE_R_DEC_CH1;
+            session_ch_1.stage_1_inductance_int = HARDCODE_L_INT_CH1;
+            session_ch_1.stage_1_inductance_dec = HARDCODE_L_DEC_CH1;
+            session_ch_1.stage_1_current_limit_int = HARDCODE_I_INT_CH1;
+            session_ch_1.stage_1_current_limit_dec = HARDCODE_I_DEC_CH1;
 
-				UART_PC_Send("Antenna hardcoded on CH1\r\n");
-				session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
+            UART_PC_Send("Antenna hardcoded on CH1\r\n");
+            session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
 #else
-				i = Session_Channel_1_Verify_Antenna(&session_ch_1);
+            i = Session_Channel_1_Verify_Antenna(&session_ch_1);
 
 
-				if (i == FIN_OK)
-					session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
+            if (i == FIN_OK)
+                session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
 
-				else if (i == FIN_ERROR)
-				{
-					session_ch_1.status = 0;
+            else if (i == FIN_ERROR)
+            {
+                session_ch_1.status = 0;
 
-					SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(1));
-					UART_PC_Send(&buffSendErr[0]);
-				}
+                SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(1));
+                UART_PC_Send(&buffSendErr[0]);
+            }
 #endif
-				break;
+            break;
 
-			case SESSION_CHANNEL_1_WARMING_UP:
+        case SESSION_CHANNEL_1_WARMING_UP:
 
-				//Warming up.
-				if (channel_1_pause == 0)
-				{
+            //Warming up.
+            if (channel_1_pause == 0)
+            {
 
-					//los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
-					i = Session_Warming_Up_Channels(CH1);
+                //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
+                i = Session_Warming_Up_Channels(CH1);
 
-					if (i == FIN_OK)
-					{
-						session_channel_1_state = SESSION_CHANNEL_1_PLATEAU;
-						UART_PC_Send("End_warming_Up,1\r\n");
+                if (i == FIN_OK)
+                {
+                    session_channel_1_state = SESSION_CHANNEL_1_PLATEAU;
+                    UART_PC_Send("End_warming_Up,1\r\n");
 
-						PWM_CH1_TiempoSubida(0); //pwm 200V.
-						PWM_CH1_TiempoMantenimiento(0);
-						PWM_CH1_TiempoBajada(0);
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
 
-					}
+                }
 
-					if ((i == TRABAJANDO) && (session_warming_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						//i = Current_Limit_CheckCh1();	//TODO: tengo que leer error para que salga la func. abajo
-						Current_Limit_CheckCh1();
-					}
+                if ((i == TRABAJANDO) && (session_warming_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    //i = Current_Limit_CheckCh1();	//TODO: tengo que leer error para que salga la func. abajo
+                    Current_Limit_CheckCh1();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_1.status = 0;
-						SetBitGlobalErrors (CH1, BIT_ERROR_WARMING_UP);
+                if (i == FIN_ERROR)
+                {
+                    session_ch_1.status = 0;
+                    SetBitGlobalErrors (CH1, BIT_ERROR_WARMING_UP);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(1));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH1_TiempoSubida(0);
-					PWM_CH1_TiempoMantenimiento(0);
-					PWM_CH1_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(1));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH1_TiempoSubida(0);
+                PWM_CH1_TiempoMantenimiento(0);
+                PWM_CH1_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_1_PLATEAU:
-				//Plateau.
-				if (channel_1_pause == 0)
-				{
+        case SESSION_CHANNEL_1_PLATEAU:
+            //Plateau.
+            if (channel_1_pause == 0)
+            {
 
-					//i = Session_Plateau_Channel_1();
-					i = Session_Plateau_Channels(CH1);
+                //i = Session_Plateau_Channel_1();
+                i = Session_Plateau_Channels(CH1);
 
-					if (i == FIN_OK)
-					{
-						session_channel_1_state = SESSION_CHANNEL_1_COOLING_DOWN;
-						UART_PC_Send("End_Plateau,1\r\n");
+                if (i == FIN_OK)
+                {
+                    session_channel_1_state = SESSION_CHANNEL_1_COOLING_DOWN;
+                    UART_PC_Send("End_Plateau,1\r\n");
 
-						PWM_CH1_TiempoSubida(0); //pwm 200V.
-						PWM_CH1_TiempoMantenimiento(0);
-						PWM_CH1_TiempoBajada(0);
-					}
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
+                }
 
-					if ((i == TRABAJANDO) && (session_plateau_channel_1_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh1();
-					}
+                if ((i == TRABAJANDO) && (session_plateau_channel_1_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh1();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_1.status = 0;
+                if (i == FIN_ERROR)
+                {
+                    session_ch_1.status = 0;
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(1));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH1_TiempoSubida(0);
-					PWM_CH1_TiempoMantenimiento(0);
-					PWM_CH1_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(1));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH1_TiempoSubida(0);
+                PWM_CH1_TiempoMantenimiento(0);
+                PWM_CH1_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_1_COOLING_DOWN:
-				//Cooling dawn.
-				if (channel_1_pause == 0)
-				{
+        case SESSION_CHANNEL_1_COOLING_DOWN:
+            //Cooling dawn.
+            if (channel_1_pause == 0)
+            {
 
-					//i = Session_Cooling_Down_Channel_1();
-					i = Session_Cooling_Down_Channels(CH1);
+                //i = Session_Cooling_Down_Channel_1();
+                i = Session_Cooling_Down_Channels(CH1);
 
-					if (i == FIN_OK)
-					{
-						session_channel_1_state = SESSION_CHANNEL_1_END;
+                if (i == FIN_OK)
+                {
+                    session_channel_1_state = SESSION_CHANNEL_1_END;
 
-						PWM_CH1_TiempoSubida(0); //pwm 200V.
-						PWM_CH1_TiempoMantenimiento(0);
-						PWM_CH1_TiempoBajada(0);
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
 
-						UART_PC_Send("End_Cooling_Down,1\r\n");
-						UART_PC_Send("finish,1\r\n");
+                    UART_PC_Send("End_Cooling_Down,1\r\n");
+                    UART_PC_Send("finish,1\r\n");
 #ifdef USE_BUZZER_ON_BOARD
-						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
+                    BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
-					}
+                }
 
-					if ((i == TRABAJANDO) && (session_cooling_down_channel_1_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh1();
-					}
+                if ((i == TRABAJANDO) && (session_cooling_down_channel_1_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh1();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_1.status = 0;
+                if (i == FIN_ERROR)
+                {
+                    session_ch_1.status = 0;
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(1));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH1_TiempoSubida(0);
-					PWM_CH1_TiempoMantenimiento(0);
-					PWM_CH1_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(1));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH1_TiempoSubida(0);
+                PWM_CH1_TiempoMantenimiento(0);
+                PWM_CH1_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_1_END:
+        case SESSION_CHANNEL_1_END:
 
-				session_ch_1.status = 0;
-				break;
+            session_ch_1.status = 0;
+            break;
 
-			default:
-				session_ch_1.status = 0;
-				break;
-		}
+        default:
+            session_ch_1.status = 0;
+            break;
+        }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH1
-		if (session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP)
-		{
-			if (session_channel_1_ask_temp == 0)
-			{
-				UART_CH1_Send("get_temp\r\n");
-				session_channel_1_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-			}
+        if (session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP)
+        {
+            //reviso que la temperatura actual no sea mayor que la seteada
+            actual_antenna_temp = AntennaGetCurrentTemp (CH1);
+            if (actual_antenna_temp > session_ch_1.ant_temp_max_int)
+            {
+                session_ch_1.status = 0;
+                SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
+                
+                UART_PC_Send(buffSendErr);
+            }
 
-			if ((temp_actual_channel_1_int != 0) || (temp_actual_channel_1_dec != 0))
-			{
-				if ((temp_actual_channel_1_int > session_ch_1.stage_1_temp_max_int)
-						|| ((temp_actual_channel_1_int == session_ch_1.stage_1_temp_max_int) && (temp_actual_channel_1_dec > session_ch_1.stage_1_temp_max_dec)))
-				{
-					session_ch_1.status = 0;
-					SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-				else
-					session_channel_1_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-
-				temp_actual_channel_1_int = 0;
-				temp_actual_channel_1_dec = 0;
-			}
-
-			if (session_channel_1_answer_temp == 0)
-			{
-				session_ch_1.status = 0;
-				SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(1));
-				UART_PC_Send(&buffSendErr[0]);
-			}
-		}
+            //reviso no haber tenido una perdida de antena
+            if (!AntennaGetConnection (CH1))
+            {
+                session_ch_1.status = 0;
+                SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_LOST(1));
+                
+                UART_PC_Send(buffSendErr);
+            }
+        }
 #endif
-	}
-	else
-	{
-		//Initial state.
-		session_channel_1_state = SESSION_CHANNEL_1_INIT;
+    }
+    else
+    {
+        //Initial state.
+        session_channel_1_state = SESSION_CHANNEL_1_INIT;
 
-		//Stop pwm channels.
-		PWM_CH1_TiempoSubida(0);
-		PWM_CH1_TiempoMantenimiento(0);
-		PWM_CH1_TiempoBajada(0);
+        //Stop pwm channels.
+        PWM_CH1_TiempoSubida(0);
+        PWM_CH1_TiempoMantenimiento(0);
+        PWM_CH1_TiempoBajada(0);
 
-		//Stop timer interrupt.
-	}
+        //Stop timer interrupt.
+    }
 }
 
 
@@ -1108,22 +1090,51 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		(p_table + i)->falling_type = 0;
 	}
 
+        unsigned short res_int;
+        unsigned char res_dec;
+        unsigned short ind_int;
+        unsigned char ind_dec;
+        unsigned char curr_int;
+        unsigned char curr_dec;
+        // unsigned char temp_max_int;
+        // unsigned char temp_max_dec;
+
+        AntennaGetParams(channel, &res_int, &res_dec, &ind_int, &ind_dec, &curr_int, &curr_dec);
+
+        //new code
 	//Resistance.
-	resistance = (float)p_session->stage_1_resistance_dec;
+	resistance = (float) res_dec;
 	resistance /= 100;
-	resistance += (float)p_session->stage_1_resistance_int;
+	resistance += (float) res_int;
 
 	//Inductance.
-	inductance = (float)p_session->stage_1_inductance_dec;
+	inductance = (float) ind_dec;
 	inductance /= 100;
-	inductance += (float)p_session->stage_1_inductance_int;
+	inductance += (float) ind_int;
 	inductance /=1000;	//ahora este en [Hy]
 
 	//Current limit.
-	current_limit = (float)p_session->stage_1_current_limit_dec;
+	current_limit = (float) curr_dec;
 	current_limit /= 100;
-	current_limit += (float)p_session->stage_1_current_limit_int;
+	current_limit += (float) curr_int;
 
+        // //old code
+	// //Resistance.
+	// resistance = (float)p_session->stage_1_resistance_dec;
+	// resistance /= 100;
+	// resistance += (float)p_session->stage_1_resistance_int;
+
+	// //Inductance.
+	// inductance = (float)p_session->stage_1_inductance_dec;
+	// inductance /= 100;
+	// inductance += (float)p_session->stage_1_inductance_int;
+	// inductance /=1000;	//ahora este en [Hy]
+
+	// //Current limit.
+	// current_limit = (float)p_session->stage_1_current_limit_dec;
+	// current_limit /= 100;
+	// current_limit += (float)p_session->stage_1_current_limit_int;
+        
 	//tengo 196mV / A + offset 456mV
 	// peak_c = (current_limit * 1.5) * 0.196 + 0.46;		//convierto corriente max a tension con 50% de margen
 	// peak_c = peak_c * 0.303;	//divido 3.3V
@@ -1775,36 +1786,36 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 						*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
 					}
 					else
-					{
-						//reviso que este presente CH1 y que no se hy agotado su timer
-						if (Session_Channel_1_Verify_Antenna_time != 0)
-						{
-							if (ch1_sync_state & SYNC_REQUIRED)
-							{
-								//CH1 presente
-								*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
-								sync_in_waiting = 0;
-							}
-							else
-							{
-								if (sync_in_waiting)
-								{
-									sprintf(&buffSendErr[0], "\r\nCH%d waiting for sync", channel);	//TODO espero SYNC y no aparece CH1 salgo por timeout??
-									UART_PC_Send(&buffSendErr[0]);
-									sync_in_waiting = 1;
-								}
-							}
-						}
-						else
-						{
-							//tengo timeout de CH1
-							*p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
+					{                                            
+                                            //debo tener CH1 presente y me llaman desde otro canal
+                                            if (AntennaGetConnection(CH1))
+                                            {
+                                                if (ch1_sync_state & SYNC_REQUIRED)
+                                                {
+                                                    //CH1 presente
+                                                    *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
+                                                    sync_in_waiting = 0;
+                                                }
+                                                else
+                                                {
+                                                    if (sync_in_waiting)
+                                                    {
+                                                        sprintf(&buffSendErr[0], "\r\nCH%d waiting for sync", channel);	//TODO espero SYNC y no aparece CH1 salgo por timeout??
+                                                        UART_PC_Send(&buffSendErr[0]);
+                                                        sync_in_waiting = 1;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                //tengo timeout de CH1
+                                                *p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
 
-							sprintf(&buffSendErr[0],"ERROR in CH%d: not CH1 detected and sync is needed\r\n", channel);
-							UART_PC_Send(&buffSendErr[0]);
-							sync_in_waiting = 0;
-							return FIN_ERROR;
-						}
+                                                sprintf(&buffSendErr[0],"ERROR in CH%d: not CH1 detected and sync is needed\r\n", channel);
+                                                UART_PC_Send(&buffSendErr[0]);
+                                                sync_in_waiting = 0;
+                                                return FIN_ERROR;
+                                            }
 					}
 				}
 				else
@@ -5080,248 +5091,237 @@ void Session_Channel_2_Stop(void)
 
 void Session_Channel_2 (void)
 {
-
-	unsigned char i;
-
-	//if the channel is enabled the session occurs.
-	//Else the program will wait with the channel turned off.
-	if (session_ch_2.status)
-	{
-
-		switch (session_channel_2_state)
-		{
-			case SESSION_CHANNEL_2_INIT:
-
-				temp_actual_channel_2_int = 0;
-				temp_actual_channel_2_dec = 0;
-
-				session_channel_2_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-				session_channel_2_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-
-				PWM_CH2_TiempoSubida(0); //pwm 200V.
-				PWM_CH2_TiempoMantenimiento(0);
-				PWM_CH2_TiempoBajada(0);
-
-				//Restart stages.
-				Session_warming_Up_Channel_2_Restart();
-				Session_Plateau_Channel_2_Restart();
-				Session_Cooling_Down_Channel_2_Restart();
-
-				SetBitGlobalErrors (CH2, BIT_ERROR_CHECK);
-
-				session_channel_2_state = SESSION_CHANNEL_2_VERIFY_ANTENNA;
-				break;
-
-			case SESSION_CHANNEL_2_VERIFY_ANTENNA:
-#ifdef WITHOUT_ANTENNA_BOARD_CH2
-				//aviso que encontre la antenna y hago un hardcode de parametros
-				//--- Antenna parameters ---//
-				session_ch_2.stage_1_resistance_int = HARDCODE_R_INT_CH2;
-				session_ch_2.stage_1_resistance_dec = HARDCODE_R_DEC_CH2;
-				session_ch_2.stage_1_inductance_int = HARDCODE_L_INT_CH2;
-				session_ch_2.stage_1_inductance_dec = HARDCODE_L_DEC_CH2;
-				session_ch_2.stage_1_current_limit_int = HARDCODE_I_INT_CH2;
-				session_ch_2.stage_1_current_limit_dec = HARDCODE_I_DEC_CH2;
-
-				UART_PC_Send("Antenna hardcoded on CH2\r\n");
-				session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
-#else
-				i = Session_Channel_2_Verify_Antenna(&session_ch_2);
-
-				if (i == FIN_OK)
-					session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
-
-				else if (i == FIN_ERROR)
-				{
-					session_ch_2.status = 0;
-					SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
-
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(2));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-#endif
-				break;
-
-			case SESSION_CHANNEL_2_WARMING_UP:
-				//warming up.
-				if (channel_2_pause == 0)
-				{
-
-					//los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
-					i = Session_Warming_Up_Channels(CH2);
-
-					if (i == FIN_OK)
-					{
-						session_channel_2_state = SESSION_CHANNEL_2_PLATEAU;
-						UART_PC_Send("End_warming_Up,2\r\n");
-
-						PWM_CH2_TiempoSubida(0); //pwm 200V.
-						PWM_CH2_TiempoMantenimiento(0);
-						PWM_CH2_TiempoBajada(0);
-
-					}
-
-					if ((i == TRABAJANDO) && (session_warming_up_channel_2_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh2();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_2.status = 0;
-						SetBitGlobalErrors (CH2, BIT_ERROR_WARMING_UP);
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(2));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH2_TiempoSubida(0);
-					PWM_CH2_TiempoMantenimiento(0);
-					PWM_CH2_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_2_PLATEAU:
-				//Plateau.
-				if (channel_2_pause == 0)
-				{
-
-					//i = Session_Plateau_Channel_2();
-					i = Session_Plateau_Channels(CH2);
-
-					if (i == FIN_OK)
-					{
-						session_channel_2_state = SESSION_CHANNEL_2_COOLING_DOWN;
-						UART_PC_Send("End_Plateau,2\r\n");
-
-						PWM_CH2_TiempoSubida(0); //pwm 200V.
-						PWM_CH2_TiempoMantenimiento(0);
-						PWM_CH2_TiempoBajada(0);
-					}
-
-					if ((i == TRABAJANDO) && (session_plateau_channel_2_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh2();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_2.status = 0;
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(2));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH2_TiempoSubida(0);
-					PWM_CH2_TiempoMantenimiento(0);
-					PWM_CH2_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_2_COOLING_DOWN:
-				//Cooling dawn.
-				if (channel_2_pause == 0)
-				{
-
-					//i = Session_Cooling_Down_Channel_2();
-					i = Session_Cooling_Down_Channels(CH2);
-
-					if (i == FIN_OK)
-					{
-						session_channel_2_state = SESSION_CHANNEL_2_END;
-						PWM_CH2_TiempoSubida(0); //pwm 200V.
-						PWM_CH2_TiempoMantenimiento(0);
-						PWM_CH2_TiempoBajada(0);
-
-						UART_PC_Send("End_Cooling_Down,2\r\n");
-						UART_PC_Send("finish,2\r\n");
-#ifdef USE_BUZZER_ON_BOARD
-						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
-#endif
-					}
-
-					if ((i == TRABAJANDO) && (session_cooling_down_channel_2_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh2();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_2.status = 0;
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(2));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH2_TiempoSubida(0);
-					PWM_CH2_TiempoMantenimiento(0);
-					PWM_CH2_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_2_END:
-				session_ch_2.status = 0;
-				break;
-
-			default:
-				session_ch_2.status = 0;
-				break;
-		}
+    unsigned char i;
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH2
-		if (session_channel_2_state >= SESSION_CHANNEL_2_WARMING_UP)
-		{
-			if (session_channel_2_ask_temp == 0)
-			{
-				UART_CH2_Send("get_temp\r\n");
-				session_channel_2_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-			}
-
-			if ((temp_actual_channel_2_int != 0) || (temp_actual_channel_2_dec != 0))
-			{
-				if ((temp_actual_channel_2_int > session_ch_2.stage_1_temp_max_int)
-						|| ((temp_actual_channel_2_int == session_ch_2.stage_1_temp_max_int) && (temp_actual_channel_2_dec > session_ch_2.stage_1_temp_max_dec)))
-				{
-					session_ch_2.status = 0;
-					SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(2));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-				else
-					session_channel_2_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-
-				temp_actual_channel_2_int = 0;
-				temp_actual_channel_2_dec = 0;
-			}
-
-			if (session_channel_2_answer_temp == 0)
-			{
-				session_ch_2.status = 0;
-				SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(2));
-				UART_PC_Send(&buffSendErr[0]);
-			}
-		}
+    unsigned char actual_antenna_temp;
 #endif
-	}
-	else
-	{
-		//Initial state.
-		session_channel_2_state = SESSION_CHANNEL_2_INIT;
+    
+    //if the channel is enabled the session occurs.
+    //Else the program will wait with the channel turned off.
+    if (session_ch_2.status)
+    {
 
-		//Stop pwm channels.
-		PWM_CH2_TiempoSubida(0);
-		PWM_CH2_TiempoMantenimiento(0);
-		PWM_CH2_TiempoBajada(0);
+        switch (session_channel_2_state)
+        {
+        case SESSION_CHANNEL_2_INIT:
 
-		//Stop timer interrupt.
-	}
+            PWM_CH2_TiempoSubida(0); //pwm 200V.
+            PWM_CH2_TiempoMantenimiento(0);
+            PWM_CH2_TiempoBajada(0);
+
+            //Restart stages.
+            Session_warming_Up_Channel_2_Restart();
+            Session_Plateau_Channel_2_Restart();
+            Session_Cooling_Down_Channel_2_Restart();
+
+            SetBitGlobalErrors (CH2, BIT_ERROR_CHECK);
+
+            session_channel_2_state = SESSION_CHANNEL_2_VERIFY_ANTENNA;
+            break;
+
+        case SESSION_CHANNEL_2_VERIFY_ANTENNA:
+#ifdef WITHOUT_ANTENNA_BOARD_CH2
+            //aviso que encontre la antenna y hago un hardcode de parametros
+            //--- Antenna parameters ---//
+            session_ch_2.stage_1_resistance_int = HARDCODE_R_INT_CH2;
+            session_ch_2.stage_1_resistance_dec = HARDCODE_R_DEC_CH2;
+            session_ch_2.stage_1_inductance_int = HARDCODE_L_INT_CH2;
+            session_ch_2.stage_1_inductance_dec = HARDCODE_L_DEC_CH2;
+            session_ch_2.stage_1_current_limit_int = HARDCODE_I_INT_CH2;
+            session_ch_2.stage_1_current_limit_dec = HARDCODE_I_DEC_CH2;
+
+            UART_PC_Send("Antenna hardcoded on CH2\r\n");
+            session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
+#else
+            i = Session_Channel_2_Verify_Antenna(&session_ch_2);
+
+            if (i == FIN_OK)
+                session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
+
+            else if (i == FIN_ERROR)
+            {
+                session_ch_2.status = 0;
+                SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
+
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(2));
+                UART_PC_Send(&buffSendErr[0]);
+            }
+#endif
+            break;
+
+        case SESSION_CHANNEL_2_WARMING_UP:
+            //warming up.
+            if (channel_2_pause == 0)
+            {
+
+                //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
+                i = Session_Warming_Up_Channels(CH2);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_2_state = SESSION_CHANNEL_2_PLATEAU;
+                    UART_PC_Send("End_warming_Up,2\r\n");
+
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+
+                }
+
+                if ((i == TRABAJANDO) && (session_warming_up_channel_2_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh2();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_2.status = 0;
+                    SetBitGlobalErrors (CH2, BIT_ERROR_WARMING_UP);
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(2));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH2_TiempoSubida(0);
+                PWM_CH2_TiempoMantenimiento(0);
+                PWM_CH2_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_2_PLATEAU:
+            //Plateau.
+            if (channel_2_pause == 0)
+            {
+
+                //i = Session_Plateau_Channel_2();
+                i = Session_Plateau_Channels(CH2);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_2_state = SESSION_CHANNEL_2_COOLING_DOWN;
+                    UART_PC_Send("End_Plateau,2\r\n");
+
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+                }
+
+                if ((i == TRABAJANDO) && (session_plateau_channel_2_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh2();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_2.status = 0;
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(2));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH2_TiempoSubida(0);
+                PWM_CH2_TiempoMantenimiento(0);
+                PWM_CH2_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_2_COOLING_DOWN:
+            //Cooling dawn.
+            if (channel_2_pause == 0)
+            {
+
+                //i = Session_Cooling_Down_Channel_2();
+                i = Session_Cooling_Down_Channels(CH2);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_2_state = SESSION_CHANNEL_2_END;
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+
+                    UART_PC_Send("End_Cooling_Down,2\r\n");
+                    UART_PC_Send("finish,2\r\n");
+#ifdef USE_BUZZER_ON_BOARD
+                    BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
+#endif
+                }
+
+                if ((i == TRABAJANDO) && (session_cooling_down_channel_2_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh2();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_2.status = 0;
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(2));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH2_TiempoSubida(0);
+                PWM_CH2_TiempoMantenimiento(0);
+                PWM_CH2_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_2_END:
+            session_ch_2.status = 0;
+            break;
+
+        default:
+            session_ch_2.status = 0;
+            break;
+        }
+
+#ifndef WITHOUT_ANTENNA_BOARD_CH2
+        if (session_channel_2_state >= SESSION_CHANNEL_2_WARMING_UP)
+        {
+            //reviso que la temperatura actual no sea mayor que la seteada
+            actual_antenna_temp = AntennaGetCurrentTemp (CH2);
+            if (actual_antenna_temp > session_ch_2.ant_temp_max_int)
+            {
+                session_ch_2.status = 0;
+                SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(2));
+                
+                UART_PC_Send(buffSendErr);
+            }
+
+            //reviso no haber tenido una perdida de antena
+            if (!AntennaGetConnection (CH2))
+            {
+                session_ch_2.status = 0;
+                SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_LOST(2));
+                
+                UART_PC_Send(buffSendErr);
+            }
+        }
+#endif
+    }
+    else
+    {
+        //Initial state.
+        session_channel_2_state = SESSION_CHANNEL_2_INIT;
+
+        //Stop pwm channels.
+        PWM_CH2_TiempoSubida(0);
+        PWM_CH2_TiempoMantenimiento(0);
+        PWM_CH2_TiempoBajada(0);
+
+        //Stop timer interrupt.
+    }
 }
 
 
@@ -5369,248 +5369,237 @@ void Session_Channel_3_Stop(void)
 
 void Session_Channel_3 (void)
 {
+    unsigned char i;
 
-	unsigned char i;
+#ifndef WITHOUT_ANTENNA_BOARD_CH3    
+    unsigned char actual_antenna_temp;
+#endif
 
-	//if the channel is enabled the session occurs.
-	//Else the program will wait with the channel turned off.
-	if (session_ch_3.status)
-	{
+    //if the channel is enabled the session occurs.
+    //Else the program will wait with the channel turned off.
+    if (session_ch_3.status)
+    {
 
-		switch (session_channel_3_state)
-		{
-			case SESSION_CHANNEL_3_INIT:
+        switch (session_channel_3_state)
+        {
+        case SESSION_CHANNEL_3_INIT:
 
-				temp_actual_channel_3_int = 0;
-				temp_actual_channel_3_dec = 0;
+            PWM_CH3_TiempoSubida(0); //pwm 200V.
+            PWM_CH3_TiempoMantenimiento(0);
+            PWM_CH3_TiempoBajada(0);
 
-				session_channel_3_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-				session_channel_3_ask_temp = SESSION_CHANNEL_ASK_TEMP;
+            //Restart stages.
+            Session_warming_Up_Channel_3_Restart();
+            Session_Plateau_Channel_3_Restart();
+            Session_Cooling_Down_Channel_3_Restart();
 
-				PWM_CH3_TiempoSubida(0); //pwm 200V.
-				PWM_CH3_TiempoMantenimiento(0);
-				PWM_CH3_TiempoBajada(0);
+            SetBitGlobalErrors (CH3, BIT_ERROR_CHECK);
+            session_channel_3_state = SESSION_CHANNEL_3_VERIFY_ANTENNA;
+            break;
 
-				//Restart stages.
-				Session_warming_Up_Channel_3_Restart();
-				Session_Plateau_Channel_3_Restart();
-				Session_Cooling_Down_Channel_3_Restart();
-
-				SetBitGlobalErrors (CH3, BIT_ERROR_CHECK);
-				session_channel_3_state = SESSION_CHANNEL_3_VERIFY_ANTENNA;
-				break;
-
-			case SESSION_CHANNEL_3_VERIFY_ANTENNA:
+        case SESSION_CHANNEL_3_VERIFY_ANTENNA:
 #ifdef WITHOUT_ANTENNA_BOARD_CH3
-				//aviso que encontre la antenna y hago un hardcode de parametros
-				//--- Antenna parameters ---//
-				session_ch_3.stage_1_resistance_int = HARDCODE_R_INT_CH3;
-				session_ch_3.stage_1_resistance_dec = HARDCODE_R_DEC_CH3;
-				session_ch_3.stage_1_inductance_int = HARDCODE_L_INT_CH3;
-				session_ch_3.stage_1_inductance_dec = HARDCODE_L_DEC_CH3;
-				session_ch_3.stage_1_current_limit_int = HARDCODE_I_INT_CH3;
-				session_ch_3.stage_1_current_limit_dec = HARDCODE_I_DEC_CH3;
+            //aviso que encontre la antenna y hago un hardcode de parametros
+            //--- Antenna parameters ---//
+            session_ch_3.stage_1_resistance_int = HARDCODE_R_INT_CH3;
+            session_ch_3.stage_1_resistance_dec = HARDCODE_R_DEC_CH3;
+            session_ch_3.stage_1_inductance_int = HARDCODE_L_INT_CH3;
+            session_ch_3.stage_1_inductance_dec = HARDCODE_L_DEC_CH3;
+            session_ch_3.stage_1_current_limit_int = HARDCODE_I_INT_CH3;
+            session_ch_3.stage_1_current_limit_dec = HARDCODE_I_DEC_CH3;
 
-				UART_PC_Send("Antenna hardcoded on CH3\r\n");
-				session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
+            UART_PC_Send("Antenna hardcoded on CH3\r\n");
+            session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
 #else
-				i = Session_Channel_3_Verify_Antenna(&session_ch_3);
+            i = Session_Channel_3_Verify_Antenna(&session_ch_3);
 
-				if (i == FIN_OK)
-					session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
+            if (i == FIN_OK)
+                session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
 
-				else if (i == FIN_ERROR)
-				{
-					session_ch_3.status = 0;
-					SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
+            else if (i == FIN_ERROR)
+            {
+                session_ch_3.status = 0;
+                SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
 
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(3));
-					UART_PC_Send(&buffSendErr[0]);
-				}
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(3));
+                UART_PC_Send(&buffSendErr[0]);
+            }
 #endif
-				break;
+            break;
 
-			case SESSION_CHANNEL_3_WARMING_UP:
-				//warming up.
-				if (channel_3_pause == 0)
-				{
+        case SESSION_CHANNEL_3_WARMING_UP:
+            //warming up.
+            if (channel_3_pause == 0)
+            {
 
-					//los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
-					i = Session_Warming_Up_Channels(CH3);
+                //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
+                i = Session_Warming_Up_Channels(CH3);
 
-					if (i == FIN_OK)
-					{
-						session_channel_3_state = SESSION_CHANNEL_3_PLATEAU;
-						UART_PC_Send("End_warming_Up,3\r\n");
+                if (i == FIN_OK)
+                {
+                    session_channel_3_state = SESSION_CHANNEL_3_PLATEAU;
+                    UART_PC_Send("End_warming_Up,3\r\n");
 
-						PWM_CH3_TiempoSubida(0); //pwm 200V.
-						PWM_CH3_TiempoMantenimiento(0);
-						PWM_CH3_TiempoBajada(0);
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
 
-					}
+                }
 
-					if ((i == TRABAJANDO) && (session_warming_up_channel_3_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh3();
-					}
+                if ((i == TRABAJANDO) && (session_warming_up_channel_3_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh3();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_3.status = 0;
-						SetBitGlobalErrors (CH3, BIT_ERROR_WARMING_UP);
+                if (i == FIN_ERROR)
+                {
+                    session_ch_3.status = 0;
+                    SetBitGlobalErrors (CH3, BIT_ERROR_WARMING_UP);
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(3));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH3_TiempoSubida(0);
-					PWM_CH3_TiempoMantenimiento(0);
-					PWM_CH3_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(3));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH3_TiempoSubida(0);
+                PWM_CH3_TiempoMantenimiento(0);
+                PWM_CH3_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_3_PLATEAU:
-				//Plateau.
-				if (channel_3_pause == 0)
-				{
+        case SESSION_CHANNEL_3_PLATEAU:
+            //Plateau.
+            if (channel_3_pause == 0)
+            {
 
-					//i = Session_Plateau_Channel_3();
-					i = Session_Plateau_Channels(CH3);
+                //i = Session_Plateau_Channel_3();
+                i = Session_Plateau_Channels(CH3);
 
-					if (i == FIN_OK)
-					{
-						session_channel_3_state = SESSION_CHANNEL_3_COOLING_DOWN;
-						UART_PC_Send("End_Plateau,3\r\n");
+                if (i == FIN_OK)
+                {
+                    session_channel_3_state = SESSION_CHANNEL_3_COOLING_DOWN;
+                    UART_PC_Send("End_Plateau,3\r\n");
 
-						PWM_CH3_TiempoSubida(0); //pwm 200V.
-						PWM_CH3_TiempoMantenimiento(0);
-						PWM_CH3_TiempoBajada(0);
-					}
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
+                }
 
-					if ((i == TRABAJANDO) && (session_plateau_channel_3_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh3();
-					}
+                if ((i == TRABAJANDO) && (session_plateau_channel_3_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh3();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_3.status = 0;
+                if (i == FIN_ERROR)
+                {
+                    session_ch_3.status = 0;
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(3));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH3_TiempoSubida(0);
-					PWM_CH3_TiempoMantenimiento(0);
-					PWM_CH3_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(3));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH3_TiempoSubida(0);
+                PWM_CH3_TiempoMantenimiento(0);
+                PWM_CH3_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_3_COOLING_DOWN:
-				//Cooling dawn.
-				if (channel_3_pause == 0)
-				{
+        case SESSION_CHANNEL_3_COOLING_DOWN:
+            //Cooling dawn.
+            if (channel_3_pause == 0)
+            {
 
-					//i = Session_Cooling_Down_Channel_3();
-					i = Session_Cooling_Down_Channels(CH3);
+                //i = Session_Cooling_Down_Channel_3();
+                i = Session_Cooling_Down_Channels(CH3);
 
-					if (i == FIN_OK)
-					{
-						session_channel_3_state = SESSION_CHANNEL_3_END;
-						PWM_CH3_TiempoSubida(0); //pwm 200V.
-						PWM_CH3_TiempoMantenimiento(0);
-						PWM_CH3_TiempoBajada(0);
+                if (i == FIN_OK)
+                {
+                    session_channel_3_state = SESSION_CHANNEL_3_END;
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
 
-						UART_PC_Send("End_Cooling_Down,3\r\n");
-						UART_PC_Send("finish,3\r\n");
+                    UART_PC_Send("End_Cooling_Down,3\r\n");
+                    UART_PC_Send("finish,3\r\n");
 #ifdef USE_BUZZER_ON_BOARD
-						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
+                    BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
-					}
+                }
 
-					if ((i == TRABAJANDO) && (session_cooling_down_channel_3_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh3();
-					}
+                if ((i == TRABAJANDO) && (session_cooling_down_channel_3_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh3();
+                }
 
-					if (i == FIN_ERROR)
-					{
-						session_ch_3.status = 0;
+                if (i == FIN_ERROR)
+                {
+                    session_ch_3.status = 0;
 
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(3));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH3_TiempoSubida(0);
-					PWM_CH3_TiempoMantenimiento(0);
-					PWM_CH3_TiempoBajada(0);
-				}
-				break;
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(3));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH3_TiempoSubida(0);
+                PWM_CH3_TiempoMantenimiento(0);
+                PWM_CH3_TiempoBajada(0);
+            }
+            break;
 
-			case SESSION_CHANNEL_3_END:
-				session_ch_3.status = 0;
+        case SESSION_CHANNEL_3_END:
+            session_ch_3.status = 0;
 
-				break;
+            break;
 
-			default:
-				session_ch_3.status = 0;
-				break;
-		}
+        default:
+            session_ch_3.status = 0;
+            break;
+        }
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH3
-		if (session_channel_3_state >= SESSION_CHANNEL_3_WARMING_UP)
-		{
-			if (session_channel_3_ask_temp == 0)
-			{
-				UART_CH3_Send("get_temp\r\n");
-				session_channel_3_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-			}
+        if (session_channel_3_state >= SESSION_CHANNEL_3_WARMING_UP)
+        {
+            //reviso que la temperatura actual no sea mayor que la seteada
+            actual_antenna_temp = AntennaGetCurrentTemp (CH3);
+            if (actual_antenna_temp > session_ch_3.ant_temp_max_int)
+            {
+                session_ch_3.status = 0;
+                SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(3));
+                
+                UART_PC_Send(buffSendErr);
+            }
 
-			if ((temp_actual_channel_3_int != 0) || (temp_actual_channel_3_dec != 0))
-			{
-				if ((temp_actual_channel_3_int > session_ch_3.stage_1_temp_max_int)
-						|| ((temp_actual_channel_3_int == session_ch_3.stage_1_temp_max_int) && (temp_actual_channel_3_dec > session_ch_3.stage_1_temp_max_dec)))
-				{
-					session_ch_3.status = 0;
-					SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(3));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-				else
-					session_channel_3_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-
-				temp_actual_channel_3_int = 0;
-				temp_actual_channel_3_dec = 0;
-			}
-
-			if (session_channel_3_answer_temp == 0)
-			{
-				session_ch_3.status = 0;
-				SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(3));
-				UART_PC_Send(&buffSendErr[0]);
-			}
-		}
+            //reviso no haber tenido una perdida de antena
+            if (!AntennaGetConnection (CH3))
+            {
+                session_ch_3.status = 0;
+                SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_LOST(3));
+                
+                UART_PC_Send(buffSendErr);
+            }
+        }
 #endif
-	}
-	else
-	{
-		//Initial state.
-		session_channel_3_state = SESSION_CHANNEL_3_INIT;
+    }
+    else
+    {
+        //Initial state.
+        session_channel_3_state = SESSION_CHANNEL_3_INIT;
 
-		//Stop pwm channels.
-		PWM_CH3_TiempoSubida(0);
-		PWM_CH3_TiempoMantenimiento(0);
-		PWM_CH3_TiempoBajada(0);
+        //Stop pwm channels.
+        PWM_CH3_TiempoSubida(0);
+        PWM_CH3_TiempoMantenimiento(0);
+        PWM_CH3_TiempoBajada(0);
 
-		//Stop timer interrupt.
-	}
+        //Stop timer interrupt.
+    }
 }
 
 
@@ -5659,280 +5648,267 @@ void Session_Channel_4_Stop(void)
 
 void Session_Channel_4 (void)
 {
-
-	unsigned char i;
-
-	//if the channel is enabled the session occurs.
-	//Else the program will wait with the channel turned off.
-
-
-	if (session_ch_4.status)
-	{
-
-		switch (session_channel_4_state)
-		{
-			case SESSION_CHANNEL_4_INIT:
-
-				temp_actual_channel_4_int = 0;
-				temp_actual_channel_4_dec = 0;
-
-				session_channel_4_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-				session_channel_4_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-
-				PWM_CH4_TiempoSubida(0); //pwm 200V.
-				PWM_CH4_TiempoMantenimiento(0);
-				PWM_CH4_TiempoBajada(0);
-
-				//Restart stages.
-				Session_warming_Up_Channel_4_Restart();
-				Session_Plateau_Channel_4_Restart();
-				Session_Cooling_Down_Channel_4_Restart();
-
-				SetBitGlobalErrors (CH4, BIT_ERROR_CHECK);
-
-				session_channel_4_state = SESSION_CHANNEL_4_VERIFY_ANTENNA;
-				break;
-
-			case SESSION_CHANNEL_4_VERIFY_ANTENNA:
-#ifdef WITHOUT_ANTENNA_BOARD_CH4
-				//aviso que encontre la antenna y hago un hardcode de parametros
-				//--- Antenna parameters ---//
-				session_ch_4.stage_1_resistance_int = HARDCODE_R_INT_CH4;
-				session_ch_4.stage_1_resistance_dec = HARDCODE_R_DEC_CH4;
-				session_ch_4.stage_1_inductance_int = HARDCODE_L_INT_CH4;
-				session_ch_4.stage_1_inductance_dec = HARDCODE_L_DEC_CH4;
-				session_ch_4.stage_1_current_limit_int = HARDCODE_I_INT_CH4;
-				session_ch_4.stage_1_current_limit_dec = HARDCODE_I_DEC_CH4;
-
-				UART_PC_Send("Antenna hardcoded on CH4\r\n");
-				session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
-#else
-				i = Session_Channel_4_Verify_Antenna(&session_ch_4);
-
-				if (i == FIN_OK)
-					session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
-
-				else if (i == FIN_ERROR)
-				{
-					session_ch_4.status = 0;
-					SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
-
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(4));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-#endif
-				break;
-
-			case SESSION_CHANNEL_4_WARMING_UP:
-				//warming up.
-				if (channel_4_pause == 0)
-				{
-
-					LED1_ON;
-					LED2_OFF;
-					//LED3_OFF;
-
-					//los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
-					i = Session_Warming_Up_Channels(CH4);
-
-					if (i == FIN_OK)
-					{
-						session_channel_4_state = SESSION_CHANNEL_4_PLATEAU;
-						UART_PC_Send("End_warming_Up,4\r\n");
-
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-
-					}
-
-					if ((i == TRABAJANDO) && (session_warming_up_channel_4_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh4();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_4.status = 0;
-						SetBitGlobalErrors (CH4, BIT_ERROR_WARMING_UP);
-
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(4));
-						UART_PC_Send(&buffSendErr[0]);
-
-
-					}
-				}
-				else
-				{
-					PWM_CH4_TiempoSubida(0);
-					PWM_CH4_TiempoMantenimiento(0);
-					PWM_CH4_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_4_PLATEAU:
-				//Plateau.
-				if (channel_4_pause == 0)
-				{
-
-					LED1_OFF;
-					LED2_ON;
-					//LED3_OFF;
-
-					//i = Session_Plateau_Channel_4();
-					i = Session_Plateau_Channels(CH4);
-
-					if (i == FIN_OK)
-					{
-						session_channel_4_state = SESSION_CHANNEL_4_COOLING_DOWN;
-						UART_PC_Send("End_Plateau,4\r\n");
-
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-					}
-
-					if ((i == TRABAJANDO) && (session_plateau_channel_4_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh4();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_4.status = 0;
-
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(4));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH4_TiempoSubida(0);
-					PWM_CH4_TiempoMantenimiento(0);
-					PWM_CH4_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_4_COOLING_DOWN:
-				//Cooling dawn.
-				if (channel_4_pause == 0)
-				{
-
-					LED1_OFF;
-					LED2_OFF;
-					//LED3_ON;
-
-					//i = Session_Cooling_Down_Channel_4();
-					i = Session_Cooling_Down_Channels(CH4);
-
-					if (i == FIN_OK)
-					{
-						session_channel_4_state = SESSION_CHANNEL_4_END;
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-
-						UART_PC_Send("End_Cooling_Down,4\r\n");
-						UART_PC_Send("finish,4\r\n");
-#ifdef USE_BUZZER_ON_BOARD
-						BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
-#endif
-					}
-
-					if ((i == TRABAJANDO) && (session_cooling_down_channel_4_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
-					{
-						Current_Limit_CheckCh4();
-					}
-
-					if (i == FIN_ERROR)
-					{
-						session_ch_4.status = 0;
-
-						PWM_CH4_TiempoSubida(0); //pwm 200V.
-						PWM_CH4_TiempoMantenimiento(0);
-						PWM_CH4_TiempoBajada(0);
-
-						sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(4));
-						UART_PC_Send(&buffSendErr[0]);
-					}
-				}
-				else
-				{
-					PWM_CH4_TiempoSubida(0);
-					PWM_CH4_TiempoMantenimiento(0);
-					PWM_CH4_TiempoBajada(0);
-				}
-				break;
-
-			case SESSION_CHANNEL_4_END:
-				session_ch_4.status = 0;
-				break;
-
-			default:
-				session_ch_4.status = 0;
-				break;
-		}
+    unsigned char i;
 
 #ifndef WITHOUT_ANTENNA_BOARD_CH4
-		if (session_channel_4_state >= SESSION_CHANNEL_4_WARMING_UP)
-		{
-			if (session_channel_4_ask_temp == 0)
-			{
-				UART_CH4_Send("get_temp\r\n");
-				session_channel_4_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-			}
-
-			if ((temp_actual_channel_4_int != 0) || (temp_actual_channel_4_dec != 0))
-			{
-				if ((temp_actual_channel_4_int > session_ch_4.stage_1_temp_max_int)
-						|| ((temp_actual_channel_4_int == session_ch_4.stage_1_temp_max_int) && (temp_actual_channel_4_dec > session_ch_4.stage_1_temp_max_dec)))
-				{
-
-					session_ch_4.status = 0;
-					SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
-					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(4));
-					UART_PC_Send(&buffSendErr[0]);
-				}
-				else
-					session_channel_4_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
-
-				temp_actual_channel_4_int = 0;
-				temp_actual_channel_4_dec = 0;
-			}
-
-			if (session_channel_4_answer_temp == 0)
-			{
-				session_ch_4.status = 0;
-				SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
-				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(4));
-				UART_PC_Send(&buffSendErr[0]);
-			}
-		}
+    unsigned char actual_antenna_temp;
 #endif
-	}
-	else
-	{
-		//Initial state.
-		session_channel_4_state = SESSION_CHANNEL_4_INIT;
 
-		//Stop pwm channels.
-		PWM_CH4_TiempoSubida(0);
-		PWM_CH4_TiempoMantenimiento(0);
-		PWM_CH4_TiempoBajada(0);
+    //if the channel is enabled the session occurs.
+    //Else the program will wait with the channel turned off.
 
-		LED1_ON;
-		LED2_OFF;
-		//LED3_OFF;
-		//Stop timer interrupt.
-	}
+    if (session_ch_4.status)
+    {
+
+        switch (session_channel_4_state)
+        {
+        case SESSION_CHANNEL_4_INIT:
+
+            PWM_CH4_TiempoSubida(0); //pwm 200V.
+            PWM_CH4_TiempoMantenimiento(0);
+            PWM_CH4_TiempoBajada(0);
+
+            //Restart stages.
+            Session_warming_Up_Channel_4_Restart();
+            Session_Plateau_Channel_4_Restart();
+            Session_Cooling_Down_Channel_4_Restart();
+
+            SetBitGlobalErrors (CH4, BIT_ERROR_CHECK);
+
+            session_channel_4_state = SESSION_CHANNEL_4_VERIFY_ANTENNA;
+            break;
+
+        case SESSION_CHANNEL_4_VERIFY_ANTENNA:
+#ifdef WITHOUT_ANTENNA_BOARD_CH4
+            //aviso que encontre la antenna y hago un hardcode de parametros
+            //--- Antenna parameters ---//
+            session_ch_4.stage_1_resistance_int = HARDCODE_R_INT_CH4;
+            session_ch_4.stage_1_resistance_dec = HARDCODE_R_DEC_CH4;
+            session_ch_4.stage_1_inductance_int = HARDCODE_L_INT_CH4;
+            session_ch_4.stage_1_inductance_dec = HARDCODE_L_DEC_CH4;
+            session_ch_4.stage_1_current_limit_int = HARDCODE_I_INT_CH4;
+            session_ch_4.stage_1_current_limit_dec = HARDCODE_I_DEC_CH4;
+
+            UART_PC_Send("Antenna hardcoded on CH4\r\n");
+            session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
+#else
+            i = Session_Channel_4_Verify_Antenna(&session_ch_4);
+
+            if (i == FIN_OK)
+                session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
+
+            else if (i == FIN_ERROR)
+            {
+                session_ch_4.status = 0;
+                SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
+
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_DISCONNECTED(4));
+                UART_PC_Send(&buffSendErr[0]);
+            }
+#endif
+            break;
+
+        case SESSION_CHANNEL_4_WARMING_UP:
+            //warming up.
+            if (channel_4_pause == 0)
+            {
+
+                LED1_ON;
+                LED2_OFF;
+                //LED3_OFF;
+
+                //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
+                i = Session_Warming_Up_Channels(CH4);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_4_state = SESSION_CHANNEL_4_PLATEAU;
+                    UART_PC_Send("End_warming_Up,4\r\n");
+
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+
+                }
+
+                if ((i == TRABAJANDO) && (session_warming_up_channel_4_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh4();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_4.status = 0;
+                    SetBitGlobalErrors (CH4, BIT_ERROR_WARMING_UP);
+
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_WARMING_UP(4));
+                    UART_PC_Send(&buffSendErr[0]);
+
+
+                }
+            }
+            else
+            {
+                PWM_CH4_TiempoSubida(0);
+                PWM_CH4_TiempoMantenimiento(0);
+                PWM_CH4_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_4_PLATEAU:
+            //Plateau.
+            if (channel_4_pause == 0)
+            {
+
+                LED1_OFF;
+                LED2_ON;
+                //LED3_OFF;
+
+                //i = Session_Plateau_Channel_4();
+                i = Session_Plateau_Channels(CH4);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_4_state = SESSION_CHANNEL_4_COOLING_DOWN;
+                    UART_PC_Send("End_Plateau,4\r\n");
+
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+                }
+
+                if ((i == TRABAJANDO) && (session_plateau_channel_4_state > SESSION_PLATEAU_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh4();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_4.status = 0;
+
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_PLATEAU(4));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH4_TiempoSubida(0);
+                PWM_CH4_TiempoMantenimiento(0);
+                PWM_CH4_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_4_COOLING_DOWN:
+            //Cooling dawn.
+            if (channel_4_pause == 0)
+            {
+
+                LED1_OFF;
+                LED2_OFF;
+                //LED3_ON;
+
+                //i = Session_Cooling_Down_Channel_4();
+                i = Session_Cooling_Down_Channels(CH4);
+
+                if (i == FIN_OK)
+                {
+                    session_channel_4_state = SESSION_CHANNEL_4_END;
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+
+                    UART_PC_Send("End_Cooling_Down,4\r\n");
+                    UART_PC_Send("finish,4\r\n");
+#ifdef USE_BUZZER_ON_BOARD
+                    BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
+#endif
+                }
+
+                if ((i == TRABAJANDO) && (session_cooling_down_channel_4_state > SESSION_COOLING_DOWN_CHANNEL_PARAMETERS_CALCULATE))
+                {
+                    Current_Limit_CheckCh4();
+                }
+
+                if (i == FIN_ERROR)
+                {
+                    session_ch_4.status = 0;
+
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+
+                    sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_COOLING_DOWN(4));
+                    UART_PC_Send(&buffSendErr[0]);
+                }
+            }
+            else
+            {
+                PWM_CH4_TiempoSubida(0);
+                PWM_CH4_TiempoMantenimiento(0);
+                PWM_CH4_TiempoBajada(0);
+            }
+            break;
+
+        case SESSION_CHANNEL_4_END:
+            session_ch_4.status = 0;
+            break;
+
+        default:
+            session_ch_4.status = 0;
+            break;
+        }
+
+#ifndef WITHOUT_ANTENNA_BOARD_CH4
+        if (session_channel_4_state >= SESSION_CHANNEL_4_WARMING_UP)
+        {
+            //reviso que la temperatura actual no sea mayor que la seteada
+            actual_antenna_temp = AntennaGetCurrentTemp (CH4);
+            if (actual_antenna_temp > session_ch_4.ant_temp_max_int)
+            {
+                session_ch_4.status = 0;
+                SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(4));
+                
+                UART_PC_Send(buffSendErr);
+            }
+
+            //reviso no haber tenido una perdida de antena
+            if (!AntennaGetConnection (CH4))
+            {
+                session_ch_4.status = 0;
+                SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
+                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        ERR_CHANNEL_ANTENNA_LOST(4));
+                
+                UART_PC_Send(buffSendErr);
+            }
+        }
+#endif
+    }
+    else
+    {
+        //Initial state.
+        session_channel_4_state = SESSION_CHANNEL_4_INIT;
+
+        //Stop pwm channels.
+        PWM_CH4_TiempoSubida(0);
+        PWM_CH4_TiempoMantenimiento(0);
+        PWM_CH4_TiempoBajada(0);
+
+        LED1_ON;
+        LED2_OFF;
+        //LED3_OFF;
+        //Stop timer interrupt.
+    }
 }
 
 

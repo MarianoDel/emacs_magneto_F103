@@ -17,6 +17,7 @@
 #include "flash_program.h"
 #include "GTK_Hard.h"
 #include "timer.h"
+#include "antennas.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -43,15 +44,6 @@ extern unsigned char channel_1_pause;
 extern unsigned char channel_2_pause;
 extern unsigned char channel_3_pause;
 extern unsigned char channel_4_pause;
-
-extern unsigned char temp_actual_channel_1_int;
-extern unsigned char temp_actual_channel_1_dec;
-extern unsigned char temp_actual_channel_2_int;
-extern unsigned char temp_actual_channel_2_dec;
-extern unsigned char temp_actual_channel_3_int;
-extern unsigned char temp_actual_channel_3_dec;
-extern unsigned char temp_actual_channel_4_int;
-extern unsigned char temp_actual_channel_4_dec;
 
 
 /* Globals ------------------------------------------------------------------*/
@@ -128,45 +120,13 @@ void UART1_Receive (void)
             localbuff[0] = '\0';
         }
 
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,", (sizeof("get_antenna,") - 1)))
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,1",
+                          (sizeof("get_antenna,1") - 1)))
         {
             //--- Get antenna parameters ---//
-            Session_Get_Antenna (&session_ch_1, 1, &antenna);
-            //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
-            //sprintf((const char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
-            sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
-                    antenna.resistance_int,
-                    antenna.resistance_dec,
-                    antenna.inductance_int,
-                    antenna.inductance_dec,
-                    antenna.current_limit_int,
-                    antenna.current_limit_dec,
-                    antenna.temp_max_int,
-                    antenna.temp_max_dec);
-
-            //UART_PC_Send((const char *) localbuff);
-            UART_PC_Send((char *) localbuff);
-            localbuff[0] = '\0';
-
-            Session_Get_Antenna (&session_ch_2, 1, &antenna);
-            //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
-            sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
-                    antenna.resistance_int,
-                    antenna.resistance_dec,
-                    antenna.inductance_int,
-                    antenna.inductance_dec,
-                    antenna.current_limit_int,
-                    antenna.current_limit_dec,
-                    antenna.temp_max_int,
-                    antenna.temp_max_dec);
-
-            //UART_PC_Send((const char *) localbuff);
-            UART_PC_Send((char *) localbuff);
-            localbuff[0] = '\0';
-
-            Session_Get_Antenna (&session_ch_3, 1, &antenna);
-            //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
-            sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
+            //TODO: despues reemplazar por nombre de antenna            
+            AntennaGetParamsStruct (CH1, &antenna);
+            sprintf((char *)&localbuff[0], "ch1,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d\r\n",
                     antenna.resistance_int,
                     antenna.resistance_dec,
                     antenna.inductance_int,
@@ -177,54 +137,162 @@ void UART1_Receive (void)
                     antenna.temp_max_dec);
 
             UART_PC_Send((char *) localbuff);
-            localbuff[0] = '\0';
-
-            Session_Get_Antenna (&session_ch_4, 1, &antenna);
-            //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
-            sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
-                    antenna.resistance_int,
-                    antenna.resistance_dec,
-                    antenna.inductance_int,
-                    antenna.inductance_dec,
-                    antenna.current_limit_int,
-                    antenna.current_limit_dec,
-                    antenna.temp_max_int,
-                    antenna.temp_max_dec);
-
-            UART_PC_Send((char *) localbuff);
-            localbuff[0] = '\0';
-
-            if (Get_Antenna_Name(CH1, (char *) &localbuff[0]) != 0)
-            {
-                UART_PC_Send((char *) (const char *) "ant_name,1,");
-                UART_PC_Send((char *) localbuff);
-                UART_PC_Send((char *) (const char *) "\r\n");
-            }
-
-            if (Get_Antenna_Name(CH2, (char *) &localbuff[0]) != 0)
-            {
-                UART_PC_Send((char *) (const char *) "ant_name,2,");
-                UART_PC_Send((char *) localbuff);
-                UART_PC_Send((char *) (const char *) "\r\n");
-            }
-
-            if (Get_Antenna_Name(CH3, (char *) &localbuff[0]) != 0)
-            {
-                UART_PC_Send((char *) (const char *) "ant_name,3,");
-                UART_PC_Send((char *) localbuff);
-                UART_PC_Send((char *) (const char *) "\r\n");
-            }
-
-            if (Get_Antenna_Name(CH4, (char *) &localbuff[0]) != 0)
-            {
-                UART_PC_Send((char *) (const char *) "ant_name,4,");
-                UART_PC_Send((char *) localbuff);
-                UART_PC_Send((char *) (const char *) "\r\n");
-            }
-
-            localbuff[0] = '\0';
         }
 
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,2",
+                          (sizeof("get_antenna,2") - 1)))
+        {
+            //--- Get antenna parameters ---//
+            //TODO: despues reemplazar por nombre de antenna            
+            AntennaGetParamsStruct (CH2, &antenna);
+            sprintf((char *)&localbuff[0], "ch2,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d\r\n",
+                    antenna.resistance_int,
+                    antenna.resistance_dec,
+                    antenna.inductance_int,
+                    antenna.inductance_dec,
+                    antenna.current_limit_int,
+                    antenna.current_limit_dec,
+                    antenna.temp_max_int,
+                    antenna.temp_max_dec);
+
+            UART_PC_Send((char *) localbuff);
+        }
+
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,3",
+                          (sizeof("get_antenna,3") - 1)))
+        {
+            //--- Get antenna parameters ---//
+            //TODO: despues reemplazar por nombre de antenna            
+            AntennaGetParamsStruct (CH3, &antenna);
+            sprintf((char *)&localbuff[0], "ch3,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d\r\n",
+                    antenna.resistance_int,
+                    antenna.resistance_dec,
+                    antenna.inductance_int,
+                    antenna.inductance_dec,
+                    antenna.current_limit_int,
+                    antenna.current_limit_dec,
+                    antenna.temp_max_int,
+                    antenna.temp_max_dec);
+
+            UART_PC_Send((char *) localbuff);
+        }
+
+        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,4",
+                          (sizeof("get_antenna,4") - 1)))
+        {
+            //--- Get antenna parameters ---//
+            AntennaGetParamsStruct (CH4, &antenna);
+            //TODO: despues reemplazar por nombre de antenna
+            sprintf((char *)&localbuff[0], "ch4,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d\r\n",
+                    antenna.resistance_int,
+                    antenna.resistance_dec,
+                    antenna.inductance_int,
+                    antenna.inductance_dec,
+                    antenna.current_limit_int,
+                    antenna.current_limit_dec,
+                    antenna.temp_max_int,
+                    antenna.temp_max_dec);
+
+            UART_PC_Send((char *) localbuff);
+        }
+        
+        // else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,1", (sizeof("get_antenna,1") - 1)))
+        // {
+        //     //--- Get antenna parameters ---//
+        //     AntennaGetParamsStruct (CH1, &antenna);
+        //     //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
+        //     //sprintf((const char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
+        //     sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
+        //             antenna.resistance_int,
+        //             antenna.resistance_dec,
+        //             antenna.inductance_int,
+        //             antenna.inductance_dec,
+        //             antenna.current_limit_int,
+        //             antenna.current_limit_dec,
+        //             antenna.temp_max_int,
+        //             antenna.temp_max_dec);
+
+        //     //UART_PC_Send((const char *) localbuff);
+        //     UART_PC_Send((char *) localbuff);
+        //     localbuff[0] = '\0';
+
+        //     Session_Get_Antenna (&session_ch_2, 1, &antenna);
+        //     //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
+        //     sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
+        //             antenna.resistance_int,
+        //             antenna.resistance_dec,
+        //             antenna.inductance_int,
+        //             antenna.inductance_dec,
+        //             antenna.current_limit_int,
+        //             antenna.current_limit_dec,
+        //             antenna.temp_max_int,
+        //             antenna.temp_max_dec);
+
+        //     //UART_PC_Send((const char *) localbuff);
+        //     UART_PC_Send((char *) localbuff);
+        //     localbuff[0] = '\0';
+
+        //     Session_Get_Antenna (&session_ch_3, 1, &antenna);
+        //     //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
+        //     sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
+        //             antenna.resistance_int,
+        //             antenna.resistance_dec,
+        //             antenna.inductance_int,
+        //             antenna.inductance_dec,
+        //             antenna.current_limit_int,
+        //             antenna.current_limit_dec,
+        //             antenna.temp_max_int,
+        //             antenna.temp_max_dec);
+
+        //     UART_PC_Send((char *) localbuff);
+        //     localbuff[0] = '\0';
+
+        //     Session_Get_Antenna (&session_ch_4, 1, &antenna);
+        //     //strcpy((const char *)&localbuff[0], (const char *)"ant0,");
+        //     sprintf((char *)&localbuff[0], "ant0,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
+        //             antenna.resistance_int,
+        //             antenna.resistance_dec,
+        //             antenna.inductance_int,
+        //             antenna.inductance_dec,
+        //             antenna.current_limit_int,
+        //             antenna.current_limit_dec,
+        //             antenna.temp_max_int,
+        //             antenna.temp_max_dec);
+
+        //     UART_PC_Send((char *) localbuff);
+        //     localbuff[0] = '\0';
+
+        //     if (Get_Antenna_Name(CH1, (char *) &localbuff[0]) != 0)
+        //     {
+        //         UART_PC_Send((char *) (const char *) "ant_name,1,");
+        //         UART_PC_Send((char *) localbuff);
+        //         UART_PC_Send((char *) (const char *) "\r\n");
+        //     }
+
+        //     if (Get_Antenna_Name(CH2, (char *) &localbuff[0]) != 0)
+        //     {
+        //         UART_PC_Send((char *) (const char *) "ant_name,2,");
+        //         UART_PC_Send((char *) localbuff);
+        //         UART_PC_Send((char *) (const char *) "\r\n");
+        //     }
+
+        //     if (Get_Antenna_Name(CH3, (char *) &localbuff[0]) != 0)
+        //     {
+        //         UART_PC_Send((char *) (const char *) "ant_name,3,");
+        //         UART_PC_Send((char *) localbuff);
+        //         UART_PC_Send((char *) (const char *) "\r\n");
+        //     }
+
+        //     if (Get_Antenna_Name(CH4, (char *) &localbuff[0]) != 0)
+        //     {
+        //         UART_PC_Send((char *) (const char *) "ant_name,4,");
+        //         UART_PC_Send((char *) localbuff);
+        //         UART_PC_Send((char *) (const char *) "\r\n");
+        //     }
+
+        //     localbuff[0] = '\0';
+        // }
+        
         else if (!strncmp((const char *)&localbuff[0], (const char *)"antenna,", (sizeof("antenna,") - 1)))
         {
 
@@ -238,7 +306,12 @@ void UART1_Receive (void)
                 antenna.current_limit_dec = (localbuff[25] - 48) * 10 + (localbuff[26] - 48);
 
                 //--- Save antenna parameters ---//
-                Session_Set_Antenna (&session_slot_aux, (localbuff[28] - 48), &antenna);
+                // Session_Set_Antenna (&session_slot_aux, (localbuff[28] - 48), &antenna);
+                //TODO: por ahora guardo en las 4 estructuras lo mismo
+                AntennaSetParamsStruct (CH1, &antenna);
+                AntennaSetParamsStruct (CH2, &antenna);
+                AntennaSetParamsStruct (CH3, &antenna);
+                AntennaSetParamsStruct (CH4, &antenna);                
 
                 UART_PC_Send((char *)"OK\r\n");
             }
@@ -520,7 +593,7 @@ void UART1_Receive (void)
 void UART2_Receive (void)
 {
 
-    unsigned short aux;
+    unsigned short aux, aux2;
     antenna_typedef antenna_aux;
 
     if (usart2_have_data)
@@ -537,20 +610,28 @@ void UART2_Receive (void)
 
             if ((localbuff[4] == ',') && (localbuff[8] == '.') && (localbuff[11] == '\r'))
             {
+                // aux = (localbuff[5] - 48) * 100;
+                // aux += (localbuff[6] - 48) * 10;
+                // aux += (localbuff[7] - 48);
+
+                // temp_actual_channel_1_int = aux;
+
+                // if (temp_actual_channel_1_int != 25)
+                //     temp_actual_channel_1_int +=1;
+
+                // aux = (localbuff[9] - 48) * 10;
+                // aux += (localbuff[10] - 48);
+
+                // temp_actual_channel_1_dec = aux;
                 aux = (localbuff[5] - 48) * 100;
                 aux += (localbuff[6] - 48) * 10;
-                aux += (localbuff[7] - 48);
+                aux += (localbuff[7] - 48);                
+                
+                aux2 = (localbuff[9] - 48) * 10;
+                aux2 += (localbuff[10] - 48);
 
-                temp_actual_channel_1_int = aux;
-
-                if (temp_actual_channel_1_int != 25)
-                    temp_actual_channel_1_int +=1;
-
-                aux = (localbuff[9] - 48) * 10;
-                aux += (localbuff[10] - 48);
-
-                temp_actual_channel_1_dec = aux;
-
+                AntennaSetCurrentTemp (CH1, (unsigned char) aux, (unsigned char) aux2);
+                
                 strcpy((char *)&localbuff[11], (const char *)",1\r\n");
                 UART_PC_Send((char *)&localbuff[0]);
                 UART_CH1_Send("OK\r\n");
@@ -610,10 +691,10 @@ void UART2_Receive (void)
 
                 antenna_aux.temp_max_dec = aux;
 
-                Session_Set_Antenna (&session_ch_1, aux , &antenna_aux);
-                Save_Antenna_Name(CH1, (char *) localbuff);
-
-
+                // Session_Set_Antenna (&session_ch_1, aux , &antenna_aux);
+                AntennaSetParamsStruct (CH1, &antenna_aux);
+                //TODO: ver despues el tema del nombre
+                // Save_Antenna_Name(CH1, (char *) localbuff);
 
                 UART_CH1_Send((char *) "OK\r\n");
             }
@@ -629,7 +710,7 @@ void UART2_Receive (void)
 
 void UART3_Receive (void)
 {
-    unsigned short aux;
+    unsigned short aux, aux2;
     antenna_typedef antenna_aux;
 
     if (usart3_have_data)
@@ -644,17 +725,26 @@ void UART3_Receive (void)
         {
             if ((localbuff[4] == ',') && (localbuff[8] == '.') && (localbuff[11] == '\r'))
             {
+                // aux = (localbuff[5] - 48) * 100;
+                // aux += (localbuff[6] - 48) * 10;
+                // aux += (localbuff[7] - 48);
+
+                // temp_actual_channel_2_int = aux;
+
+                // aux = (localbuff[9] - 48) * 10;
+                // aux += (localbuff[10] - 48);
+
+                // temp_actual_channel_2_dec = aux;
+
                 aux = (localbuff[5] - 48) * 100;
                 aux += (localbuff[6] - 48) * 10;
-                aux += (localbuff[7] - 48);
+                aux += (localbuff[7] - 48);                
+                
+                aux2 = (localbuff[9] - 48) * 10;
+                aux2 += (localbuff[10] - 48);
 
-                temp_actual_channel_2_int = aux;
-
-                aux = (localbuff[9] - 48) * 10;
-                aux += (localbuff[10] - 48);
-
-                temp_actual_channel_2_dec = aux;
-
+                AntennaSetCurrentTemp (CH2, (unsigned char) aux, (unsigned char) aux2);
+                
                 strcpy((char *)&localbuff[11], (const char *)",2\r\n");
                 UART_PC_Send((char *)&localbuff[0]);
                 UART_CH2_Send("OK\r\n");
@@ -714,8 +804,10 @@ void UART3_Receive (void)
                 antenna_aux.temp_max_dec = aux;
 
 
-                Session_Set_Antenna (&session_ch_2, aux , &antenna_aux);
-                Save_Antenna_Name(CH2, (char *) localbuff);
+                // Session_Set_Antenna (&session_ch_2, aux , &antenna_aux);
+                AntennaSetParamsStruct (CH2, &antenna_aux);
+                //TODO: ver despues el tema del nombre                
+                // Save_Antenna_Name(CH2, (char *) localbuff);
 
                 UART_CH2_Send((char *) "OK\r\n");
             }
@@ -730,7 +822,7 @@ void UART3_Receive (void)
 
 void UART4_Receive (void)
 {
-    unsigned short aux;
+    unsigned short aux, aux2;
     antenna_typedef antenna_aux;
 
     if (usart4_have_data)
@@ -745,17 +837,26 @@ void UART4_Receive (void)
         {
             if ((localbuff[4] == ',') && (localbuff[8] == '.') && (localbuff[11] == '\r'))
             {
+                // aux = (localbuff[5] - 48) * 100;
+                // aux += (localbuff[6] - 48) * 10;
+                // aux += (localbuff[7] - 48);
+
+                // temp_actual_channel_3_int = aux;
+
+                // aux = (localbuff[9] - 48) * 10;
+                // aux += (localbuff[10] - 48);
+
+                // temp_actual_channel_3_dec = aux;
+
                 aux = (localbuff[5] - 48) * 100;
                 aux += (localbuff[6] - 48) * 10;
-                aux += (localbuff[7] - 48);
+                aux += (localbuff[7] - 48);                
+                
+                aux2 = (localbuff[9] - 48) * 10;
+                aux2 += (localbuff[10] - 48);
 
-                temp_actual_channel_3_int = aux;
-
-                aux = (localbuff[9] - 48) * 10;
-                aux += (localbuff[10] - 48);
-
-                temp_actual_channel_3_dec = aux;
-
+                AntennaSetCurrentTemp (CH3, (unsigned char) aux, (unsigned char) aux2);
+                
                 strcpy((char *)&localbuff[11], (const char *)",3\r\n");
                 UART_PC_Send((char *)&localbuff[0]);
                 UART_CH3_Send("OK\r\n");
@@ -815,8 +916,10 @@ void UART4_Receive (void)
 
                 antenna_aux.temp_max_dec = aux;
 
-                Session_Set_Antenna (&session_ch_3, aux , &antenna_aux);
-                Save_Antenna_Name(CH3, (char *) localbuff);
+                // Session_Set_Antenna (&session_ch_3, aux , &antenna_aux);
+                AntennaSetParamsStruct (CH3, &antenna_aux);
+                //TODO: ver despues el tema del nombre                
+                // Save_Antenna_Name(CH3, (char *) localbuff);
 
                 UART_CH3_Send((char *) "OK\r\n");
             }
@@ -830,17 +933,8 @@ void UART4_Receive (void)
 
 void UART5_Receive (void)
 {
-    unsigned short aux;
+    unsigned short aux, aux2;
     antenna_typedef antenna_aux;
-
-    // if (msUART5rxTimeOut == 0)
-    // {
-
-    // 	MSUART5RXTIMEOUT;
-
-    // 	pBuffUART5rxW = &buffUART5rx[0];
-    // 	pBuffUART5rxR = &buffUART5rx[0];
-    // }
 
     if (usart5_have_data)
     {
@@ -854,17 +948,26 @@ void UART5_Receive (void)
         {
             if ((localbuff[4] == ',') && (localbuff[8] == '.') && (localbuff[11] == '\r'))
             {
+                // aux = (localbuff[5] - 48) * 100;
+                // aux += (localbuff[6] - 48) * 10;
+                // aux += (localbuff[7] - 48);
+
+                // temp_actual_channel_4_int = aux;
+
+                // aux = (localbuff[9] - 48) * 10;
+                // aux += (localbuff[10] - 48);
+
+                // temp_actual_channel_4_dec = aux;
+
                 aux = (localbuff[5] - 48) * 100;
                 aux += (localbuff[6] - 48) * 10;
-                aux += (localbuff[7] - 48);
+                aux += (localbuff[7] - 48);                
+                
+                aux2 = (localbuff[9] - 48) * 10;
+                aux2 += (localbuff[10] - 48);
 
-                temp_actual_channel_4_int = aux;
-
-                aux = (localbuff[9] - 48) * 10;
-                aux += (localbuff[10] - 48);
-
-                temp_actual_channel_4_dec = aux;
-
+                AntennaSetCurrentTemp (CH4, (unsigned char) aux, (unsigned char) aux2);
+                
                 strcpy((char *)&localbuff[11], (const char *)",4\r\n");
                 UART_PC_Send((char *)&localbuff[0]);
                 UART_CH4_Send("OK\r\n");
@@ -923,8 +1026,10 @@ void UART5_Receive (void)
 
                 antenna_aux.temp_max_dec = aux;
 
-                Session_Set_Antenna (&session_ch_4, aux , &antenna_aux);
-                Save_Antenna_Name(CH4, (char *) localbuff);
+                // Session_Set_Antenna (&session_ch_4, aux , &antenna_aux);
+                AntennaSetParamsStruct (CH4, &antenna_aux);
+                //TODO: ver despues el tema del nombre                
+                // Save_Antenna_Name(CH4, (char *) localbuff);
 
                 UART_CH4_Send((char *) "OK\r\n");
             }

@@ -143,6 +143,12 @@
 // #define HARDCODE_I_DEC_CH4 0
 //----- End of Use it whithout Antenna Board Configuration ---//
 
+//definicion de canales para todos los modulos
+#define CH0		0
+#define CH1		1
+#define CH2		2
+#define CH3		3
+#define CH4		4
 
 enum resultados
 {

@@ -12,7 +12,7 @@
 #define _ANTENNAS_H_
 
 //---- Includes to help the Defines ----------
-
+#include "GTK_Estructura.h"        //por antenna_typedef
 
 
 //---- Configurations Defines --------------------
@@ -65,6 +65,15 @@ enum Session_Channel_4_Verify_Antenna_states
 
 //--- Exported functions ---//
 void AntennaUpdateStates (void);
+void AntennaSetCurrentTemp (unsigned char, unsigned char, unsigned char);
+unsigned char AntennaGetConnection (unsigned char);
+unsigned char AntennaGetCurrentTemp (unsigned char);
+void AntennaGetParams (unsigned char, unsigned short *, unsigned char *, unsigned short *, unsigned char *, unsigned char *, unsigned char *);
+void AntennaGetParamsStruct (unsigned char, antenna_typedef *);
+void AntennaSetParamsStruct (unsigned char, antenna_typedef *);
+
+void Signal_TIM1MS (void);
+
 
 
 // void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);

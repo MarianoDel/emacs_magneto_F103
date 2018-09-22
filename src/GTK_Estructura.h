@@ -17,99 +17,105 @@
 //--- Sesion ---//
 typedef struct
 {
-	//--- --- --- --- --- Stage 1 --- --- --- --- ---//
-	//--- General ---//												//2 bytes
-	unsigned char stage_1_status; //Enable/Disable.
-	unsigned char stage_1_special_function;
+    //--- --- --- --- --- Stage 1 --- --- --- --- ---//
+    //--- General ---//
+    //2 bytes
+    unsigned char stage_1_status; //Enable/Disable.
+    unsigned char stage_1_special_function;
 
-	//--- Duration ---//												//3 bytes
-	unsigned char stage_1_time_hours;
-	unsigned char stage_1_time_minutes;
-	unsigned char stage_1_time_seconds;
+    //--- Duration ---//
+    //3 bytes
+    unsigned char stage_1_time_hours;
+    unsigned char stage_1_time_minutes;
+    unsigned char stage_1_time_seconds;
 
-	//--- Antenna parameters ---//								//8 bytes
-	unsigned short stage_1_resistance_int;
-	unsigned char stage_1_resistance_dec;
-	unsigned short stage_1_inductance_int;
-	unsigned char stage_1_inductance_dec;
-	unsigned char stage_1_current_limit_int;
-	unsigned char stage_1_current_limit_dec;
+    //--- Signal ---//
+    //18 bytes
+    unsigned char stage_1_initial_power;
+    unsigned char stage_1_final_power;
+    unsigned int stage_1_time_per_step;
 
-	//--- Signal ---//												//20 bytes
-	unsigned char stage_1_initial_power;
-	unsigned char stage_1_final_power;
-	unsigned char stage_1_temp_max_int;
-	unsigned char stage_1_temp_max_dec;
+    unsigned short stage_1_rising_time;
+    unsigned short stage_1_maintenance_time;
+    unsigned short stage_1_falling_time;
+    unsigned short stage_1_low_time;
 
-	unsigned int stage_1_time_per_step;
+    unsigned short stage_1_burst_mode_on;
+    unsigned short stage_1_burst_mode_off;
 
-	unsigned short stage_1_rising_time;
-	unsigned short stage_1_maintenance_time;
-	unsigned short stage_1_falling_time;
-	unsigned short stage_1_low_time;
+    //--- --- --- --- --- Stage 2 --- --- --- --- ---//
+    //--- General ---//
+    //2 bytes
+    unsigned char stage_2_status; //Enable/Disable.
+    unsigned char stage_2_special_function;
 
-	unsigned short stage_1_burst_mode_on;
-	unsigned short stage_1_burst_mode_off;
+    //--- Duration ---//
+    //3 bytes
+    unsigned char stage_2_time_hours;
+    unsigned char stage_2_time_minutes;
+    unsigned char stage_2_time_seconds;
 
-	//--- --- --- --- --- Stage 2 --- --- --- --- ---//
-	//--- General ---//												//2 bytes
-	unsigned char stage_2_status; //Enable/Disable.
-	unsigned char stage_2_special_function;
+    //--- Signal ---//
+    //18 bytes
+    unsigned char stage_2_initial_power;
+    unsigned char stage_2_final_power;
+    unsigned int stage_2_time_per_step;
 
-	//--- Duration ---//												//3 bytes
-	unsigned char stage_2_time_hours;
-	unsigned char stage_2_time_minutes;
-	unsigned char stage_2_time_seconds;
+    unsigned short stage_2_rising_time;
+    unsigned short stage_2_maintenance_time;
+    unsigned short stage_2_falling_time;
+    unsigned short stage_2_low_time;
 
-	//--- Signal ---//												//20 bytes
-	unsigned char stage_2_initial_power;
-	unsigned char stage_2_final_power;
-	unsigned char stage_2_temp_max_int;
-	unsigned char stage_2_temp_max_dec;
+    unsigned short stage_2_burst_mode_on;
+    unsigned short stage_2_burst_mode_off;
 
-	unsigned int stage_2_time_per_step;
+    //--- --- --- --- --- Stage 3 --- --- --- --- ---//
+    //--- General ---//
+    //2 bytes
+    unsigned char stage_3_status; //Enable/Disable.
+    unsigned char stage_3_special_function;
 
-	unsigned short stage_2_rising_time;
-	unsigned short stage_2_maintenance_time;
-	unsigned short stage_2_falling_time;
-	unsigned short stage_2_low_time;
+    //--- Duration ---//
+    //3 bytes
+    unsigned char stage_3_time_hours;
+    unsigned char stage_3_time_minutes;
+    unsigned char stage_3_time_seconds;
 
-	unsigned short stage_2_burst_mode_on;
-	unsigned short stage_2_burst_mode_off;
+    //--- Signal ---//
+    //20 bytes
+    unsigned char stage_3_initial_power;
+    unsigned char stage_3_final_power;
+    unsigned int stage_3_time_per_step;
 
-	//--- --- --- --- --- Stage 3 --- --- --- --- ---//
-	//--- General ---//												//2 bytes
-	unsigned char stage_3_status; //Enable/Disable.
-	unsigned char stage_3_special_function;
+    unsigned short stage_3_rising_time;
+    unsigned short stage_3_maintenance_time;
+    unsigned short stage_3_falling_time;
+    unsigned short stage_3_low_time;
 
-	//--- Duration ---//												//3 bytes
-	unsigned char stage_3_time_hours;
-	unsigned char stage_3_time_minutes;
-	unsigned char stage_3_time_seconds;
+    unsigned short stage_3_burst_mode_on;
+    unsigned short stage_3_burst_mode_off;
 
-	//--- Signal ---//												//20 bytes
-	unsigned char stage_3_initial_power;
-	unsigned char stage_3_final_power;
-	unsigned char stage_3_temp_max_int;
-	unsigned char stage_3_temp_max_dec;
+    //--- --- --- --- --- General Parameters --- --- --- --- ---//
+    //1 byte
+    unsigned char status;
 
-	unsigned int stage_3_time_per_step;
+    //--- Antenna parameters ---//
+    //10 bytes
+    unsigned short ant_resistance_int;
+    unsigned char ant_resistance_dec;
+    unsigned short ant_inductance_int;
+    unsigned char ant_inductance_dec;
+    unsigned char ant_current_limit_int;
+    unsigned char ant_current_limit_dec;
+    unsigned char ant_temp_max_int;
+    unsigned char ant_temp_max_dec;
 
-	unsigned short stage_3_rising_time;
-	unsigned short stage_3_maintenance_time;
-	unsigned short stage_3_falling_time;
-	unsigned short stage_3_low_time;
+    //24 bytes o usar ant_name como dummy para conseguir multiplo de 4
+    unsigned char sync_on;
+    unsigned short peak_current_limit;
+    char connected_ant_name [21];    
 
-	unsigned short stage_3_burst_mode_on;
-	unsigned short stage_3_burst_mode_off;
-
-	//--- --- --- --- --- General Parameters --- --- --- --- ---//
-	unsigned char status;											//21 bytes
-	char connected_ant_name [17];
-	unsigned char sync_on;
-	unsigned short peak_current_limit;
-
-} session_typedef;													//total 104 bytes
+} session_typedef;    //total (2 + 3 + 18) * 3 + 1 + 10 + 24 = 104 bytes
 
 
 typedef struct {

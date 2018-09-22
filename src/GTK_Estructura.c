@@ -927,23 +927,29 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel)
 	ptr_session->stage_1_time_seconds = a;
 
 	//Antenna.
-	a = ptr_session_channel->stage_1_resistance_int;
-	ptr_session->stage_1_resistance_int = a;
+	a = ptr_session_channel->ant_resistance_int;
+	ptr_session->ant_resistance_int = a;
 
-	a = ptr_session_channel->stage_1_resistance_dec;
-	ptr_session->stage_1_resistance_dec = a;
+	a = ptr_session_channel->ant_resistance_dec;
+	ptr_session->ant_resistance_dec = a;
 
-	a = ptr_session_channel->stage_1_inductance_int;
-	ptr_session->stage_1_inductance_int = a;
+	a = ptr_session_channel->ant_inductance_int;
+	ptr_session->ant_inductance_int = a;
 
-	a = ptr_session_channel->stage_1_inductance_dec;
-	ptr_session->stage_1_inductance_dec = a;
+	a = ptr_session_channel->ant_inductance_dec;
+	ptr_session->ant_inductance_dec = a;
 
-	a = ptr_session_channel->stage_1_current_limit_int;
-	ptr_session->stage_1_current_limit_int = a;
+	a = ptr_session_channel->ant_current_limit_int;
+	ptr_session->ant_current_limit_int = a;
 
-	a = ptr_session_channel->stage_1_current_limit_dec;
-	ptr_session->stage_1_current_limit_dec = a;
+	a = ptr_session_channel->ant_current_limit_dec;
+	ptr_session->ant_current_limit_dec = a;
+
+	a = ptr_session_channel->ant_temp_max_int;
+	ptr_session->ant_temp_max_int = a;
+
+	a = ptr_session_channel->ant_temp_max_dec;
+	ptr_session->ant_temp_max_dec = a;
 
 	//Signal.
 	a = ptr_session_channel->stage_1_initial_power;
@@ -951,12 +957,6 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel)
 
 	a = ptr_session_channel->stage_1_final_power;
 	ptr_session->stage_1_final_power = a;
-
-	a = ptr_session_channel->stage_1_temp_max_int;
-	ptr_session->stage_1_temp_max_int = a;
-
-	a = ptr_session_channel->stage_1_temp_max_dec;
-	ptr_session->stage_1_temp_max_dec = a;
 
 	a = ptr_session_channel->stage_1_rising_time;
 	ptr_session->stage_1_rising_time = a;
@@ -995,39 +995,12 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel)
 	a = ptr_session_channel->stage_2_time_seconds;
 	ptr_session->stage_2_time_seconds = a;
 
-	//Antenna.
-	/*
-	a = ptr_session_channel->stage_2_resistance_int;
-	ptr_session->stage_2_resistance_int = a;
-
-	a = ptr_session_channel->stage_2_resistance_dec;
-	ptr_session->stage_2_resistance_dec = a;
-
-	a = ptr_session_channel->stage_2_inductance_int;
-	ptr_session->stage_2_inductance_int = a;
-
-	a = ptr_session_channel->stage_2_inductance_dec;
-	ptr_session->stage_2_inductance_dec = a;
-
-	a = ptr_session_channel->stage_2_current_limit_int;
-	ptr_session->stage_2_current_limit_int = a;
-
-	a = ptr_session_channel->stage_2_current_limit_dec;
-	ptr_session->stage_2_current_limit_dec = a;
-	*/
-
 	//Signal.
 	a = ptr_session_channel->stage_2_initial_power;
 	ptr_session->stage_2_initial_power = a;
 
 	a = ptr_session_channel->stage_2_final_power;
 	ptr_session->stage_2_final_power = a;
-
-	a = ptr_session_channel->stage_2_temp_max_int;
-	ptr_session->stage_1_temp_max_int = a;
-
-	a = ptr_session_channel->stage_2_temp_max_dec;
-	ptr_session->stage_1_temp_max_dec = a;
 
 	a = ptr_session_channel->stage_2_rising_time;
 	ptr_session->stage_2_rising_time = a;
@@ -1066,39 +1039,12 @@ void Channel_Load (session_typedef * ptr_session, unsigned char channel)
 	a = ptr_session_channel->stage_3_time_seconds;
 	ptr_session->stage_3_time_seconds = a;
 
-	//Antenna.
-	/*
-	a = ptr_session_channel->stage_3_resistance_int;
-	ptr_session->stage_3_resistance_int = a;
-
-	a = ptr_session_channel->stage_3_resistance_dec;
-	ptr_session->stage_3_resistance_dec = a;
-
-	a = ptr_session_channel->stage_3_inductance_int;
-	ptr_session->stage_3_inductance_int = a;
-
-	a = ptr_session_channel->stage_3_inductance_dec;
-	ptr_session->stage_3_inductance_dec = a;
-
-	a = ptr_session_channel->stage_3_current_limit_int;
-	ptr_session->stage_3_current_limit_int = a;
-
-	a = ptr_session_channel->stage_3_current_limit_dec;
-	ptr_session->stage_3_current_limit_dec = a;
-	*/
-
 	//Signal.
 	a = ptr_session_channel->stage_3_initial_power;
 	ptr_session->stage_3_initial_power = a;
 
 	a = ptr_session_channel->stage_3_final_power;
 	ptr_session->stage_3_final_power = a;
-
-	a = ptr_session_channel->stage_3_temp_max_int;
-	ptr_session->stage_1_temp_max_int = a;
-
-	a = ptr_session_channel->stage_3_temp_max_dec;
-	ptr_session->stage_1_temp_max_dec = a;
 
 	a = ptr_session_channel->stage_3_rising_time;
 	ptr_session->stage_3_rising_time = a;
@@ -1180,36 +1126,36 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 		ptr_session_channel->stage_1_time_seconds = a;
 
 		//Antenna.
-		a = ptr_session_slot.stage_1_resistance_int;
-		ptr_session_channel->stage_1_resistance_int = a;
+		a = ptr_session_slot.ant_resistance_int;
+		ptr_session_channel->ant_resistance_int = a;
 
-		a = ptr_session_slot.stage_1_resistance_dec;
-		ptr_session_channel->stage_1_resistance_dec = a;
+		a = ptr_session_slot.ant_resistance_dec;
+		ptr_session_channel->ant_resistance_dec = a;
 
-		a = ptr_session_slot.stage_1_inductance_int;
-		ptr_session_channel->stage_1_inductance_int = a;
+		a = ptr_session_slot.ant_inductance_int;
+		ptr_session_channel->ant_inductance_int = a;
 
-		a = ptr_session_slot.stage_1_inductance_dec;
-		ptr_session_channel->stage_1_inductance_dec = a;
+		a = ptr_session_slot.ant_inductance_dec;
+		ptr_session_channel->ant_inductance_dec = a;
 
-		a = ptr_session_slot.stage_1_current_limit_int;
-		ptr_session_channel->stage_1_current_limit_int = a;
+		a = ptr_session_slot.ant_current_limit_int;
+		ptr_session_channel->ant_current_limit_int = a;
 
-		a = ptr_session_slot.stage_1_current_limit_dec;
-		ptr_session_channel->stage_1_current_limit_dec = a;
+		a = ptr_session_slot.ant_current_limit_dec;
+		ptr_session_channel->ant_current_limit_dec = a;
 
+		a = ptr_session_slot.ant_temp_max_int;
+		ptr_session_channel->ant_temp_max_int = a;
+
+		a = ptr_session_slot.ant_temp_max_dec;
+		ptr_session_channel->ant_temp_max_dec = a;
+                
 		//Signal.
 		a = ptr_session_slot.stage_1_initial_power;
 		ptr_session_channel->stage_1_initial_power = a;
 
 		a = ptr_session_slot.stage_1_final_power;
 		ptr_session_channel->stage_1_final_power = a;
-
-		a = ptr_session_slot.stage_1_temp_max_int;
-		ptr_session_channel->stage_1_temp_max_int = a;
-
-		a = ptr_session_slot.stage_1_temp_max_dec;
-		ptr_session_channel->stage_1_temp_max_dec = a;
 
 		a = ptr_session_slot.stage_1_rising_time;
 		ptr_session_channel->stage_1_rising_time = a;
@@ -1248,39 +1194,12 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 		a = ptr_session_slot.stage_2_time_seconds;
 		ptr_session_channel->stage_2_time_seconds = a;
 
-		//Antenna.
-		/*
-		a = ptr_session_slot.stage_2_resistance_int;
-		ptr_session_channel->stage_2_resistance_int = a;
-
-		a = ptr_session_slot.stage_2_resistance_dec;
-		ptr_session_channel->stage_2_resistance_dec = a;
-
-		a = ptr_session_slot.stage_2_inductance_int;
-		ptr_session_channel->stage_2_inductance_int = a;
-
-		a = ptr_session_slot.stage_2_inductance_dec;
-		ptr_session_channel->stage_2_inductance_dec = a;
-
-		a = ptr_session_slot.stage_2_current_limit_int;
-		ptr_session_channel->stage_2_current_limit_int = a;
-
-		a = ptr_session_slot.stage_2_current_limit_dec;
-		ptr_session_channel->stage_2_current_limit_dec = a;
-		*/
-
 		//Signal.
 		a = ptr_session_slot.stage_2_initial_power;
 		ptr_session_channel->stage_2_initial_power = a;
 
 		a = ptr_session_slot.stage_2_final_power;
 		ptr_session_channel->stage_2_final_power = a;
-
-		a = ptr_session_slot.stage_2_temp_max_int;
-		ptr_session_channel->stage_2_temp_max_int = a;
-
-		a = ptr_session_slot.stage_2_temp_max_dec;
-		ptr_session_channel->stage_2_temp_max_dec = a;
 
 		a = ptr_session_slot.stage_2_rising_time;
 		ptr_session_channel->stage_2_rising_time = a;
@@ -1319,39 +1238,12 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 		a = ptr_session_slot.stage_3_time_seconds;
 		ptr_session_channel->stage_3_time_seconds = a;
 
-		//Antenna.
-		/*
-		a = ptr_session_slot.stage_3_resistance_int;
-		ptr_session_channel->stage_3_resistance_int = a;
-
-		a = ptr_session_slot.stage_3_resistance_dec;
-		ptr_session_channel->stage_3_resistance_dec = a;
-
-		a = ptr_session_slot.stage_3_inductance_int;
-		ptr_session_channel->stage_3_inductance_int = a;
-
-		a = ptr_session_slot.stage_3_inductance_dec;
-		ptr_session_channel->stage_3_inductance_dec = a;
-
-		a = ptr_session_slot.stage_3_current_limit_int;
-		ptr_session_channel->stage_3_current_limit_int = a;
-
-		a = ptr_session_slot.stage_3_current_limit_dec;
-		ptr_session_channel->stage_3_current_limit_dec = a;
-		*/
-
 		//Signal.
 		a = ptr_session_slot.stage_3_initial_power;
 		ptr_session_channel->stage_3_initial_power = a;
 
 		a = ptr_session_slot.stage_3_final_power;
 		ptr_session_channel->stage_3_final_power = a;
-
-		a = ptr_session_slot.stage_3_temp_max_int;
-		ptr_session_channel->stage_3_temp_max_int = a;
-
-		a = ptr_session_slot.stage_3_temp_max_dec;
-		ptr_session_channel->stage_3_temp_max_dec = a;
 
 		a = ptr_session_slot.stage_3_rising_time;
 		ptr_session_channel->stage_3_rising_time = a;

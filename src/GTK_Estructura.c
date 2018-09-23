@@ -1124,31 +1124,6 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 
 		a = ptr_session_slot.stage_1_time_seconds;
 		ptr_session_channel->stage_1_time_seconds = a;
-
-		//Antenna.
-		a = ptr_session_slot.ant_resistance_int;
-		ptr_session_channel->ant_resistance_int = a;
-
-		a = ptr_session_slot.ant_resistance_dec;
-		ptr_session_channel->ant_resistance_dec = a;
-
-		a = ptr_session_slot.ant_inductance_int;
-		ptr_session_channel->ant_inductance_int = a;
-
-		a = ptr_session_slot.ant_inductance_dec;
-		ptr_session_channel->ant_inductance_dec = a;
-
-		a = ptr_session_slot.ant_current_limit_int;
-		ptr_session_channel->ant_current_limit_int = a;
-
-		a = ptr_session_slot.ant_current_limit_dec;
-		ptr_session_channel->ant_current_limit_dec = a;
-
-		a = ptr_session_slot.ant_temp_max_int;
-		ptr_session_channel->ant_temp_max_int = a;
-
-		a = ptr_session_slot.ant_temp_max_dec;
-		ptr_session_channel->ant_temp_max_dec = a;
                 
 		//Signal.
 		a = ptr_session_slot.stage_1_initial_power;
@@ -1264,7 +1239,6 @@ void Session_Load (session_typedef * ptr_session, unsigned char slot, unsigned c
 		ptr_session_channel->stage_3_burst_mode_off = a;
 
 		//General Parameters
-//		strcpy(&(ptr_session_channel->connected_ant_name), &ptr_session_slot.connected_ant_name);
 		a = ptr_session_slot.sync_on;
 		ptr_session_channel->sync_on = a;
 

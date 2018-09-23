@@ -405,14 +405,20 @@ int main (void)
         UART_CH1_Receive();
 
         //Channel 2.
+        // SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
+        // AntennaVerifyForTreatment(CH2);
         Session_Channel_2 ();
         UART_CH2_Receive();
 
         //Channel 3.
+        // SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
+        // AntennaVerifyForTreatment(CH3);        
         Session_Channel_3 ();
         UART_CH3_Receive();
 
         //Channel 4.
+        // SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
+        // AntennaVerifyForTreatment(CH4);        
         Session_Channel_4 ();
         UART_CH4_Receive();
 

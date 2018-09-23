@@ -528,7 +528,10 @@ void Session_Channel_1 (void)
             i = AntennaVerifyForTreatment(CH1);
 
             if (i == FIN_OK)
+            {
                 session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
+            }
+                
 
             else if (i == FIN_ERROR)
             {
@@ -678,8 +681,11 @@ void Session_Channel_1 (void)
             {
                 session_channel_1_state = SESSION_CHANNEL_1_END;
                 SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-                sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
-                        ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
+                // sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n",
+                        // ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
+                sprintf(buffSendErr, "current: %d max: %d\r\n",
+                        actual_antenna_temp,
+                        session_ch_1.ant_temp_max_int);
                 
                 UART_PC_Send(buffSendErr);
             }
@@ -1813,6 +1819,10 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
 				else
 				{
 					sprintf(&buffSendErr[0], "CH%d no sync needed\r\n", channel);
+                                    // sprintf(&buffSendErr[0], "CH%d no sync needed %d\r\n",
+                                    //         channel,
+                                    //         p_session_ch->ant_temp_max_int);
+                                    
 					UART_PC_Send(&buffSendErr[0]);
 					ch1_sync_state &= NO_SYNC_REQUIRED_MASK;
 					*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;

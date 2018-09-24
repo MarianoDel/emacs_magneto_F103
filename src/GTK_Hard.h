@@ -19,8 +19,8 @@
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio SIN BUZZER
-// #define SOFTWARE_VERSION_1_3        //sin libST, adc con dma
-#define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
+#define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
+// #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
 
@@ -33,6 +33,9 @@
 #define USE_BUZZER_ON_BOARD
 #endif
 
+#ifdef SOFTWARE_VERSION_1_3
+#define USE_ADC_SAMPLE_BY_SAMPLE
+#endif
 #ifdef SOFTWARE_VERSION_1_2
 #define USE_ADC_SAMPLE_BY_SAMPLE
 #endif

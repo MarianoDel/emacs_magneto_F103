@@ -12,41 +12,48 @@
 ** TODO Agregar codigo de Hardware de MotherBoard
    - pag 1073 Unique device ID
 
-** TODO Nuevo modulo para antenas
-*** En arranque
+** TODO Nuevo Modulo para Antenas / y funciones del Viejo
+*** En arranque - VIEJO -
     - en el arranque las antenas se revisan con la nueva funcion UpdateAntennaState()
     - pero no da bola a las respuestas mas que cargar el string de antX
-    - 
     
-*** Antes de empezar un tratamiento
+*** Antes de empezar un tratamiento - VIEJO -
     - se revisa nuevamente las antenas conectadas justo antes de calcular seniales
     - se pregunta por el string desde Session_Channel_X con el comando get_params de la funcion
       Session_Channel_1_Verify_Antenna(* session)    
     - luego arranca Warming_Up Plateau Cooling_Down
     - el estado de la antena lo sigue preguntando Session_Channel_X independiente del estado en que se encuentre
+
+*** las antenas se revisan por un timer que depende de TIM7 (1ms) - VIEJO -
+    - Signal_TIM1MS ()
+      solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
+
+*** si en el tratamiento se usa la pausa la comunicacion se cae - VIEJO -
+    - tiene que ver con que Signal_TIM1MS () no descuenta el timer si esta en pausa
+    - el canal Session_Channel_1() debe estar corriendo pero pausado con (session_ch_1.status == 1)
+      la pausa hace que no se genere en ningun de los tres estados WMUP PLATEAU CDWN
     
 *** con el modulo nuevo
     arm-none-eabi-size Magneto_GTK_rom.elf
     text    data     bss     dec     hex filename
-    68992     112   24820   93924   16ee4 Magneto_GTK_rom.elf      
+    70624     112   24828   95564   1754c Magneto_GTK_rom.elf
 
-*** comunicacion desde la placa de antena 
+*** Modulo nuevo en version 1.2 - NUEVO -
+    - el nuevo modulo se comunica con las antenas y manda segun modo (keepalive, get_params, get_temp)
+    - funciona en standby esperando parametros y enviado keepalive
+    - cuando desde la sesion avisan que se pasa a tratamiento hace un lock de canales y pasa a treatment
+    - en treatment pide get_temp, y actualiza el contador de keepalive (que no llegue a 0)
+    - avisa a la sesion que la antena esta presente si tiene parametros y keepalive
+    - cuando se termina el tratamiento pasa nuevamente a standby
+    - no debera caer la comunicacion en pause
+    - si se conecta una nueva antena se comunica pero no le manda tratamiento
+
+*** comunicacion desde la placa de antena (ACTUAL PLACA ANTENA)
     - manda el mensaje de conexion 1 ves por segundo hasta estar conectada
-    - despues si no recibe nada a los 10 segs aprox lo vuelve a mandar
-    - en el medio si esta en conexion no manda nada solo contesta lo que se le pregunta
-
+    - pasa a conexion con cualquier mensaje valido desde el mother/magneto
+    - si conecta, despues si no recibe nada a los 10 segs aprox lo vuelve a mandar
+    - si esta conectada, no manda nada solo contesta lo que se le pregunta
     - en el codigo actual contesta a get_params get_temp keepalive
-
-
-    
-*** las antenas se revisan por un timer que depende de TIM7 (1ms)
-    - Signal_TIM1MS ()
-      solo se revisan si la sesion no comenzo, sino las revisa el manager de la sesion en cada canal
-
-*** si en el tratamiento se usa la pausa la comunicacion se cae
-    - tiene que ver con que Signal_TIM1MS () no descuenta el timer si esta en pausa
-    - el canal Session_Channel_1() debe estar corriendo pero pausado con (session_ch_1.status == 1)
-      la pausa hace que no se genere en ningun de los tres estados WMUP PLATEAU CDWN
 
 
 ** Errores encontrados

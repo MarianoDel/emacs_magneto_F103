@@ -555,6 +555,7 @@ void AntennaGetParamsStruct (unsigned char ch, antenna_typedef *ant)
     }        
 }
 
+//contesta a la sesion si la antena esta presente/contestando y tiene parametros
 unsigned char AntennaGetConnection (unsigned char ch)
 {
     unsigned char conn = 0;
@@ -579,6 +580,7 @@ unsigned char AntennaGetConnection (unsigned char ch)
     
 }
 
+//contesta a la sesion la ultima temperatura conocida de la antena
 unsigned char AntennaGetCurrentTemp (unsigned char ch)
 {
     unsigned char temp = 0;
@@ -599,6 +601,8 @@ unsigned char AntennaGetCurrentTemp (unsigned char ch)
     
 }
 
+//llaman desde la sesion para saber si tiene antena presente y avisar del comienzo
+//de un nuevo tratamiento
 unsigned char AntennaVerifyForTreatment (unsigned char ch)
 {
     unsigned char resp = FIN_ERROR;
@@ -609,7 +613,8 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         if (ch1_ant_have_params)
         {
             AntennaLockCh1(CH1_ANT_LOCKED | CH1_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch1, &session_ch_1);            
+            AntennaBackupParams(&antenna_locked_ch1, &session_ch_1);
+            keepalive_ch1 = KEEP_ALIVE_COUNTER;
             resp = FIN_OK;
         }
         else
@@ -623,7 +628,8 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         if (ch2_ant_have_params)
         {
             AntennaLockCh2(CH2_ANT_LOCKED | CH2_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch2, &session_ch_2);            
+            AntennaBackupParams(&antenna_locked_ch2, &session_ch_2);
+            keepalive_ch2 = KEEP_ALIVE_COUNTER;            
             resp = FIN_OK;
         }
         else
@@ -637,7 +643,8 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         if (ch3_ant_have_params)
         {
             AntennaLockCh3(CH3_ANT_LOCKED | CH3_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch3, &session_ch_3);            
+            AntennaBackupParams(&antenna_locked_ch3, &session_ch_3);
+            keepalive_ch3 = KEEP_ALIVE_COUNTER;            
             resp = FIN_OK;
         }
         else
@@ -651,7 +658,8 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         if (ch4_ant_have_params)
         {
             AntennaLockCh4(CH4_ANT_LOCKED | CH4_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch4, &session_ch_4);            
+            AntennaBackupParams(&antenna_locked_ch4, &session_ch_4);
+            keepalive_ch4 = KEEP_ALIVE_COUNTER;
             resp = FIN_OK;
         }
         else

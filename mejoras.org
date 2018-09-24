@@ -12,6 +12,9 @@
 ** TODO Agregar codigo de Hardware de MotherBoard
    - pag 1073 Unique device ID
 
+   serial num 12bytes
+   0xff335dd3735563443027122
+
 ** TODO Nuevo Modulo para Antenas / y funciones del Viejo
 *** En arranque - VIEJO -
     - en el arranque las antenas se revisan con la nueva funcion UpdateAntennaState()

@@ -30,8 +30,9 @@
 #define ERR_CHANNEL_ANTENNA_CURRENT_OUT_OF_RANGE(err_channel)	0x50 + err_channel //The temperature of antenna was major than upper limit.
 
 //Session errors.
-#define ERR_CHANNEL_WARMING_UP(err_channel)										0x110 + err_channel //The equipment had an error in warming up section.
-#define ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(err_channel)				0x120 + err_channel
+ //The equipment had an error in warming up section.
+#define ERR_CHANNEL_WARMING_UP(err_channel)    (0x110 + err_channel)
+#define ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(err_channel) (0x120 + err_channel)
 
 
 #define ERR_CHANNEL_PLATEAU(err_channel)										0x130 + err_channel //The equipment had an error in plateau section.

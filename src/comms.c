@@ -105,16 +105,25 @@ void UART1_Receive (void)
                           (const char *)"serial num",
                           (sizeof("serial num") - 1)))
         {
+#ifdef USE_DEVICE_ID_4BYTES
+            unsigned int device_id = *((unsigned short*)0x1FFFF7E8);
+            device_id <<= 16;
+            device_id |= *((unsigned short*)(0x1FFFF7E8 + 2));
+            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 4));
+            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 8));
+            UART_PC_Send((char *)localbuff);            
+#endif
             // sprintf((char *)localbuff, "mem: %dk\r\n", *((unsigned short*)0x1FFFF7E0));
             // sprintf((char *)localbuff, "0x%x\r\n", *((unsigned short*)0x1FFFF7E8));            
-            
+#ifdef USE_DEVICE_ID_12BYTES
             sprintf((char *)localbuff, "0x%x%x%x%x\r\n",
                     *((unsigned short*)0x1FFFF7E8),
-                    *((unsigned short*)0x1FFFF7E8 + 2),
+                    *((unsigned short*)(0x1FFFF7E8 + 2)),
                     *((unsigned int*)(0x1FFFF7E8 + 4)),
                     *((unsigned int*)(0x1FFFF7E8 + 8)));
 
             UART_PC_Send((char *)localbuff);
+#endif
         }
 #endif
         else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna_con,", (sizeof("get_antenna_con,") - 1)))

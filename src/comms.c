@@ -436,15 +436,6 @@ void UART1_Receive (void)
 
         else if (!strncmp((const char *)&localbuff[0], (const char *)"start,", (sizeof("start,") - 1)))
         {
-/*			if ((buffUART3rx2[6] - 48) == 1)
-                        Session_Channel_1_Start();
-			if ((buffUART3rx2[6] - 48) == 2)
-                        Session_Channel_2_Start();
-			if ((buffUART3rx2[6] - 48) == 3)
-                        Session_Channel_3_Start();
-			if ((buffUART3rx2[6] - 48) == 4)
-                        Session_Channel_4_Start();
-*/
             Session_Channel_1_Start();
             Session_Channel_2_Start();
             Session_Channel_3_Start();
@@ -458,19 +449,7 @@ void UART1_Receive (void)
 
         else if (!strncmp((const char *)&localbuff[0], (const char *)"stop,", (sizeof("stop,") - 1)))
         {
-/*			if((buffUART3rx2[5] - 48) == 1)
-                        Session_Channel_1_Stop();
-			if((buffUART3rx2[5] - 48) == 2)
-                        Session_Channel_2_Stop();
-			if((buffUART3rx2[5] - 48) == 3)
-                        Session_Channel_3_Stop();
-			if((buffUART3rx2[5] - 48) == 4)
-                        Session_Channel_4_Stop();
-*/
-            Session_Channel_1_Stop();
-            Session_Channel_2_Stop();
-            Session_Channel_3_Stop();
-            Session_Channel_4_Stop();
+            StopAllChannels();
 
             UART_PC_Send((char *)"OK\r\n");
         }
@@ -478,10 +457,7 @@ void UART1_Receive (void)
 #ifdef HARDWARE_VERSION_2_1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"finish_ok,", (sizeof("finish_ok,") - 1)))
         {
-            Session_Channel_1_Stop();
-            Session_Channel_2_Stop();
-            Session_Channel_3_Stop();
-            Session_Channel_4_Stop();
+            StopAllChannels();
 
             BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
             UART_PC_Send((char *)"OK\r\n");

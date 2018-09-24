@@ -9,11 +9,14 @@
 ** TODO Enviar con cada nueva conexion de antena los 4 strings de canales
 ** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
 ** TODO Avisar de la desconexion de un canal
-** TODO Agregar codigo de Hardware de MotherBoard
+** DONE Agregar codigo de Hardware de MotherBoard
+   CLOSED: [2018-09-24 Mon 11:30]
    - pag 1073 Unique device ID
 
    serial num 12bytes
-   0xff335dd3735563443027122
+   0xff3305dd3735563443027122
+   serial num 4bytes
+   0x8b0422cb
 
 ** TODO Nuevo Modulo para Antenas / y funciones del Viejo
 *** En arranque - VIEJO -

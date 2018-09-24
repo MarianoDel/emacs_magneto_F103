@@ -19,6 +19,7 @@
 #define ANTENNA_KEEP_ALIVE_TIMER        2500    //2.5 segundos
 #define ANTENNA_TEMP_TIMER        1000    //1 segundo
 #define KEEP_ALIVE_COUNTER    3
+#define ANTENNA_INFO_TIMER_FIRST_START        10000
 
 //---- Common Defines --------------------
 
@@ -69,7 +70,6 @@ void AntennaUpdateStates (void);
 void AntennaSetCurrentTemp (unsigned char, unsigned char, unsigned char);
 unsigned char AntennaGetConnection (unsigned char);
 unsigned char AntennaGetCurrentTemp (unsigned char);
-void AntennaGetParams (unsigned char, unsigned short *, unsigned char *, unsigned short *, unsigned char *, unsigned char *, unsigned char *);
 void AntennaGetParamsStruct (unsigned char, antenna_typedef *);
 void AntennaSetParamsStruct (unsigned char, antenna_typedef *);
 unsigned char AntennaVerifyForTreatment (unsigned char);

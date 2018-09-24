@@ -1088,33 +1088,25 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		(p_table + i)->falling_type = 0;
 	}
 
-        unsigned short res_int;
-        unsigned char res_dec;
-        unsigned short ind_int;
-        unsigned char ind_dec;
-        unsigned char curr_int;
-        unsigned char curr_dec;
-        // unsigned char temp_max_int;
-        // unsigned char temp_max_dec;
-
-        AntennaGetParams(channel, &res_int, &res_dec, &ind_int, &ind_dec, &curr_int, &curr_dec);
+        antenna_typedef ant_params;
+        AntennaGetParamsStruct(channel, &ant_params);
 
         //new code
 	//Resistance.
-	resistance = (float) res_dec;
+	resistance = (float) ant_params.resistance_dec;
 	resistance /= 100;
-	resistance += (float) res_int;
+	resistance += (float) ant_params.resistance_int;
 
 	//Inductance.
-	inductance = (float) ind_dec;
+	inductance = (float) ant_params.inductance_dec;
 	inductance /= 100;
-	inductance += (float) ind_int;
+	inductance += (float) ant_params.inductance_int;
 	inductance /=1000;	//ahora este en [Hy]
 
 	//Current limit.
-	current_limit = (float) curr_dec;
+	current_limit = (float) ant_params.current_limit_dec;
 	current_limit /= 100;
-	current_limit += (float) curr_int;
+	current_limit += (float) ant_params.current_limit_int;
 
         // //old code
 	// //Resistance.

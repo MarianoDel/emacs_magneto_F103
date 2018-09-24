@@ -40,6 +40,9 @@ volatile unsigned char usart5_have_data = 0;
 
 //--- Externals para enviar keepalive por UART (nuevo en modulo antenna)
 volatile unsigned short antenna_timer = 0;
+#ifdef SOFTWARE_VERSION_1_3
+volatile unsigned short antenna_info_timer = 0;
+#endif
 
 //--- Externals para muestreos de corriente con el ADC
 volatile unsigned char take_current_samples = 0;

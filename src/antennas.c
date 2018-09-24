@@ -14,13 +14,8 @@
 #include "usart.h"
 #include "GTK_Estructura.h"
 #include "GTK_Hard.h"        //define el nombre de los canales
-// #include "GTK_Signal.h"
-// #include "flash_program.h"
-// #include "GTK_Hard.h"
-// #include "timer.h"
 
-// #include <string.h>
-// #include <stdio.h>
+#include <stdio.h>
 
 
 //--- Used for Antenna Sync - Time base ---//
@@ -64,27 +59,13 @@ extern session_typedef session_ch_2;
 extern session_typedef session_ch_3;
 extern session_typedef session_ch_4;
 
+#ifdef SOFTWARE_VERSION_1_3
+extern volatile unsigned short antenna_info_timer;
+#endif
+
 
 /* Globals ----------------------------------------------------------------------------*/
 antenna_state_t antenna_state;
-
-// unsigned char Session_Channel_1_Verify_Antenna_state = 0;
-// unsigned short Session_Channel_1_Verify_Antenna_time = 0;
-// unsigned char Session_Channel_2_Verify_Antenna_state = 0;
-// unsigned short Session_Channel_2_Verify_Antenna_time = 0;
-// unsigned char Session_Channel_3_Verify_Antenna_state = 0;
-// unsigned short Session_Channel_3_Verify_Antenna_time = 0;
-// unsigned char Session_Channel_4_Verify_Antenna_state = 0;
-// unsigned short Session_Channel_4_Verify_Antenna_time = 0;
-
-// unsigned short session_channel_1_ask_temp = 0;
-// unsigned short session_channel_1_answer_temp = 0;
-// unsigned short session_channel_2_ask_temp = 0;
-// unsigned short session_channel_2_answer_temp = 0;
-// unsigned short session_channel_3_ask_temp = 0;
-// unsigned short session_channel_3_answer_temp = 0;
-// unsigned short session_channel_4_ask_temp = 0;
-// unsigned short session_channel_4_answer_temp = 0;
 
 unsigned char ch1_ant_current_temp_int = 0;
 unsigned char ch1_ant_current_temp_dec = 0;
@@ -116,11 +97,19 @@ antenna_typedef antenna_locked_ch2;
 antenna_typedef antenna_locked_ch3;
 antenna_typedef antenna_locked_ch4;
 
+#ifdef SOFTWARE_VERSION_1_3
+unsigned char antennas_info_sended = 0;
+#endif
+
+
 /* Module Private Functions -----------------------------------------------------------*/
 // void AntennaLock (unsigned char ch);
 // void AntennaUnlock (unsigned char ch);
 void AntennaBackupParams (antenna_typedef *, session_typedef *);
-void AntennaFlushParams (antenna_typedef *);
+//TODO: ver si la que sigue se puede quitar
+void AntennaFlushParamsInLock (antenna_typedef *);
+void AntennaFlushParams (unsigned char);
+void AntennaSendKnowParams (void);
 
 /* Module Exported Functions ----------------------------------------------------------*/
 void AntennaUpdateStates (void)
@@ -128,6 +117,10 @@ void AntennaUpdateStates (void)
     switch (antenna_state)
     {
     case ANTENNA_INIT:
+#ifdef SOFTWARE_VERSION_1_3
+        antenna_info_timer = ANTENNA_INFO_TIMER_FIRST_START;
+        antennas_info_sended = 0;
+#endif
         antenna_state++;
         break;
 
@@ -150,7 +143,10 @@ void AntennaUpdateStates (void)
                         UART_CH1_Send("keepalive\r\n");
                     }
                     else
+                    {
+                        // AntennaFlushParams(CH1);
                         ch1_ant_have_params = 0;
+                    }
                 }
             }
             else
@@ -172,7 +168,10 @@ void AntennaUpdateStates (void)
                         UART_CH2_Send("keepalive\r\n");
                     }
                     else
+                    {
+                        // AntennaFlushParams(CH2);                        
                         ch2_ant_have_params = 0;
+                    }
                 }
             }
             else
@@ -194,7 +193,10 @@ void AntennaUpdateStates (void)
                         UART_CH3_Send("keepalive\r\n");
                     }
                     else
+                    {
+                        // AntennaFlushParams(CH3);
                         ch3_ant_have_params = 0;
+                    }                        
                 }
             }
             else
@@ -216,7 +218,10 @@ void AntennaUpdateStates (void)
                         UART_CH4_Send("keepalive\r\n");
                     }
                     else
+                    {
+                        // AntennaFlushParams(CH4);
                         ch4_ant_have_params = 0;
+                    }
                 }
             }
             else
@@ -228,7 +233,13 @@ void AntennaUpdateStates (void)
         //si tengo todos los canales en lock voy a tratamiento
         if (AntennaIsLockCh1 && AntennaIsLockCh2 && AntennaIsLockCh3 && AntennaIsLockCh4)
             antenna_state++;
-        
+
+        //si paso este timer envio la info de las antenas que conozco a la PC
+        if ((!antenna_info_timer) && (!antennas_info_sended))
+        {
+            AntennaSendKnowParams();
+            antennas_info_sended = 1;
+        }
         break;
 
     case ANTENNA_IN_TREATMENT:
@@ -438,73 +449,28 @@ void AntennaSetParamsStruct (unsigned char ch, antenna_typedef *ant)
     {
         if (ch == CH1)
         {
-            ch1_ant_have_params = 1;
+            ch1_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
             ch1_ant_conn = 1;
         }
         if (ch == CH2)
         {
-            ch2_ant_have_params = 1;
+            ch2_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
             ch2_ant_conn = 1;
         }
         if (ch == CH3)
         {
-            ch3_ant_have_params = 1;
+            ch3_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
             ch3_ant_conn = 1;
         }
         if (ch == CH4)
         {
-            ch4_ant_have_params = 1;
+            ch4_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
             ch4_ant_conn = 1;
         }
     }    
 }
 
-//la llaman desde comms o GTK_Signal para conocer los parametros de antenas
-void AntennaGetParams (unsigned char ch,
-                       unsigned short *res_int, unsigned char *res_dec,
-                       unsigned short *ind_int, unsigned char *ind_dec,
-                       unsigned char *cur_int, unsigned char *cur_dec)
-{
-    switch (ch)
-    {
-    case CH1:
-        *res_int = session_ch_1.ant_resistance_int;
-        *res_dec = session_ch_1.ant_resistance_dec;
-        *ind_int = session_ch_1.ant_inductance_int;
-        *ind_dec = session_ch_1.ant_inductance_dec;
-        *cur_int = session_ch_1.ant_current_limit_int;
-        *cur_dec = session_ch_1.ant_current_limit_dec;
-        break;
-
-    case CH2:
-        *res_int = session_ch_2.ant_resistance_int;
-        *res_dec = session_ch_2.ant_resistance_dec;
-        *ind_int = session_ch_2.ant_inductance_int;
-        *ind_dec = session_ch_2.ant_inductance_dec;
-        *cur_int = session_ch_2.ant_current_limit_int;
-        *cur_dec = session_ch_2.ant_current_limit_dec;        
-        break;
-
-    case CH3:
-        *res_int = session_ch_3.ant_resistance_int;
-        *res_dec = session_ch_3.ant_resistance_dec;
-        *ind_int = session_ch_3.ant_inductance_int;
-        *ind_dec = session_ch_3.ant_inductance_dec;
-        *cur_int = session_ch_3.ant_current_limit_int;
-        *cur_dec = session_ch_3.ant_current_limit_dec;        
-        break;
-
-    case CH4:
-        *res_int = session_ch_4.ant_resistance_int;
-        *res_dec = session_ch_4.ant_resistance_dec;
-        *ind_int = session_ch_4.ant_inductance_int;
-        *ind_dec = session_ch_4.ant_inductance_dec;
-        *cur_int = session_ch_4.ant_current_limit_int;
-        *cur_dec = session_ch_4.ant_current_limit_dec;        
-        break;
-    }    
-}
-
+//me llaman desde comms y GTK_Signal para conocer los parametros de antena
 void AntennaGetParamsStruct (unsigned char ch, antenna_typedef *ant)
 {
     switch (ch)
@@ -620,7 +586,7 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         else
         {
             AntennaLockCh1(CH1_ANT_LOCKED);
-            AntennaFlushParams(&antenna_locked_ch1);
+            AntennaFlushParamsInLock(&antenna_locked_ch1);
         }
         break;
 
@@ -635,7 +601,7 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         else
         {
             AntennaLockCh2(CH2_ANT_LOCKED);
-            AntennaFlushParams(&antenna_locked_ch2);
+            AntennaFlushParamsInLock(&antenna_locked_ch2);
         }        
         break;
 
@@ -650,7 +616,7 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         else
         {
             AntennaLockCh3(CH3_ANT_LOCKED);
-            AntennaFlushParams(&antenna_locked_ch3);
+            AntennaFlushParamsInLock(&antenna_locked_ch3);
         }        
         break;
 
@@ -665,7 +631,7 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
         else
         {
             AntennaLockCh4(CH4_ANT_LOCKED);
-            AntennaFlushParams(&antenna_locked_ch4);
+            AntennaFlushParamsInLock(&antenna_locked_ch4);
         }        
         break;
 
@@ -700,11 +666,10 @@ void AntennaBackupParams (antenna_typedef *plock_in, session_typedef *psession)
     plock_in->current_limit_int = psession->ant_current_limit_int;
     plock_in->current_limit_dec = psession->ant_current_limit_dec;
     plock_in->temp_max_int = psession->ant_temp_max_int;
-    plock_in->temp_max_dec = psession->ant_temp_max_dec;
-    
+    plock_in->temp_max_dec = psession->ant_temp_max_dec;    
 }
 
-void AntennaFlushParams (antenna_typedef * plock_in)
+void AntennaFlushParamsInLock (antenna_typedef * plock_in)
 {
     plock_in->resistance_int = 0;
     plock_in->resistance_dec = 0;
@@ -716,448 +681,124 @@ void AntennaFlushParams (antenna_typedef * plock_in)
     plock_in->temp_max_dec = 0;    
 }
 
-// void AntennaLock (unsigned char ch)
-// {
-//     if (ch == CH1)
-//         lock_states |= CH1_ANT_LOCKED;
-
-//     if (ch == CH2)
-//         lock_states |= CH2_ANT_LOCKED;        
-
-//     if (ch == CH3)
-//         lock_states |= CH3_ANT_LOCKED;        
-
-//     if (ch == CH4)
-//         lock_states |= CH4_ANT_LOCKED;
-// }
-
-// void AntennaUnlock (unsigned char ch)
-// {
-//     if (ch == CH1)
-//         lock_states &= ~CH1_ANT_LOCKED;
-
-//     if (ch == CH2)
-//         lock_states &= ~CH2_ANT_LOCKED;        
-
-//     if (ch == CH3)
-//         lock_states &= ~CH3_ANT_LOCKED;        
-
-//     if (ch == CH4)
-//         lock_states &= ~CH4_ANT_LOCKED;
-// }
-
-// void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage)
-// {
-// 	//Resistance.
-// 	ptr_session->stage_1_resistance_int = 0;
-// 	ptr_session->stage_1_resistance_dec = 0;
-
-// 	//Inductance.
-// 	ptr_session->stage_1_inductance_int = 0;
-// 	ptr_session->stage_1_inductance_dec = 0;
-
-// 	//Current limit.
-// 	ptr_session->stage_1_current_limit_int = 0;
-// 	ptr_session->stage_1_current_limit_dec = 0;
-
-// }
-
-// //carga el valor de antenna que recibe por la uart en la estructura de session
-// //los parametros le llegan por el *ptr_antenna y donde guardarlo en *ptr_session
-// void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna)
-// {
-// 	unsigned char a;
-// 	unsigned short aa;
-
-// 	//Resistance.
-// 	aa = ptr_antenna->resistance_int;
-// 	if (aa <= 999)
-// 		ptr_session->stage_1_resistance_int = aa;
-// 	else
-// 		ptr_session->stage_1_resistance_int = 999;
-
-// 	a = ptr_antenna->resistance_dec;
-// 	ptr_session->stage_1_resistance_dec = a;
-
-// 	//Inductance.
-// 	aa = ptr_antenna->inductance_int;
-// 	if (aa <= 999)
-// 		ptr_session->stage_1_inductance_int = aa;
-// 	else
-// 		ptr_session->stage_1_inductance_int = 999;
-
-// 	a = ptr_antenna->inductance_dec;
-// 	ptr_session->stage_1_inductance_dec = a;
-
-// 	//Current limit.
-// 	a = ptr_antenna->current_limit_int;
-// 	ptr_session->stage_1_current_limit_int = a;
-// 	a = ptr_antenna->current_limit_dec;
-// 	ptr_session->stage_1_current_limit_dec = a;
-
-// 	//Temperature limit.
-// 	a = ptr_antenna->temp_max_int;
-// 	ptr_session->stage_1_temp_max_int = a;
-// 	a = ptr_antenna->temp_max_dec;
-// 	ptr_session->stage_1_temp_max_dec = a;
-
-// }
-
-// //Preguntaa la sesion los valores de parametros antenna conectada
-// //devuelve info por el puntero *ptr_antenna
-// void Session_Get_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna)
-// {
-// 	unsigned char a;
-// 	unsigned short aa;
-
-// 	//Resistance.
-// 	aa = ptr_session->stage_1_resistance_int;
-// 	ptr_antenna->resistance_int = aa;
-// 	a = ptr_session->stage_1_resistance_dec;
-// 	ptr_antenna->resistance_dec = a;
-
-// 	//Inductance.
-// 	aa = ptr_session->stage_1_inductance_int;
-// 	ptr_antenna->inductance_int = aa;
-// 	a = ptr_session->stage_1_inductance_dec;
-// 	ptr_antenna->inductance_dec = a;
-
-// 	//Current limit.
-// 	a = ptr_session->stage_1_current_limit_int;
-// 	ptr_antenna->current_limit_int = a;
-// 	a = ptr_session->stage_1_current_limit_dec;
-// 	ptr_antenna->current_limit_dec = a;
-
-// 	//Temperature limit.
-// 	a = ptr_session->stage_1_temp_max_int;
-// 	ptr_antenna->temp_max_int = a;
-// 	a = ptr_session->stage_1_temp_max_dec;
-// 	ptr_antenna->temp_max_dec = a;
-
-// }
-
-// unsigned char Session_Channel_1_Verify_Antenna (session_typedef * ptr_session)
-// {
-// 	switch (Session_Channel_1_Verify_Antenna_state)
-// 	{
-// 		case SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT:
-
-// 			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-// //			//Resistance.
-// //			ptr_session->stage_1_resistance_int = 0;
-// //			ptr_session->stage_1_resistance_dec = 0;
-// //
-// //			//Inductance.
-// //			ptr_session->stage_1_inductance_int = 0;
-// //			ptr_session->stage_1_inductance_dec = 0;
-// //
-// //			//Current limit.
-// //			ptr_session->stage_1_current_limit_int = 0;
-// //			ptr_session->stage_1_current_limit_dec = 0;
-
-
-// 			UART_PC_Send("Getting antenna parameters of channel 1\r\n");
-// 			UART_CH1_Send("get_params\r\n");
-
-// 			Session_Channel_1_Verify_Antenna_time = SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME;
-// 			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS;
-// 			break;
-
-// 		case SESSION_CHANNEL_1_VERIFY_ANTENNA_WAIT_PARAMS:
-
-// 			if (Session_Channel_1_Verify_Antenna_time == 0)
-// 				Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR;
-// 			else
-// 			{
-// 				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-// 					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-// 					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-// 				{
-// 					Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK;
-// 				}
-// 			}
-// 			break;
-
-// 		case SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_OK:
-
-// 			UART_PC_Send("Antenna detected on CH1\r\n");
-// 			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-// 			return FIN_OK;
-// 			break;
-
-// 		case SESSION_CHANNEL_1_VERIFY_ANTENNA_FIN_ERROR:
-
-// 			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-// 			return FIN_ERROR;
-// 			break;
-
-// 		default:
-// 			Session_Channel_1_Verify_Antenna_state = SESSION_CHANNEL_1_VERIFY_ANTENNA_INIT;
-// 			break;
-// 	}
-
-// 	return TRABAJANDO;
-// }
-
-
-// unsigned char Session_Channel_2_Verify_Antenna (session_typedef * ptr_session)
-// {
-// 	switch (Session_Channel_2_Verify_Antenna_state)
-// 	{
-// 		case SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT:
-
-// 			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-// 			UART_PC_Send("Getting antenna parameters of channel 2\r\n");
-// 			UART_CH2_Send("get_params\r\n");
-
-// 			Session_Channel_2_Verify_Antenna_time = SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME;
-// 			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS;
-// 			break;
-
-// 		case SESSION_CHANNEL_2_VERIFY_ANTENNA_WAIT_PARAMS:
-
-// 			if (Session_Channel_2_Verify_Antenna_time == 0)
-// 				Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR;
-// 			else
-// 			{
-// 				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-// 					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-// 					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-// 				{
-// 					Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK;
-// 				}
-// 			}
-// 			break;
-
-// 		case SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_OK:
-
-// 			UART_PC_Send("Antenna detected on CH2\r\n");
-// 			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-// 			return FIN_OK;
-// 			break;
-
-// 		case SESSION_CHANNEL_2_VERIFY_ANTENNA_FIN_ERROR:
-
-// 			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-// 			return FIN_ERROR;
-// 			break;
-
-// 		default:
-// 			Session_Channel_2_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-// 			break;
-// 	}
-
-// 	return TRABAJANDO;
-// }
-
-// unsigned char Session_Channel_3_Verify_Antenna (session_typedef * ptr_session)
-// {
-// 	switch (Session_Channel_3_Verify_Antenna_state)
-// 	{
-// 		case SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT:
-
-// 			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-// 			UART_PC_Send("Getting antenna parameters of channel 3\r\n");
-// 			UART_CH3_Send("get_params\r\n");
-
-// 			Session_Channel_3_Verify_Antenna_time = SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME;
-// 			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS;
-// 			break;
-
-// 		case SESSION_CHANNEL_3_VERIFY_ANTENNA_WAIT_PARAMS:
-
-// 			if (Session_Channel_3_Verify_Antenna_time == 0)
-// 				Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR;
-// 			else
-// 			{
-// 				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-// 					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-// 					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-// 				{
-// 					Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK;
-// 				}
-// 			}
-// 			break;
-
-// 		case SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_OK:
-
-// 			UART_PC_Send("Antenna detected on CH3\r\n");
-// 			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-// 			return FIN_OK;
-// 			break;
-
-// 		case SESSION_CHANNEL_3_VERIFY_ANTENNA_FIN_ERROR:
-
-// 			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-// 			return FIN_ERROR;
-// 			break;
-
-// 		default:
-// 			Session_Channel_3_Verify_Antenna_state = SESSION_CHANNEL_3_VERIFY_ANTENNA_INIT;
-// 			break;
-// 	}
-
-// 	return TRABAJANDO;
-// }
-
-// unsigned char Session_Channel_4_Verify_Antenna (session_typedef * ptr_session)
-// {
-// 	switch (Session_Channel_4_Verify_Antenna_state)
-// 	{
-// 		case SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT:
-
-// 			Session_Clear_Antenna (ptr_session, SESSION_STAGE_1);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_2);
-// 			//Session_Clear_Antenna (ptr_session, SESSION_STAGE_3);
-
-// 			UART_PC_Send("Getting antenna parameters of channel 4\r\n");
-// 			UART_CH4_Send("get_params\r\n");
-
-// 			Session_Channel_4_Verify_Antenna_time = SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME;
-// 			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS;
-// 			break;
-
-// 		case SESSION_CHANNEL_4_VERIFY_ANTENNA_WAIT_PARAMS:
-
-// 			if (Session_Channel_4_Verify_Antenna_time == 0)
-// 				Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR;
-// 			else
-// 			{
-// 				if 	(((ptr_session->stage_1_resistance_int != 0) || (ptr_session->stage_1_resistance_dec != 0))
-// 					&& ((ptr_session->stage_1_inductance_int != 0) || (ptr_session->stage_1_inductance_dec != 0))
-// 					&& ((ptr_session->stage_1_current_limit_int != 0) || (ptr_session->stage_1_current_limit_dec != 0)))
-// 				{
-// 					Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK;
-// 				}
-// 			}
-// 			break;
-
-// 		case SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_OK:
-
-// 			UART_PC_Send("Antenna detected on CH4\r\n");
-// 			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT;
-// 			return FIN_OK;
-// 			break;
-
-// 		case SESSION_CHANNEL_4_VERIFY_ANTENNA_FIN_ERROR:
-// 			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_4_VERIFY_ANTENNA_INIT;
-// 			return FIN_ERROR;
-// 			break;
-
-// 		default:
-// 			Session_Channel_4_Verify_Antenna_state = SESSION_CHANNEL_2_VERIFY_ANTENNA_INIT;
-// 			break;
-// 	}
-
-// 	return TRABAJANDO;
-// }
-
-void Signal_TIM1MS (void)
+void AntennaFlushParams (unsigned char ch)
 {
+    switch (ch)
+    {
+    case CH1:
+        session_ch_1.ant_resistance_int = 0;
+        session_ch_1.ant_resistance_dec = 0;
+        session_ch_1.ant_inductance_int = 0;
+        session_ch_1.ant_inductance_dec = 0;
+        session_ch_1.ant_current_limit_int = 0;
+        session_ch_1.ant_current_limit_dec = 0;
+        session_ch_1.ant_temp_max_int = 0;
+        session_ch_1.ant_temp_max_dec = 0;
+        break;
 
-// 	if (channel_1_pause == 0)
-// 	{
-// 		if (Session_Channel_1_Verify_Antenna_time)
-// 			Session_Channel_1_Verify_Antenna_time--;
+    case CH2:
+        session_ch_2.ant_resistance_int = 0;
+        session_ch_2.ant_resistance_dec = 0;
+        session_ch_2.ant_inductance_int = 0;
+        session_ch_2.ant_inductance_dec = 0;
+        session_ch_2.ant_current_limit_int = 0;
+        session_ch_2.ant_current_limit_dec = 0;
+        session_ch_2.ant_temp_max_int = 0;
+        session_ch_2.ant_temp_max_dec = 0;
+        break;
 
-// 		if (session_channel_1_ask_temp)
-// 			session_channel_1_ask_temp--;
+    case CH3:
+        session_ch_3.ant_resistance_int = 0;
+        session_ch_3.ant_resistance_dec = 0;
+        session_ch_3.ant_inductance_int = 0;
+        session_ch_3.ant_inductance_dec = 0;
+        session_ch_3.ant_current_limit_int = 0;
+        session_ch_3.ant_current_limit_dec = 0;
+        session_ch_3.ant_temp_max_int = 0;
+        session_ch_3.ant_temp_max_dec = 0;
+        break;
 
-// 		if (session_channel_1_answer_temp)
-// 			session_channel_1_answer_temp--;
-// 	}
-
-// 	if (channel_2_pause == 0)
-// 	{
-
-// 		if (Session_Channel_2_Verify_Antenna_time)
-// 			Session_Channel_2_Verify_Antenna_time--;
-
-// 		if (session_channel_2_ask_temp)
-// 			session_channel_2_ask_temp--;
-
-// 		if (session_channel_2_answer_temp)
-// 			session_channel_2_answer_temp--;
-// 	}
-
-// 	if (channel_3_pause == 0)
-// 	{
-
-// 		if (Session_Channel_3_Verify_Antenna_time)
-// 			Session_Channel_3_Verify_Antenna_time--;
-
-// 		if (session_channel_3_ask_temp)
-// 			session_channel_3_ask_temp--;
-
-// 		if (session_channel_3_answer_temp)
-// 			session_channel_3_answer_temp--;
-
-// 	}
-
-// 	if (channel_4_pause == 0)
-// 	{
-
-// 		if (Session_Channel_4_Verify_Antenna_time)
-// 			Session_Channel_4_Verify_Antenna_time--;
-
-// 		if (session_channel_4_ask_temp)
-// 			session_channel_4_ask_temp--;
-
-// 		if (session_channel_4_answer_temp)
-// 			session_channel_4_answer_temp--;
-// 	}
+    case CH4:
+        session_ch_4.ant_resistance_int = 0;
+        session_ch_4.ant_resistance_dec = 0;
+        session_ch_4.ant_inductance_int = 0;
+        session_ch_4.ant_inductance_dec = 0;
+        session_ch_4.ant_current_limit_int = 0;
+        session_ch_4.ant_current_limit_dec = 0;
+        session_ch_4.ant_temp_max_int = 0;
+        session_ch_4.ant_temp_max_dec = 0;
+        break;
+    }        
 }
 
+void AntennaSendKnowParams (void)
+{
+    unsigned char antbuff [SIZEOF_RXDATA];
 
+    if (AntennaGetConnection(CH1))
+    {
+        //TODO: despues enviar nombre de antena si se conoce
+        sprintf((char *)antbuff, "ch1,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
+                session_ch_1.ant_resistance_int,
+                session_ch_1.ant_resistance_dec,
+                session_ch_1.ant_inductance_int,
+                session_ch_1.ant_inductance_dec,
+                session_ch_1.ant_current_limit_int,
+                session_ch_1.ant_current_limit_dec,
+                session_ch_1.ant_temp_max_int,
+                session_ch_1.ant_temp_max_dec);
+    
+        UART_PC_Send((char *) antbuff);
+    }
 
+    if (AntennaGetConnection(CH2))
+    {
+        //TODO: despues enviar nombre de antena si se conoce
+        sprintf((char *)antbuff, "ch2,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
+                session_ch_2.ant_resistance_int,
+                session_ch_2.ant_resistance_dec,
+                session_ch_2.ant_inductance_int,
+                session_ch_2.ant_inductance_dec,
+                session_ch_2.ant_current_limit_int,
+                session_ch_2.ant_current_limit_dec,
+                session_ch_2.ant_temp_max_int,
+                session_ch_2.ant_temp_max_dec);
+    
+        UART_PC_Send((char *) antbuff);
+    }
 
-// 		if (session_channel_1_state >= SESSION_CHANNEL_1_WARMING_UP)
-// 		{
-// 			if (session_channel_1_ask_temp == 0)
-// 			{
-// 				UART_CH1_Send("get_temp\r\n");
-// 				session_channel_1_ask_temp = SESSION_CHANNEL_ASK_TEMP;
-// 			}
+    if (AntennaGetConnection(CH3))
+    {
+        //TODO: despues enviar nombre de antena si se conoce
+        sprintf((char *)antbuff, "ch3,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
+                session_ch_3.ant_resistance_int,
+                session_ch_3.ant_resistance_dec,
+                session_ch_3.ant_inductance_int,
+                session_ch_3.ant_inductance_dec,
+                session_ch_3.ant_current_limit_int,
+                session_ch_3.ant_current_limit_dec,
+                session_ch_3.ant_temp_max_int,
+                session_ch_3.ant_temp_max_dec);
+    
+        UART_PC_Send((char *) antbuff);
+    }
 
-// 			if ((temp_actual_channel_1_int != 0) || (temp_actual_channel_1_dec != 0))
-// 			{
-// 				if ((temp_actual_channel_1_int > session_ch_1.stage_1_temp_max_int)
-// 						|| ((temp_actual_channel_1_int == session_ch_1.stage_1_temp_max_int) && (temp_actual_channel_1_dec > session_ch_1.stage_1_temp_max_dec)))
-// 				{
-// 					session_ch_1.status = 0;
-// 					SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-// 					sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_TMP_OUT_OF_RANGE(1));
-// 					UART_PC_Send(&buffSendErr[0]);
-// 				}
-// 				else
-// 					session_channel_1_answer_temp = SESSION_CHANNEL_ANSWER_TEMP;
+    if (AntennaGetConnection(CH4))
+    {
+        //TODO: despues enviar nombre de antena si se conoce
+        sprintf((char *)antbuff, "ch4,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
+                session_ch_4.ant_resistance_int,
+                session_ch_4.ant_resistance_dec,
+                session_ch_4.ant_inductance_int,
+                session_ch_4.ant_inductance_dec,
+                session_ch_4.ant_current_limit_int,
+                session_ch_4.ant_current_limit_dec,
+                session_ch_4.ant_temp_max_int,
+                session_ch_4.ant_temp_max_dec);
+    
+        UART_PC_Send((char *) antbuff);
+    }
+}
 
-// 				temp_actual_channel_1_int = 0;
-// 				temp_actual_channel_1_dec = 0;
-// 			}
-
-// 			if (session_channel_1_answer_temp == 0)
-// 			{
-// 				session_ch_1.status = 0;
-// 				SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
-// 				sprintf(&buffSendErr[0], (const char *) "ERROR(0x%03X)\r\n", ERR_CHANNEL_ANTENNA_LOST(1));
-// 				UART_PC_Send(&buffSendErr[0]);
-// 			}
-// 		}
-
-// extern unsigned char temp_actual_channel_1_int;
-// extern unsigned char temp_actual_channel_1_dec;
-// extern unsigned char temp_actual_channel_2_int;
-// extern unsigned char temp_actual_channel_2_dec;
-// extern unsigned char temp_actual_channel_3_int;
-// extern unsigned char temp_actual_channel_3_dec;
-// extern unsigned char temp_actual_channel_4_int;
-// extern unsigned char temp_actual_channel_4_dec;
 
 //---- end of file ----//

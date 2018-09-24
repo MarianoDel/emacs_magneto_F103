@@ -6390,6 +6390,7 @@ void StopAllChannels (void)
     PWM_CH4_TiempoBajada(0);
 
     //esto es terminar por error todos los canales
+    //o desde modulo comms terminar con finish_ok o stop (desde PC)
     AntennaEndTreatment(CH1);
     AntennaEndTreatment(CH2);
     AntennaEndTreatment(CH3);

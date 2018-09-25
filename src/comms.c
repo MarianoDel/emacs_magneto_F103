@@ -128,24 +128,13 @@ void UART1_Receive (void)
 #endif
         }
 #endif
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna_con,", (sizeof("get_antenna_con,") - 1)))
+        else if (!strncmp((const char *)&localbuff[0],
+                          (const char *)"get_antenna,",
+                          (sizeof("get_antenna,") - 1)))
         {
-            //0 si no tengo, 1 si esta 1, 2 si est 2 "ant_con,0,2,0,0\r\n"
-            /*
-              sprintf((const char *)&localbuff[0], "ant_con,0,2,0,0\r\n",
-              antenna.resistance_int,
-              antenna.resistance_dec,
-              antenna.inductance_int,
-              antenna.inductance_dec,
-              antenna.current_limit_int,
-              antenna.current_limit_dec,
-              antenna.temp_max_int,
-              antenna.temp_max_dec);
-              UART_PC_Send(localbuff);
-              localbuff[0] = '\0';
-            */
-            UART_PC_Send((char *) "ant_con,0,2,0,0\r\n");
-            localbuff[0] = '\0';
+            UART_PC_Send((char *)"OK\r\n");
+            //pido envio de info de antenas conocidas hasta ahora
+            AntennaSendKnowInfoWithTimer ();            
         }
 
         else if (!strncmp((const char *)&localbuff[0], (const char *)"get_antenna,1",
@@ -566,8 +555,10 @@ void UART2_Receive (void)
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ant", (sizeof("ant") - 1)))
         {
 
+#ifndef SOFTWARE_VERSION_1_3
             strcpy((char *)&localbuff[32], (const char *)",1\r\n");
             UART_PC_Send((char *)&localbuff[0]);
+#endif
 
             if ((localbuff[4] == ',') && (localbuff[11] == ',') && (localbuff[18] == ',') && (localbuff[25] == ','))
             {
@@ -631,8 +622,14 @@ void UART2_Receive (void)
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
             AntennaIsAnswering(CH1);
         
-        
-        //--- end ---//
+#ifdef SOFTWARE_VERSION_1_3        
+        else if ((!strncmp((char *)localbuff,
+                           (const char *)"name:",
+                           sizeof("name:") - 1)))
+        {
+            AntennaSetName(CH1, (char *) (localbuff + (sizeof("name:") - 1)));
+        }
+#endif
 
         usart2_have_data = 0;
     }
@@ -649,7 +646,7 @@ void UART3_Receive (void)
         ReadUsart3Buffer(localbuff, sizeof(localbuff));
 
         //--- Introduce your code here ---//
-        // UART_PC_Send(localbuff);
+        // UART_PC_Send((char *) localbuff);
 
         //temp,055.00\r\n
         if (!strncmp((const char *)&localbuff[0], (const char *)"temp", (sizeof("temp") - 1)))
@@ -685,8 +682,10 @@ void UART3_Receive (void)
         //ant0,012.27,087.90,001.80,065.00\r\n.
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ant", (sizeof("ant") - 1)))
         {
+#ifndef SOFTWARE_VERSION_1_3
             strcpy((char *)&localbuff[32], (const char *)",2\r\n");
             UART_PC_Send((char *)&localbuff[0]);
+#endif
 
             if ((localbuff[4] == ',') && (localbuff[11] == ',') && (localbuff[18] == ',') && (localbuff[25] == ','))
             {
@@ -749,8 +748,16 @@ void UART3_Receive (void)
         //respuesta al keepalive
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
             AntennaIsAnswering(CH2);
-        
-        //--- end ---//
+
+#ifdef SOFTWARE_VERSION_1_3        
+        else if ((!strncmp((char *)localbuff,
+                           (const char *)"name:",
+                           sizeof("name:") - 1)))
+        {
+            // UART_PC_Send((char *) localbuff);
+            AntennaSetName(CH2, (char *) (localbuff + (sizeof("name:") - 1)));
+        }
+#endif
 
         usart3_have_data = 0;
     }
@@ -803,10 +810,10 @@ void UART4_Receive (void)
         //ant0,012.27,087.90,001.80,065.00\r\n.
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ant", (sizeof("ant") - 1)))
         {
-
+#ifndef SOFTWARE_VERSION_1_3
             strcpy((char *)&localbuff[32], (const char *)",3\r\n");
             UART_PC_Send((char *)&localbuff[0]);
-
+#endif
             if ((localbuff[4] == ',') && (localbuff[11] == ',') && (localbuff[18] == ',') && (localbuff[25] == ','))
             {
                 aux = (localbuff[5] - 48) * 100;
@@ -868,6 +875,15 @@ void UART4_Receive (void)
         //respuesta al keepalive
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
             AntennaIsAnswering(CH3);
+
+#ifdef SOFTWARE_VERSION_1_3        
+        else if ((!strncmp((char *)localbuff,
+                           (const char *)"name:",
+                           sizeof("name:") - 1)))
+        {
+            AntennaSetName(CH3, (char *) (localbuff + (sizeof("name:") - 1)));
+        }
+#endif
         
         usart4_have_data = 0;
     }
@@ -920,8 +936,10 @@ void UART5_Receive (void)
         //ant0,012.27,087.90,001.80,065.00\r\n.
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ant", (sizeof("ant") - 1)))
         {
+#ifndef SOFTWARE_VERSION_1_3
             strcpy((char *)&localbuff[32], (const char *)",4\r\n");
             UART_PC_Send((char *) &localbuff[0]);
+#endif
 
             if ((localbuff[4] == ',') && (localbuff[11] == ',') && (localbuff[18] == ',') && (localbuff[25] == ','))
             {
@@ -983,8 +1001,16 @@ void UART5_Receive (void)
         //respuesta al keepalive
         else if (!strncmp((const char *)&localbuff[0], (const char *)"ok\r", (sizeof("ok\r") - 1)))
             AntennaIsAnswering(CH4);
-        
-        //--- end ---//
+
+#ifdef SOFTWARE_VERSION_1_3        
+        else if ((!strncmp((char *)localbuff,
+                           (const char *)"name:",
+                           sizeof("name:") - 1)))
+        {
+            // UART_PC_Send((char *)localbuff);
+            AntennaSetName(CH4, (char *) (localbuff + (sizeof("name:") - 1)));
+        }
+#endif
 
         usart5_have_data = 0;
     }

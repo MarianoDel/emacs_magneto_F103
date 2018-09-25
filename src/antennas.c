@@ -16,40 +16,113 @@
 #include "GTK_Hard.h"        //define el nombre de los canales
 
 #include <stdio.h>
-
+#include <string.h>
 
 //--- Used for Antenna Sync - Time base ---//
 #define SESSION_CHANNEL_ASK_TEMP 2500 //2.5 segundos
 #define SESSION_CHANNEL_ANSWER_TEMP 10000 //10segundos.
 
-#define SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME 5000			//ms
-#define SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME 5000			//ms
+// #define SESSION_CHANNEL_1_VERIFY_ANTENNA_TIME 5000			//ms
+// #define SESSION_CHANNEL_2_VERIFY_ANTENNA_TIME 5000			//ms
+// #define SESSION_CHANNEL_3_VERIFY_ANTENNA_TIME 5000			//ms
+// #define SESSION_CHANNEL_4_VERIFY_ANTENNA_TIME 5000			//ms
 
-#define CH1_ANT_LOCKED    0x01
-#define CH2_ANT_LOCKED    0x02
-#define CH3_ANT_LOCKED    0x04
-#define CH4_ANT_LOCKED    0x08
-#define CH1_ANT_CONNECTED    0x10
-#define CH2_ANT_CONNECTED    0x20
-#define CH3_ANT_CONNECTED    0x40
-#define CH4_ANT_CONNECTED    0x80
+#define ANT_LOCKED    0x01
+#define ANT_CONNECTED    0x02
+#define ANT_HAVE_PARAMS    0x04
+#define ANT_NEW_PARAMS     0x08
+#define ANT_IN_TREATMENT    0x10
+#define ANT_HAVE_NAME    0x20
 
-#define AntennaLockCh1(X)    (lock_states |= (X))
-#define AntennaLockCh2(X)    (lock_states |= (X))
-#define AntennaLockCh3(X)    (lock_states |= (X))
-#define AntennaLockCh4(X)    (lock_states |= (X))
+#define AntennaNewParamsCh1    (ch1_ant_conn_status |= ANT_NEW_PARAMS)
+#define AntennaNewParamsCh2    (ch2_ant_conn_status |= ANT_NEW_PARAMS)
+#define AntennaNewParamsCh3    (ch3_ant_conn_status |= ANT_NEW_PARAMS)
+#define AntennaNewParamsCh4    (ch4_ant_conn_status |= ANT_NEW_PARAMS)
 
-#define AntennaUnlockCh1    (lock_states &= ~CH1_ANT_LOCKED)
-#define AntennaUnlockCh2    (lock_states &= ~CH2_ANT_LOCKED)
-#define AntennaUnlockCh3    (lock_states &= ~CH3_ANT_LOCKED)
-#define AntennaUnlockCh4    (lock_states &= ~CH4_ANT_LOCKED)
+#define AntennaNoNewParamsCh1    (ch1_ant_conn_status &= ~ANT_NEW_PARAMS)
+#define AntennaNoNewParamsCh2    (ch2_ant_conn_status &= ~ANT_NEW_PARAMS)
+#define AntennaNoNewParamsCh3    (ch3_ant_conn_status &= ~ANT_NEW_PARAMS)
+#define AntennaNoNewParamsCh4    (ch4_ant_conn_status &= ~ANT_NEW_PARAMS)
 
-#define AntennaIsLockCh1    (lock_states & CH1_ANT_LOCKED)
-#define AntennaIsLockCh2    (lock_states & CH2_ANT_LOCKED)
-#define AntennaIsLockCh3    (lock_states & CH3_ANT_LOCKED)
-#define AntennaIsLockCh4    (lock_states & CH4_ANT_LOCKED)
+#define AntennaCheckNewParamsCh1    (ch1_ant_conn_status & ANT_NEW_PARAMS)
+#define AntennaCheckNewParamsCh2    (ch2_ant_conn_status & ANT_NEW_PARAMS)
+#define AntennaCheckNewParamsCh3    (ch3_ant_conn_status & ANT_NEW_PARAMS)
+#define AntennaCheckNewParamsCh4    (ch4_ant_conn_status & ANT_NEW_PARAMS)
+
+#define AntennaParamsCh1    (ch1_ant_conn_status |= ANT_HAVE_PARAMS)
+#define AntennaParamsCh2    (ch2_ant_conn_status |= ANT_HAVE_PARAMS)
+#define AntennaParamsCh3    (ch3_ant_conn_status |= ANT_HAVE_PARAMS)
+#define AntennaParamsCh4    (ch4_ant_conn_status |= ANT_HAVE_PARAMS)
+
+#define AntennaNoParamsCh1    (ch1_ant_conn_status &= ~ANT_HAVE_PARAMS)
+#define AntennaNoParamsCh2    (ch2_ant_conn_status &= ~ANT_HAVE_PARAMS)
+#define AntennaNoParamsCh3    (ch3_ant_conn_status &= ~ANT_HAVE_PARAMS)
+#define AntennaNoParamsCh4    (ch4_ant_conn_status &= ~ANT_HAVE_PARAMS)
+
+#define AntennaCheckParamsCh1    (ch1_ant_conn_status & ANT_HAVE_PARAMS)
+#define AntennaCheckParamsCh2    (ch2_ant_conn_status & ANT_HAVE_PARAMS)
+#define AntennaCheckParamsCh3    (ch3_ant_conn_status & ANT_HAVE_PARAMS)
+#define AntennaCheckParamsCh4    (ch4_ant_conn_status & ANT_HAVE_PARAMS)
+
+#define AntennaConnectionCh1    (ch1_ant_conn_status |= ANT_CONNECTED)
+#define AntennaConnectionCh2    (ch2_ant_conn_status |= ANT_CONNECTED)
+#define AntennaConnectionCh3    (ch3_ant_conn_status |= ANT_CONNECTED)
+#define AntennaConnectionCh4    (ch4_ant_conn_status |= ANT_CONNECTED)
+
+#define AntennaNoConnectionCh1    (ch1_ant_conn_status &= ~ANT_CONNECTED)
+#define AntennaNoConnectionCh2    (ch2_ant_conn_status &= ~ANT_CONNECTED)
+#define AntennaNoConnectionCh3    (ch3_ant_conn_status &= ~ANT_CONNECTED)
+#define AntennaNoConnectionCh4    (ch4_ant_conn_status &= ~ANT_CONNECTED)
+
+#define AntennaCheckConnectionCh1    (ch1_ant_conn_status & ANT_CONNECTED)
+#define AntennaCheckConnectionCh2    (ch2_ant_conn_status & ANT_CONNECTED)
+#define AntennaCheckConnectionCh3    (ch3_ant_conn_status & ANT_CONNECTED)
+#define AntennaCheckConnectionCh4    (ch4_ant_conn_status & ANT_CONNECTED)
+
+#define AntennaLockCh1    (ch1_ant_conn_status |= ANT_LOCKED)
+#define AntennaLockCh2    (ch2_ant_conn_status |= ANT_LOCKED)
+#define AntennaLockCh3    (ch3_ant_conn_status |= ANT_LOCKED)
+#define AntennaLockCh4    (ch4_ant_conn_status |= ANT_LOCKED)
+
+#define AntennaUnlockCh1    (ch1_ant_conn_status &= ~ANT_LOCKED)
+#define AntennaUnlockCh2    (ch2_ant_conn_status &= ~ANT_LOCKED)
+#define AntennaUnlockCh3    (ch3_ant_conn_status &= ~ANT_LOCKED)
+#define AntennaUnlockCh4    (ch4_ant_conn_status &= ~ANT_LOCKED)
+
+#define AntennaCheckLockCh1    (ch1_ant_conn_status & ANT_LOCKED)
+#define AntennaCheckLockCh2    (ch2_ant_conn_status & ANT_LOCKED)
+#define AntennaCheckLockCh3    (ch3_ant_conn_status & ANT_LOCKED)
+#define AntennaCheckLockCh4    (ch4_ant_conn_status & ANT_LOCKED)
+
+#define AntennaInTreatmentCh1    (ch1_ant_conn_status |= ANT_IN_TREATMENT)
+#define AntennaInTreatmentCh2    (ch2_ant_conn_status |= ANT_IN_TREATMENT)
+#define AntennaInTreatmentCh3    (ch3_ant_conn_status |= ANT_IN_TREATMENT)
+#define AntennaInTreatmentCh4    (ch4_ant_conn_status |= ANT_IN_TREATMENT)
+
+#define AntennaNoInTreatmentCh1    (ch1_ant_conn_status &= ~ANT_IN_TREATMENT)
+#define AntennaNoInTreatmentCh2    (ch2_ant_conn_status &= ~ANT_IN_TREATMENT)
+#define AntennaNoInTreatmentCh3    (ch3_ant_conn_status &= ~ANT_IN_TREATMENT)
+#define AntennaNoInTreatmentCh4    (ch4_ant_conn_status &= ~ANT_IN_TREATMENT)
+
+#define AntennaCheckInTreatmentCh1    (ch1_ant_conn_status & ANT_IN_TREATMENT)
+#define AntennaCheckInTreatmentCh2    (ch2_ant_conn_status & ANT_IN_TREATMENT)
+#define AntennaCheckInTreatmentCh3    (ch3_ant_conn_status & ANT_IN_TREATMENT)
+#define AntennaCheckInTreatmentCh4    (ch4_ant_conn_status & ANT_IN_TREATMENT)
+
+#define AntennaNameCh1    (ch1_ant_conn_status |= ANT_HAVE_NAME)
+#define AntennaNameCh2    (ch2_ant_conn_status |= ANT_HAVE_NAME)
+#define AntennaNameCh3    (ch3_ant_conn_status |= ANT_HAVE_NAME)
+#define AntennaNameCh4    (ch4_ant_conn_status |= ANT_HAVE_NAME)
+
+#define AntennaNoNameCh1    (ch1_ant_conn_status &= ~ANT_HAVE_NAME)
+#define AntennaNoNameCh2    (ch2_ant_conn_status &= ~ANT_HAVE_NAME)
+#define AntennaNoNameCh3    (ch3_ant_conn_status &= ~ANT_HAVE_NAME)
+#define AntennaNoNameCh4    (ch4_ant_conn_status &= ~ANT_HAVE_NAME)
+
+#define AntennaCheckNameCh1    (ch1_ant_conn_status & ANT_HAVE_NAME)
+#define AntennaCheckNameCh2    (ch2_ant_conn_status & ANT_HAVE_NAME)
+#define AntennaCheckNameCh3    (ch3_ant_conn_status & ANT_HAVE_NAME)
+#define AntennaCheckNameCh4    (ch4_ant_conn_status & ANT_HAVE_NAME)
 
 /* Externals ------------------------------------------------------------------*/
 extern volatile unsigned short antenna_timer;
@@ -76,40 +149,34 @@ unsigned char ch3_ant_current_temp_dec = 0;
 unsigned char ch4_ant_current_temp_int = 0;
 unsigned char ch4_ant_current_temp_dec = 0;
 
-unsigned char ch1_ant_conn = 0;
-unsigned char ch2_ant_conn = 0;
-unsigned char ch3_ant_conn = 0;
-unsigned char ch4_ant_conn = 0;
+unsigned char ch1_ant_conn_status = 0;
+unsigned char ch2_ant_conn_status = 0;
+unsigned char ch3_ant_conn_status = 0;
+unsigned char ch4_ant_conn_status = 0;
 
 unsigned char keepalive_ch1 = 0;
 unsigned char keepalive_ch2 = 0;
 unsigned char keepalive_ch3 = 0;
 unsigned char keepalive_ch4 = 0;
 
-unsigned char ch1_ant_have_params = 0;
-unsigned char ch2_ant_have_params = 0;
-unsigned char ch3_ant_have_params = 0;
-unsigned char ch4_ant_have_params = 0;
-
-unsigned char lock_states = 0x00;
-antenna_typedef antenna_locked_ch1;
-antenna_typedef antenna_locked_ch2;
-antenna_typedef antenna_locked_ch3;
-antenna_typedef antenna_locked_ch4;
+unsigned char keepalive_name_ch1 = 0;
+unsigned char keepalive_name_ch2 = 0;
+unsigned char keepalive_name_ch3 = 0;
+unsigned char keepalive_name_ch4 = 0;
 
 #ifdef SOFTWARE_VERSION_1_3
-unsigned char antennas_info_sended = 0;
+unsigned char antenna_info_sended = 0;
+unsigned char antenna_send_info_with_timer = 0;
 #endif
 
 
 /* Module Private Functions -----------------------------------------------------------*/
-// void AntennaLock (unsigned char ch);
-// void AntennaUnlock (unsigned char ch);
 void AntennaBackupParams (antenna_typedef *, session_typedef *);
-//TODO: ver si la que sigue se puede quitar
+void AntennaSendKnowParams (void);
+
 void AntennaFlushParamsInLock (antenna_typedef *);
 void AntennaFlushParams (unsigned char);
-void AntennaSendKnowParams (void);
+
 
 /* Module Exported Functions ----------------------------------------------------------*/
 void AntennaUpdateStates (void)
@@ -119,7 +186,7 @@ void AntennaUpdateStates (void)
     case ANTENNA_INIT:
 #ifdef SOFTWARE_VERSION_1_3
         antenna_info_timer = ANTENNA_INFO_TIMER_FIRST_START;
-        antennas_info_sended = 0;
+        antenna_info_sended = 0;
 #endif
         antenna_state++;
         break;
@@ -127,13 +194,20 @@ void AntennaUpdateStates (void)
     case ANTENNA_IN_STANDBY:
         if (!antenna_timer)
         {
-            if (ch1_ant_have_params)
+            if (AntennaCheckParamsCh1)
             {
-                if (ch1_ant_conn)    //tengo parametros y contesta
+                if (AntennaCheckConnectionCh1)    //tengo parametros y contesta
                 {
-                    UART_CH1_Send("keepalive\r\n");
+                    if ((!AntennaCheckNameCh1) && (keepalive_name_ch1))
+                    {
+                        keepalive_name_ch1--;
+                        UART_CH1_Send("get_name\r\n");
+                    }
+                    else    //tengo el nombre o me canse de preguntar
+                        UART_CH1_Send("keepalive\r\n");
+
                     keepalive_ch1 = KEEP_ALIVE_COUNTER;                    
-                    ch1_ant_conn = 0;
+                    AntennaNoConnectionCh1;
                 }
                 else 
                 {
@@ -142,23 +216,31 @@ void AntennaUpdateStates (void)
                         keepalive_ch1--;
                         UART_CH1_Send("keepalive\r\n");
                     }
-                    else
+                    else    //tenia parametros y los perdio
                     {
-                        // AntennaFlushParams(CH1);
-                        ch1_ant_have_params = 0;
+                        AntennaNewParamsCh1;
+                        AntennaNoParamsCh1;
+                        AntennaNoNameCh1;
                     }
                 }
             }
             else
                 UART_CH1_Send("get_params\r\n");
 
-            if (ch2_ant_have_params)
+            if (AntennaCheckParamsCh2)
             {
-                if (ch2_ant_conn)    //tengo parametros y contesta
+                if (AntennaCheckConnectionCh2)    //tengo parametros y contesta
                 {
-                    UART_CH2_Send("keepalive\r\n");
+                    if ((!AntennaCheckNameCh2) && (keepalive_name_ch2))
+                    {
+                        keepalive_name_ch2--;
+                        UART_CH2_Send("get_name\r\n");
+                    }
+                    else    //tengo el nombre o me canse de preguntar
+                        UART_CH2_Send("keepalive\r\n");
+
                     keepalive_ch2 = KEEP_ALIVE_COUNTER;                    
-                    ch2_ant_conn = 0;
+                    AntennaNoConnectionCh2;                    
                 }
                 else 
                 {
@@ -167,23 +249,31 @@ void AntennaUpdateStates (void)
                         keepalive_ch2--;
                         UART_CH2_Send("keepalive\r\n");
                     }
-                    else
+                    else    //tenia parametros y los perdio
                     {
-                        // AntennaFlushParams(CH2);                        
-                        ch2_ant_have_params = 0;
+                        AntennaNewParamsCh2;
+                        AntennaNoParamsCh2;
+                        AntennaNoNameCh2;
                     }
                 }
             }
             else
                 UART_CH2_Send("get_params\r\n");
 
-            if (ch3_ant_have_params)
+            if (AntennaCheckParamsCh3)
             {
-                if (ch3_ant_conn)    //tengo parametros y contesta
+                if (AntennaCheckConnectionCh3)    //tengo parametros y contesta
                 {
-                    UART_CH3_Send("keepalive\r\n");
+                    if ((!AntennaCheckNameCh3) && (keepalive_name_ch3))
+                    {
+                        keepalive_name_ch3--;
+                        UART_CH3_Send("get_name\r\n");
+                    }
+                    else    //tengo el nombre o me canse de preguntar
+                        UART_CH3_Send("keepalive\r\n");
+
                     keepalive_ch3 = KEEP_ALIVE_COUNTER;                    
-                    ch3_ant_conn = 0;
+                    AntennaNoConnectionCh3;                    
                 }
                 else 
                 {
@@ -192,23 +282,31 @@ void AntennaUpdateStates (void)
                         keepalive_ch3--;
                         UART_CH3_Send("keepalive\r\n");
                     }
-                    else
+                    else    //tenia parametros y los perdio
                     {
-                        // AntennaFlushParams(CH3);
-                        ch3_ant_have_params = 0;
-                    }                        
+                        AntennaNewParamsCh3;
+                        AntennaNoParamsCh3;
+                        AntennaNoNameCh3;
+                    }
                 }
             }
             else
                 UART_CH3_Send("get_params\r\n");
 
-            if (ch4_ant_have_params)
+            if (AntennaCheckParamsCh4)
             {
-                if (ch4_ant_conn)    //tengo parametros y contesta
+                if (AntennaCheckConnectionCh4)    //tengo parametros y contesta
                 {
-                    UART_CH4_Send("keepalive\r\n");
+                    if ((!AntennaCheckNameCh4) && (keepalive_name_ch4))
+                    {
+                        keepalive_name_ch4--;
+                        UART_CH4_Send("get_name\r\n");
+                    }
+                    else    //tengo el nombre o me canse de preguntar
+                        UART_CH4_Send("keepalive\r\n");
+
                     keepalive_ch4 = KEEP_ALIVE_COUNTER;                    
-                    ch4_ant_conn = 0;
+                    AntennaNoConnectionCh4;                    
                 }
                 else 
                 {
@@ -217,10 +315,11 @@ void AntennaUpdateStates (void)
                         keepalive_ch4--;
                         UART_CH4_Send("keepalive\r\n");
                     }
-                    else
+                    else    //tenia parametros y los perdio
                     {
-                        // AntennaFlushParams(CH4);
-                        ch4_ant_have_params = 0;
+                        AntennaNewParamsCh4;
+                        AntennaNoParamsCh4;
+                        AntennaNameCh4;
                     }
                 }
             }
@@ -231,97 +330,164 @@ void AntennaUpdateStates (void)
         }
 
         //si tengo todos los canales en lock voy a tratamiento
-        if (AntennaIsLockCh1 && AntennaIsLockCh2 && AntennaIsLockCh3 && AntennaIsLockCh4)
+        //y aviso cuales antenas esta presentes
+        if (AntennaCheckLockCh1 && AntennaCheckLockCh2 && AntennaCheckLockCh3 && AntennaCheckLockCh4)
+        {
+            if (AntennaGetConnection(CH1))
+                AntennaInTreatmentCh1;
+
+            if (AntennaGetConnection(CH2))
+                AntennaInTreatmentCh2;
+ 
+            if (AntennaGetConnection(CH3))
+                AntennaInTreatmentCh3;
+
+            if (AntennaGetConnection(CH4))
+                AntennaInTreatmentCh4;
+                        
             antenna_state++;
+        }
+
+#ifdef SOFTWARE_VERSION_1_3
+        //si alguna tuvo update doy algo de tiempo y luego envio info a la PC
+        if (AntennaCheckNewParamsCh1 || AntennaCheckNewParamsCh2 ||
+            AntennaCheckNewParamsCh3 || AntennaCheckNewParamsCh4)
+        {
+            AntennaNoNewParamsCh1;
+            AntennaNoNewParamsCh2;
+            AntennaNoNewParamsCh3;
+            AntennaNoNewParamsCh4;
+            if (!antenna_info_timer)
+                antenna_info_timer = ANTENNA_INFO_TIMER_UPDATE;
+            
+            antenna_info_sended = 0;
+        }
 
         //si paso este timer envio la info de las antenas que conozco a la PC
-        if ((!antenna_info_timer) && (!antennas_info_sended))
+        if (!antenna_info_timer)
         {
-            AntennaSendKnowParams();
-            antennas_info_sended = 1;
+            if (!antenna_info_sended)
+            {
+                AntennaSendKnowParams();
+                antenna_info_sended = 1;
+            }
         }
+
+        if (antenna_send_info_with_timer)
+        {
+            if (!antenna_info_timer)
+                antenna_info_timer = ANTENNA_INFO_TIMER_UPDATE;
+            
+            antenna_info_sended = 0;
+            antenna_send_info_with_timer = 0;
+        }            
+#endif
         break;
 
     case ANTENNA_IN_TREATMENT:
         if (!antenna_timer)
         {
-            if (ch1_ant_have_params)
+            if (AntennaCheckInTreatmentCh1)    //si es una de las que esta en tratamiento
             {
-                if (ch1_ant_conn)    //tengo parametros y contesta
+                if (AntennaCheckParamsCh1)
                 {
-                    UART_CH1_Send("get_temp\r\n");
-                    keepalive_ch1 = KEEP_ALIVE_COUNTER;                    
-                    ch1_ant_conn = 0;
-                }
-                else 
-                {
-                    if (keepalive_ch1)
+                    if (AntennaCheckConnectionCh1)    //tengo parametros y contesta
                     {
-                        keepalive_ch1--;
                         UART_CH1_Send("get_temp\r\n");
+                        keepalive_ch1 = KEEP_ALIVE_COUNTER;                    
+                        AntennaNoConnectionCh1;
                     }
-                    else
-                        ch1_ant_have_params = 0;
+                    else 
+                    {
+                        if (keepalive_ch1)
+                        {
+                            keepalive_ch1--;
+                            UART_CH1_Send("get_temp\r\n");
+                        }
+                        else    //estaba conectada pero se perdio
+                        {
+                            AntennaNoParamsCh1;
+                            antenna_send_info_with_timer = 1;
+                        }
+                    }
                 }
             }
 
-            if (ch2_ant_have_params)
-            {
-                if (ch2_ant_conn)    //tengo parametros y contesta
+            if (AntennaCheckInTreatmentCh2)    //si es una de las que esta en tratamiento
+            {                            
+                if (AntennaCheckParamsCh2)
                 {
-                    UART_CH2_Send("get_temp\r\n");
-                    keepalive_ch2 = KEEP_ALIVE_COUNTER;                    
-                    ch2_ant_conn = 0;
-                }
-                else 
-                {
-                    if (keepalive_ch2)
+                    if (AntennaCheckConnectionCh2)    //tengo parametros y contesta
                     {
-                        keepalive_ch2--;
                         UART_CH2_Send("get_temp\r\n");
+                        keepalive_ch2 = KEEP_ALIVE_COUNTER;                    
+                        AntennaNoConnectionCh2;
                     }
-                    else
-                        ch2_ant_have_params = 0;
+                    else 
+                    {
+                        if (keepalive_ch2)
+                        {
+                            keepalive_ch2--;
+                            UART_CH2_Send("get_temp\r\n");
+                        }
+                        else    //estaba conectada pero se perdio
+                        {
+                            AntennaNoParamsCh2;
+                            antenna_send_info_with_timer = 1;
+                        }
+                    }
                 }
             }
 
-            if (ch3_ant_have_params)
-            {
-                if (ch3_ant_conn)    //tengo parametros y contesta
+            if (AntennaCheckInTreatmentCh3)    //si es una de las que esta en tratamiento
+            {                                            
+                if (AntennaCheckParamsCh3)
                 {
-                    UART_CH3_Send("get_temp\r\n");
-                    keepalive_ch3 = KEEP_ALIVE_COUNTER;                    
-                    ch3_ant_conn = 0;
-                }
-                else 
-                {
-                    if (keepalive_ch3)
+                    if (AntennaCheckConnectionCh3)    //tengo parametros y contesta
                     {
-                        keepalive_ch3--;
                         UART_CH3_Send("get_temp\r\n");
+                        keepalive_ch3 = KEEP_ALIVE_COUNTER;                    
+                        AntennaNoConnectionCh3;
                     }
-                    else
-                        ch3_ant_have_params = 0;
+                    else 
+                    {
+                        if (keepalive_ch3)
+                        {
+                            keepalive_ch3--;
+                            UART_CH3_Send("get_temp\r\n");
+                        }
+                        else    //estaba conectada pero se perdio
+                        {                            
+                            AntennaNoParamsCh3;
+                            antenna_send_info_with_timer = 1;
+                        }
+                    }
                 }
             }
 
-            if (ch4_ant_have_params)
-            {
-                if (ch4_ant_conn)    //tengo parametros y contesta
+            if (AntennaCheckInTreatmentCh4)    //si es una de las que esta en tratamiento
+            {                                                        
+                if (AntennaCheckParamsCh4)
                 {
-                    UART_CH4_Send("get_temp\r\n");
-                    keepalive_ch4 = KEEP_ALIVE_COUNTER;                    
-                    ch4_ant_conn = 0;
-                }
-                else 
-                {
-                    if (keepalive_ch4)
+                    if (AntennaCheckConnectionCh4)    //tengo parametros y contesta
                     {
-                        keepalive_ch4--;
                         UART_CH4_Send("get_temp\r\n");
+                        keepalive_ch4 = KEEP_ALIVE_COUNTER;                    
+                        AntennaNoConnectionCh4;
                     }
-                    else
-                        ch4_ant_have_params = 0;
+                    else 
+                    {
+                        if (keepalive_ch4)
+                        {
+                            keepalive_ch4--;
+                            UART_CH4_Send("get_temp\r\n");
+                        }
+                        else    //estaba conectada pero se perdio
+                        {
+                            AntennaNoParamsCh4;
+                            antenna_send_info_with_timer = 1;
+                        }
+                    }
                 }
             }
 
@@ -329,9 +495,57 @@ void AntennaUpdateStates (void)
         }
 
         //si tengo todos los canales en unlock salgo del tratamiento
-        if ((!AntennaIsLockCh1) && (!AntennaIsLockCh2) && (!AntennaIsLockCh3) && (!AntennaIsLockCh4))
+        if ((!AntennaCheckLockCh1) && (!AntennaCheckLockCh2) && (!AntennaCheckLockCh3) && (!AntennaCheckLockCh4))
+        {
+            AntennaNoInTreatmentCh1;
+            AntennaNoInTreatmentCh2;
+            AntennaNoInTreatmentCh3;
+            AntennaNoInTreatmentCh4;
+            
             antenna_state = ANTENNA_IN_STANDBY;
-        
+        }
+
+#ifdef SOFTWARE_VERSION_1_3
+        //si alguna tuvo update, se desenchufo y enchufo
+        if (AntennaCheckNewParamsCh1 && AntennaCheckInTreatmentCh1)
+        {
+            AntennaNoNewParamsCh1;
+            AntennaNoInTreatmentCh1;
+            AntennaNoParamsCh1;
+            antenna_send_info_with_timer = 1;
+        }
+
+        if (AntennaCheckNewParamsCh2 && AntennaCheckInTreatmentCh2)
+        {
+            AntennaNoNewParamsCh2;
+            AntennaNoInTreatmentCh2;
+            AntennaNoParamsCh2;
+            antenna_send_info_with_timer = 1;
+        }
+
+        if (AntennaCheckNewParamsCh3 && AntennaCheckInTreatmentCh3)
+        {
+            AntennaNoNewParamsCh3;
+            AntennaNoInTreatmentCh3;
+            AntennaNoParamsCh3;
+            antenna_send_info_with_timer = 1;
+        }
+
+        if (AntennaCheckNewParamsCh4 && AntennaCheckInTreatmentCh4)
+        {
+            AntennaNoNewParamsCh4;
+            AntennaNoInTreatmentCh4;
+            AntennaNoParamsCh4;
+            antenna_send_info_with_timer = 1;
+        }
+
+        //si estoy en tratamiento puedo enviar info sin esperar
+        if (antenna_send_info_with_timer)
+        {
+            AntennaSendKnowParams();            
+            antenna_send_info_with_timer = 0;
+        }
+#endif        
         break;
 
     case ANTENNA_IN_PAUSE:
@@ -351,25 +565,25 @@ void AntennaSetCurrentTemp (unsigned char ch, unsigned char t_int, unsigned char
     case CH1:
         ch1_ant_current_temp_int = t_int;
         ch1_ant_current_temp_dec = t_dec;
-        ch1_ant_conn = 1;        
+        AntennaConnectionCh1;        
         break;
 
     case CH2:
         ch2_ant_current_temp_int = t_int;
         ch2_ant_current_temp_dec = t_dec;
-        ch2_ant_conn = 1;                
+        AntennaConnectionCh2;                
         break;
 
     case CH3:
         ch3_ant_current_temp_int = t_int;
         ch3_ant_current_temp_dec = t_dec;
-        ch3_ant_conn = 1;                
+        AntennaConnectionCh3;                
         break;
 
     case CH4:
         ch4_ant_current_temp_int = t_int;
         ch4_ant_current_temp_dec = t_dec;
-        ch4_ant_conn = 1;                
+        AntennaConnectionCh4;                
         break;
     }    
 }
@@ -378,16 +592,16 @@ void AntennaSetCurrentTemp (unsigned char ch, unsigned char t_int, unsigned char
 void AntennaIsAnswering (unsigned char ch)
 {
     if (ch == CH1)
-        ch1_ant_conn = 1;
+        AntennaConnectionCh1;
 
     if (ch == CH2)
-        ch2_ant_conn = 1;
+        AntennaConnectionCh2;
 
     if (ch == CH3)
-        ch3_ant_conn = 1;
+        AntennaConnectionCh3;
 
     if (ch == CH4)
-        ch4_ant_conn = 1;
+        AntennaConnectionCh4;
     
 }
 
@@ -449,23 +663,31 @@ void AntennaSetParamsStruct (unsigned char ch, antenna_typedef *ant)
     {
         if (ch == CH1)
         {
-            ch1_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
-            ch1_ant_conn = 1;
+            AntennaParamsCh1;
+            AntennaNewParamsCh1;
+            AntennaConnectionCh1;
+            keepalive_name_ch1 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;
         }
         if (ch == CH2)
         {
-            ch2_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
-            ch2_ant_conn = 1;
+            AntennaParamsCh2;
+            AntennaNewParamsCh2;
+            AntennaConnectionCh2;
+            keepalive_name_ch2 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
         if (ch == CH3)
         {
-            ch3_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
-            ch3_ant_conn = 1;
+            AntennaParamsCh3;
+            AntennaNewParamsCh3;
+            AntennaConnectionCh3;
+            keepalive_name_ch3 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
         if (ch == CH4)
         {
-            ch4_ant_have_params |= ANT_HAVE_PARAMS | ANT_NEW_PARAMS;
-            ch4_ant_conn = 1;
+            AntennaParamsCh4;
+            AntennaNewParamsCh4;
+            AntennaConnectionCh4;
+            keepalive_name_ch4 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
     }    
 }
@@ -527,19 +749,19 @@ unsigned char AntennaGetConnection (unsigned char ch)
     unsigned char conn = 0;
 
     if (ch == CH1)
-        if (ch1_ant_have_params && keepalive_ch1)
+        if (AntennaCheckParamsCh1 && keepalive_ch1)
             conn = 1;
 
     if (ch == CH2)
-        if (ch2_ant_have_params && keepalive_ch2)
+        if (AntennaCheckParamsCh2 && keepalive_ch2)
             conn = 1;
 
     if (ch == CH3)
-        if (ch3_ant_have_params && keepalive_ch3)
+        if (AntennaCheckParamsCh3 && keepalive_ch3)
             conn = 1;
 
     if (ch == CH4)
-        if (ch4_ant_have_params && keepalive_ch4)
+        if (AntennaCheckParamsCh4 && keepalive_ch4)
             conn = 1;
 
     return conn;
@@ -576,63 +798,43 @@ unsigned char AntennaVerifyForTreatment (unsigned char ch)
     switch (ch)
     {
     case CH1:
-        if (ch1_ant_have_params)
+        if (AntennaCheckParamsCh1)
         {
-            AntennaLockCh1(CH1_ANT_LOCKED | CH1_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch1, &session_ch_1);
             keepalive_ch1 = KEEP_ALIVE_COUNTER;
             resp = FIN_OK;
         }
-        else
-        {
-            AntennaLockCh1(CH1_ANT_LOCKED);
-            AntennaFlushParamsInLock(&antenna_locked_ch1);
-        }
+
+        AntennaLockCh1;
         break;
 
     case CH2:
-        if (ch2_ant_have_params)
+        if (AntennaCheckParamsCh2)
         {
-            AntennaLockCh2(CH2_ANT_LOCKED | CH2_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch2, &session_ch_2);
             keepalive_ch2 = KEEP_ALIVE_COUNTER;            
             resp = FIN_OK;
         }
-        else
-        {
-            AntennaLockCh2(CH2_ANT_LOCKED);
-            AntennaFlushParamsInLock(&antenna_locked_ch2);
-        }        
+
+        AntennaLockCh2;
         break;
 
     case CH3:
-        if (ch3_ant_have_params)
+        if (AntennaCheckParamsCh3)
         {
-            AntennaLockCh3(CH3_ANT_LOCKED | CH3_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch3, &session_ch_3);
             keepalive_ch3 = KEEP_ALIVE_COUNTER;            
             resp = FIN_OK;
         }
-        else
-        {
-            AntennaLockCh3(CH3_ANT_LOCKED);
-            AntennaFlushParamsInLock(&antenna_locked_ch3);
-        }        
+
+        AntennaLockCh3;
         break;
 
     case CH4:
-        if (ch4_ant_have_params)
+        if (AntennaCheckParamsCh4)
         {
-            AntennaLockCh4(CH4_ANT_LOCKED | CH4_ANT_CONNECTED);
-            AntennaBackupParams(&antenna_locked_ch4, &session_ch_4);
             keepalive_ch4 = KEEP_ALIVE_COUNTER;
             resp = FIN_OK;
         }
-        else
-        {
-            AntennaLockCh4(CH4_ANT_LOCKED);
-            AntennaFlushParamsInLock(&antenna_locked_ch4);
-        }        
+
+        AntennaLockCh4;
         break;
 
     default:
@@ -737,68 +939,178 @@ void AntennaSendKnowParams (void)
 
     if (AntennaGetConnection(CH1))
     {
-        //TODO: despues enviar nombre de antena si se conoce
-        sprintf((char *)antbuff, "ch1,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
-                session_ch_1.ant_resistance_int,
-                session_ch_1.ant_resistance_dec,
-                session_ch_1.ant_inductance_int,
-                session_ch_1.ant_inductance_dec,
-                session_ch_1.ant_current_limit_int,
-                session_ch_1.ant_current_limit_dec,
-                session_ch_1.ant_temp_max_int,
-                session_ch_1.ant_temp_max_dec);
+        if (AntennaCheckNameCh1)
+        {
+            sprintf((char *)antbuff, "%s,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
+                    session_ch_1.connected_ant_name,
+                    session_ch_1.ant_resistance_int,
+                    session_ch_1.ant_resistance_dec,
+                    session_ch_1.ant_inductance_int,
+                    session_ch_1.ant_inductance_dec,
+                    session_ch_1.ant_current_limit_int,
+                    session_ch_1.ant_current_limit_dec,
+                    session_ch_1.ant_temp_max_int,
+                    session_ch_1.ant_temp_max_dec);            
+        }
+        else
+        {
+            sprintf((char *)antbuff, "ch1,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,1\r\n",
+                    session_ch_1.ant_resistance_int,
+                    session_ch_1.ant_resistance_dec,
+                    session_ch_1.ant_inductance_int,
+                    session_ch_1.ant_inductance_dec,
+                    session_ch_1.ant_current_limit_int,
+                    session_ch_1.ant_current_limit_dec,
+                    session_ch_1.ant_temp_max_int,
+                    session_ch_1.ant_temp_max_dec);
+        }
     
         UART_PC_Send((char *) antbuff);
     }
 
     if (AntennaGetConnection(CH2))
     {
-        //TODO: despues enviar nombre de antena si se conoce
-        sprintf((char *)antbuff, "ch2,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
-                session_ch_2.ant_resistance_int,
-                session_ch_2.ant_resistance_dec,
-                session_ch_2.ant_inductance_int,
-                session_ch_2.ant_inductance_dec,
-                session_ch_2.ant_current_limit_int,
-                session_ch_2.ant_current_limit_dec,
-                session_ch_2.ant_temp_max_int,
-                session_ch_2.ant_temp_max_dec);
+        if (AntennaCheckNameCh2)
+        {
+            sprintf((char *)antbuff, "%s,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
+                    session_ch_2.connected_ant_name,
+                    session_ch_2.ant_resistance_int,
+                    session_ch_2.ant_resistance_dec,
+                    session_ch_2.ant_inductance_int,
+                    session_ch_2.ant_inductance_dec,
+                    session_ch_2.ant_current_limit_int,
+                    session_ch_2.ant_current_limit_dec,
+                    session_ch_2.ant_temp_max_int,
+                    session_ch_2.ant_temp_max_dec);
+            
+        }
+        else
+        {
+            sprintf((char *)antbuff, "ch2,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,2\r\n",
+                    session_ch_2.ant_resistance_int,
+                    session_ch_2.ant_resistance_dec,
+                    session_ch_2.ant_inductance_int,
+                    session_ch_2.ant_inductance_dec,
+                    session_ch_2.ant_current_limit_int,
+                    session_ch_2.ant_current_limit_dec,
+                    session_ch_2.ant_temp_max_int,
+                    session_ch_2.ant_temp_max_dec);
+        }
     
         UART_PC_Send((char *) antbuff);
     }
 
     if (AntennaGetConnection(CH3))
     {
-        //TODO: despues enviar nombre de antena si se conoce
-        sprintf((char *)antbuff, "ch3,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
-                session_ch_3.ant_resistance_int,
-                session_ch_3.ant_resistance_dec,
-                session_ch_3.ant_inductance_int,
-                session_ch_3.ant_inductance_dec,
-                session_ch_3.ant_current_limit_int,
-                session_ch_3.ant_current_limit_dec,
-                session_ch_3.ant_temp_max_int,
-                session_ch_3.ant_temp_max_dec);
+        if (AntennaCheckNameCh3)            
+        {
+            sprintf((char *)antbuff, "%s,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
+                    session_ch_3.connected_ant_name,
+                    session_ch_3.ant_resistance_int,
+                    session_ch_3.ant_resistance_dec,
+                    session_ch_3.ant_inductance_int,
+                    session_ch_3.ant_inductance_dec,
+                    session_ch_3.ant_current_limit_int,
+                    session_ch_3.ant_current_limit_dec,
+                    session_ch_3.ant_temp_max_int,
+                    session_ch_3.ant_temp_max_dec);            
+        }
+        else
+        {
+            sprintf((char *)antbuff, "ch3,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,3\r\n",
+                    session_ch_3.ant_resistance_int,
+                    session_ch_3.ant_resistance_dec,
+                    session_ch_3.ant_inductance_int,
+                    session_ch_3.ant_inductance_dec,
+                    session_ch_3.ant_current_limit_int,
+                    session_ch_3.ant_current_limit_dec,
+                    session_ch_3.ant_temp_max_int,
+                    session_ch_3.ant_temp_max_dec);
+        }
     
         UART_PC_Send((char *) antbuff);
     }
 
     if (AntennaGetConnection(CH4))
     {
-        //TODO: despues enviar nombre de antena si se conoce
-        sprintf((char *)antbuff, "ch4,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
-                session_ch_4.ant_resistance_int,
-                session_ch_4.ant_resistance_dec,
-                session_ch_4.ant_inductance_int,
-                session_ch_4.ant_inductance_dec,
-                session_ch_4.ant_current_limit_int,
-                session_ch_4.ant_current_limit_dec,
-                session_ch_4.ant_temp_max_int,
-                session_ch_4.ant_temp_max_dec);
+        if (AntennaCheckNameCh4)
+        {
+            sprintf((char *)antbuff, "%s,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
+                    session_ch_4.connected_ant_name,
+                    session_ch_4.ant_resistance_int,
+                    session_ch_4.ant_resistance_dec,
+                    session_ch_4.ant_inductance_int,
+                    session_ch_4.ant_inductance_dec,
+                    session_ch_4.ant_current_limit_int,
+                    session_ch_4.ant_current_limit_dec,
+                    session_ch_4.ant_temp_max_int,
+                    session_ch_4.ant_temp_max_dec);            
+        }
+        else
+        {
+            sprintf((char *)antbuff, "ch4,%03d.%02d,%03d.%02d,%03d.%02d,%03d.%02d,4\r\n",
+                    session_ch_4.ant_resistance_int,
+                    session_ch_4.ant_resistance_dec,
+                    session_ch_4.ant_inductance_int,
+                    session_ch_4.ant_inductance_dec,
+                    session_ch_4.ant_current_limit_int,
+                    session_ch_4.ant_current_limit_dec,
+                    session_ch_4.ant_temp_max_int,
+                    session_ch_4.ant_temp_max_dec);
+        }
     
         UART_PC_Send((char *) antbuff);
     }
 }
 
+//me llaman desde comms para conocer las antenas conectadas
+void AntennaSendKnowInfoWithTimer (void)
+{
+    antenna_send_info_with_timer = 1;
+}
 
+//me llaman desde comms para setear el nombre de la antena
+void AntennaSetName (unsigned char ch, char * pname)
+{
+    unsigned char len;
+    
+    len = strlen(pname);
+    //si tiene \r final lo quito y ajusto
+    if (*(pname + len - 1) == '\r')
+    {
+        *(pname + len - 1) = '\0';
+        len--;
+    }
+
+    if (len < (SIZEOF_ANTENNA_NAME - 1))
+    {
+        if (ch == CH1)
+        {
+            AntennaNameCh1;            
+            strcpy(session_ch_1.connected_ant_name, pname);
+            AntennaConnectionCh1;
+        }
+
+        if (ch == CH2)
+        {
+            AntennaNameCh2;            
+            strcpy(session_ch_2.connected_ant_name, pname);
+            AntennaConnectionCh2;
+        }
+
+        if (ch == CH3)
+        {
+            AntennaNameCh3;            
+            strcpy(session_ch_3.connected_ant_name, pname);
+            AntennaConnectionCh3;
+        }
+
+        if (ch == CH4)
+        {
+            AntennaNameCh4;
+            strcpy(session_ch_4.connected_ant_name, pname);
+            AntennaConnectionCh4;
+        }
+    }    
+}
 //---- end of file ----//

@@ -381,6 +381,9 @@ int main (void)
 #ifdef NO_ERRORS_IN_RISING
     UART_PC_Send("No errors in rising\r\n");
 #endif
+#ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
+    UART_PC_Send("Start without Load activated\r\n");
+#endif    
     UART_PC_Send("Ready!\r\n");
     // BuzzerCommands(BUZZER_MULTIPLE_SHORT, 1);
 //---- End of Defines from GTK_Hard.h -----//

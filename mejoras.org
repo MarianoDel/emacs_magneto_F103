@@ -5,20 +5,29 @@
    CLOSED: [2018-09-21 Fri 16:12]
 
 
-** TODO Enviar 4 strings al booteo del equipo
-** TODO Enviar con cada nueva conexion de antena los 4 strings de canales
+** DONE Enviar 4 strings al booteo del equipo
+   CLOSED: [2018-09-25 Tue 11:31]
+   - lo hago despues de una llamada a serial num, ya que no se cuando termina de bootear la PC
+
+** DONE Enviar con cada nueva conexion de antena los 4 strings de canales
+   CLOSED: [2018-09-25 Tue 11:06]
 ** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
-** TODO Avisar de la desconexion de un canal
-** DONE Agregar codigo de Hardware de MotherBoard
+** DONE Avisar de la desconexion de un canal
+   CLOSED: [2018-09-25 Tue 11:32]
+** DONE Device ID Agregar codigo de Hardware de MotherBoard
    CLOSED: [2018-09-24 Mon 11:30]
    - pag 1073 Unique device ID
+*** Motherboard N3
+    serial num 12bytes
+    0xff3305dd3735563443027122
+    serial num 4bytes
+    0x8b0422cb
+*** Motherboard N12
+    serial num 4bytes
+    0x8b1426d9
 
-   serial num 12bytes
-   0xff3305dd3735563443027122
-   serial num 4bytes
-   0x8b0422cb
-
-** TODO Nuevo Modulo para Antenas / y funciones del Viejo
+** DONE Nuevo Modulo para Antenas / y funciones del Viejo
+   CLOSED: [2018-09-25 Tue 11:32]
 *** En arranque - VIEJO -
     - en el arranque las antenas se revisan con la nueva funcion UpdateAntennaState()
     - pero no da bola a las respuestas mas que cargar el string de antX
@@ -60,6 +69,8 @@
     - si conecta, despues si no recibe nada a los 10 segs aprox lo vuelve a mandar
     - si esta conectada, no manda nada solo contesta lo que se le pregunta
     - en el codigo actual contesta a get_params get_temp keepalive
+
+** TODO Enviar nombres de antenas conocidos
 
 
 ** Errores encontrados

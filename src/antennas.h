@@ -16,10 +16,12 @@
 
 
 //---- Configurations Defines --------------------
-#define ANTENNA_KEEP_ALIVE_TIMER        2500    //2.5 segundos
+#define ANTENNA_KEEP_ALIVE_TIMER        1250    //1.25 segundos
 #define ANTENNA_TEMP_TIMER        1000    //1 segundo
 #define KEEP_ALIVE_COUNTER    3
+#define KEEP_ALIVE_ANTENNA_NAME_COUNTER    3
 #define ANTENNA_INFO_TIMER_FIRST_START        10000
+#define ANTENNA_INFO_TIMER_UPDATE        (KEEP_ALIVE_COUNTER * ANTENNA_KEEP_ALIVE_TIMER)
 
 //---- Common Defines --------------------
 
@@ -74,9 +76,9 @@ void AntennaGetParamsStruct (unsigned char, antenna_typedef *);
 void AntennaSetParamsStruct (unsigned char, antenna_typedef *);
 unsigned char AntennaVerifyForTreatment (unsigned char);
 void AntennaIsAnswering (unsigned char);
-void Signal_TIM1MS (void);
 void AntennaEndTreatment (unsigned char);
-
+void AntennaSendKnowInfoWithTimer (void);
+void AntennaSetName (unsigned char, char *);
 
 // void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
 // void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage);

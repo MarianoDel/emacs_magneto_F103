@@ -13,6 +13,7 @@
 
 
 //-- Exported Typedefs --------------------
+#define SIZEOF_ANTENNA_NAME    21
 //---- Nuevas estructuras ---//
 //--- Sesion ---//
 typedef struct
@@ -113,7 +114,7 @@ typedef struct
     //24 bytes o usar ant_name como dummy para conseguir multiplo de 4
     unsigned char sync_on;
     unsigned short peak_current_limit;
-    char connected_ant_name [21];    
+    char connected_ant_name [SIZEOF_ANTENNA_NAME];    
 
 } session_typedef;    //total (2 + 3 + 18) * 3 + 1 + 10 + 24 = 104 bytes
 

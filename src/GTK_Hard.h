@@ -25,7 +25,7 @@
 //#define SOFTWARE_VERSION_1_0
 
 // #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
-// #define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
+#define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
 #define USE_CURRENT_SLOT_WITHOUT_LOAD_CMD    //se puede dar start, sin hacer el load previo
 
 //---- Internal configs depending on the prevous versions -------------//

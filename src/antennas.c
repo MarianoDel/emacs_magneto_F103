@@ -935,6 +935,7 @@ void AntennaFlushParams (unsigned char ch)
 
 void AntennaSendKnowParams (void)
 {
+    unsigned char some_sended = 0;
     unsigned char antbuff [SIZEOF_RXDATA];
 
     if (AntennaGetConnection(CH1))
@@ -964,7 +965,8 @@ void AntennaSendKnowParams (void)
                     session_ch_1.ant_temp_max_int,
                     session_ch_1.ant_temp_max_dec);
         }
-    
+
+        some_sended = 1;
         UART_PC_Send((char *) antbuff);
     }
 
@@ -996,7 +998,8 @@ void AntennaSendKnowParams (void)
                     session_ch_2.ant_temp_max_int,
                     session_ch_2.ant_temp_max_dec);
         }
-    
+
+        some_sended = 1;
         UART_PC_Send((char *) antbuff);
     }
 
@@ -1027,7 +1030,8 @@ void AntennaSendKnowParams (void)
                     session_ch_3.ant_temp_max_int,
                     session_ch_3.ant_temp_max_dec);
         }
-    
+
+        some_sended = 1;
         UART_PC_Send((char *) antbuff);
     }
 
@@ -1058,9 +1062,14 @@ void AntennaSendKnowParams (void)
                     session_ch_4.ant_temp_max_int,
                     session_ch_4.ant_temp_max_dec);
         }
-    
+
+        some_sended = 1;
         UART_PC_Send((char *) antbuff);
     }
+
+    if (!some_sended)
+        UART_PC_Send("antenna none\r\n");
+
 }
 
 //me llaman desde comms para conocer las antenas conectadas

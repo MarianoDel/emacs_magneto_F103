@@ -4,14 +4,14 @@
 ** DONE Empiezo nuevas funcionalidades
    CLOSED: [2018-09-21 Fri 16:12]
 
-
 ** DONE Enviar 4 strings al booteo del equipo
    CLOSED: [2018-09-25 Tue 11:31]
    - lo hago despues de una llamada a serial num, ya que no se cuando termina de bootear la PC
 
 ** DONE Enviar con cada nueva conexion de antena los 4 strings de canales
    CLOSED: [2018-09-25 Tue 11:06]
-** TODO Achicar tiempo entre conexion y deteccion de falla para las antenas
+** DONE Achicar tiempo entre conexion y deteccion de falla para las antenas
+   CLOSED: [2018-09-26 Wed 15:33]
 ** DONE Avisar de la desconexion de un canal
    CLOSED: [2018-09-25 Tue 11:32]
 ** DONE Device ID Agregar codigo de Hardware de MotherBoard
@@ -70,12 +70,17 @@
     - si esta conectada, no manda nada solo contesta lo que se le pregunta
     - en el codigo actual contesta a get_params get_temp keepalive
 
-** TODO Enviar nombres de antenas conocidos
+** DONE Enviar nombres de antenas conocidos
+   CLOSED: [2018-09-26 Wed 15:35]
+   - pide el nombre 3 veces luego de conocer los parametros
+   - cuando le preguntan por las antenas conectadas si tiene el nombre lo envia, sino ch1 ch2 ch3 o ch4
+   - ademas cuando no tiene antenas manda antenna none\r\n
 
-
-** Errores encontrados
+** DONE Errores encontrados
+   CLOSED: [2018-09-26 Wed 15:35]
    - arrancan 2 antenas quito 1 (no avisa) si a cambio en 5 segundos no ve la desconexion??
    - arranca con 1 la cambio de lugar y sigue
+   - solucionado con el nuevo modulo de antenas
 
 
 * Migrar a emacs y repositorio github atom -> emacs
@@ -318,3 +323,24 @@ serial num (de placa 3)
     ##### Luego de cualquiera de lo errores por corriente termina el tratamiento por error #####
     cuando decide cortar por error, envía hacia la raspberry como mínimo dos mensajes de stop
     "STOP\r\n"
+
+* Errores o mejoras 26-09-18
+** Para pulir interface grafica
+   - Cuando inicia tratamiento alrededor de 20 segundos si se le envia un error o STOP por error general no lo ve
+     luego de un rato (30 segudos?) si lo ve.
+   - Si se comienza un tratamiento sin antenas, se le envia el error apenas se detecta, pero la inteface no lo ve
+     debe ser lo mismo anterior.
+   - Como ejemplo en un tratamiento de 15 minutos, alrededor del 15:10 el equipo envia las antenas conocidas, 
+     pero la interface no ve esos strings, mismo error anterior?
+   - Aparentemente despues de enviar un start, apaga las antenas conocidas, y las vuelve a pedir con get_antenna,
+     en ese momento el equipo envia las antenas conocidas pero dentro de mensajes de temperatura, muy de vez en
+     cuando la intreface pierde esos mensajes de antena.
+   - en el string  ant0,xxx,xxx.... se reemplazo la parte de adelante (solo en el caso de conocer el nombre de la
+     antena) por el nombre_antenna,xxx,xxx... pero la interface no parece cambiar nada, no le da bola o no sabe
+     que hacer con el nombre.
+   - Hay que agregar un comendo para blanquear los strings de antenas, cuando se desconectan todas antes de un
+     tratamiento por ejemplo. El nuevo comando que debe blanquear las antenas es antenna none\r\n
+   - Los tiempos de inicio y fin de tratamiento estan un poco corridos, en un tratamiento corto el equipo
+     termina antes que la interface, en uno largo (50 min.) la interface antes del equipo.
+     Si la interface termina antes puede usar el comando finish_ok,\r\n que detiene al equipo con el buzzer
+     de tratamiento terminado

@@ -319,7 +319,7 @@ void AntennaUpdateStates (void)
                     {
                         AntennaNewParamsCh4;
                         AntennaNoParamsCh4;
-                        AntennaNameCh4;
+                        AntennaNoNameCh4;
                     }
                 }
             }

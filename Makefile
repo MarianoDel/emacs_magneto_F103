@@ -78,6 +78,7 @@ SRC += ./src/comms.c
 SRC += ./src/gpio.c
 SRC += ./src/dma.c
 SRC += ./src/antennas.c
+SRC += ./src/utils.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c
@@ -88,7 +89,7 @@ ASRC = ./startup_src/startup_stm32f10x_hd.s
 
 # List all user directories here
 UINCDIR = $(CORELIBDIR) \
-	  $(STARTUPDIR)    \
+	  $(STARTUPDIR) \
           ./inc
 
 # List the user directory to look for the libraries here
@@ -147,7 +148,7 @@ LDFLAGS = $(MCFLAGS) -mthumb -lm --specs=nano.specs -Wl,--gc-sections -nostartfi
 # makefile rules
 #
 
-aassemblersources = $(ASRC)
+assemblersources = $(ASRC)
 sources = $(SRC)
 OBJS  = $(ASRC:.s=.o) $(SRC:.c=.o)
 

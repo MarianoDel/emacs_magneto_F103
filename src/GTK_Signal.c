@@ -514,12 +514,12 @@ void Session_Channel_1 (void)
 #ifdef WITHOUT_ANTENNA_BOARD_CH1
             //aviso que encontre la antenna y hago un hardcode de parametros
             //--- Antenna parameters ---//
-            session_ch_1.stage_1_resistance_int = HARDCODE_R_INT_CH1;
-            session_ch_1.stage_1_resistance_dec = HARDCODE_R_DEC_CH1;
-            session_ch_1.stage_1_inductance_int = HARDCODE_L_INT_CH1;
-            session_ch_1.stage_1_inductance_dec = HARDCODE_L_DEC_CH1;
-            session_ch_1.stage_1_current_limit_int = HARDCODE_I_INT_CH1;
-            session_ch_1.stage_1_current_limit_dec = HARDCODE_I_DEC_CH1;
+            session_ch_1.ant_resistance_int = HARDCODE_R_INT_CH1;
+            session_ch_1.ant_resistance_dec = HARDCODE_R_DEC_CH1;
+            session_ch_1.ant_inductance_int = HARDCODE_L_INT_CH1;
+            session_ch_1.ant_inductance_dec = HARDCODE_L_DEC_CH1;
+            session_ch_1.ant_current_limit_int = HARDCODE_I_INT_CH1;
+            session_ch_1.ant_current_limit_dec = HARDCODE_I_DEC_CH1;
 
             UART_PC_Send("Antenna hardcoded on CH1\r\n");
             session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
@@ -5118,12 +5118,12 @@ void Session_Channel_2 (void)
 #ifdef WITHOUT_ANTENNA_BOARD_CH2
             //aviso que encontre la antenna y hago un hardcode de parametros
             //--- Antenna parameters ---//
-            session_ch_2.stage_1_resistance_int = HARDCODE_R_INT_CH2;
-            session_ch_2.stage_1_resistance_dec = HARDCODE_R_DEC_CH2;
-            session_ch_2.stage_1_inductance_int = HARDCODE_L_INT_CH2;
-            session_ch_2.stage_1_inductance_dec = HARDCODE_L_DEC_CH2;
-            session_ch_2.stage_1_current_limit_int = HARDCODE_I_INT_CH2;
-            session_ch_2.stage_1_current_limit_dec = HARDCODE_I_DEC_CH2;
+            session_ch_2.ant_resistance_int = HARDCODE_R_INT_CH2;
+            session_ch_2.ant_resistance_dec = HARDCODE_R_DEC_CH2;
+            session_ch_2.ant_inductance_int = HARDCODE_L_INT_CH2;
+            session_ch_2.ant_inductance_dec = HARDCODE_L_DEC_CH2;
+            session_ch_2.ant_current_limit_int = HARDCODE_I_INT_CH2;
+            session_ch_2.ant_current_limit_dec = HARDCODE_I_DEC_CH2;
 
             UART_PC_Send("Antenna hardcoded on CH2\r\n");
             session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
@@ -5390,12 +5390,12 @@ void Session_Channel_3 (void)
 #ifdef WITHOUT_ANTENNA_BOARD_CH3
             //aviso que encontre la antenna y hago un hardcode de parametros
             //--- Antenna parameters ---//
-            session_ch_3.stage_1_resistance_int = HARDCODE_R_INT_CH3;
-            session_ch_3.stage_1_resistance_dec = HARDCODE_R_DEC_CH3;
-            session_ch_3.stage_1_inductance_int = HARDCODE_L_INT_CH3;
-            session_ch_3.stage_1_inductance_dec = HARDCODE_L_DEC_CH3;
-            session_ch_3.stage_1_current_limit_int = HARDCODE_I_INT_CH3;
-            session_ch_3.stage_1_current_limit_dec = HARDCODE_I_DEC_CH3;
+            session_ch_3.ant_resistance_int = HARDCODE_R_INT_CH3;
+            session_ch_3.ant_resistance_dec = HARDCODE_R_DEC_CH3;
+            session_ch_3.ant_inductance_int = HARDCODE_L_INT_CH3;
+            session_ch_3.ant_inductance_dec = HARDCODE_L_DEC_CH3;
+            session_ch_3.ant_current_limit_int = HARDCODE_I_INT_CH3;
+            session_ch_3.ant_current_limit_dec = HARDCODE_I_DEC_CH3;
 
             UART_PC_Send("Antenna hardcoded on CH3\r\n");
             session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
@@ -5665,12 +5665,12 @@ void Session_Channel_4 (void)
 #ifdef WITHOUT_ANTENNA_BOARD_CH4
             //aviso que encontre la antenna y hago un hardcode de parametros
             //--- Antenna parameters ---//
-            session_ch_4.stage_1_resistance_int = HARDCODE_R_INT_CH4;
-            session_ch_4.stage_1_resistance_dec = HARDCODE_R_DEC_CH4;
-            session_ch_4.stage_1_inductance_int = HARDCODE_L_INT_CH4;
-            session_ch_4.stage_1_inductance_dec = HARDCODE_L_DEC_CH4;
-            session_ch_4.stage_1_current_limit_int = HARDCODE_I_INT_CH4;
-            session_ch_4.stage_1_current_limit_dec = HARDCODE_I_DEC_CH4;
+            session_ch_4.ant_resistance_int = HARDCODE_R_INT_CH4;
+            session_ch_4.ant_resistance_dec = HARDCODE_R_DEC_CH4;
+            session_ch_4.ant_inductance_int = HARDCODE_L_INT_CH4;
+            session_ch_4.ant_inductance_dec = HARDCODE_L_DEC_CH4;
+            session_ch_4.ant_current_limit_int = HARDCODE_I_INT_CH4;
+            session_ch_4.ant_current_limit_dec = HARDCODE_I_DEC_CH4;
 
             UART_PC_Send("Antenna hardcoded on CH4\r\n");
             session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
@@ -5695,9 +5695,6 @@ void Session_Channel_4 (void)
             //warming up.
             if (channel_4_pause == 0)
             {
-                LED1_ON;
-                LED2_OFF;
-
                 //los errores pueden ser por calculo de parametros o falta de sync cuando se necesita
                 i = Session_Warming_Up_Channels(CH4);
 
@@ -5737,10 +5734,6 @@ void Session_Channel_4 (void)
             //Plateau.
             if (channel_4_pause == 0)
             {
-
-                LED1_OFF;
-                LED2_ON;
-
                 i = Session_Plateau_Channels(CH4);
 
                 if (i == FIN_OK)
@@ -5777,10 +5770,6 @@ void Session_Channel_4 (void)
             //Cooling dawn.
             if (channel_4_pause == 0)
             {
-
-                LED1_OFF;
-                LED2_OFF;
-
                 i = Session_Cooling_Down_Channels(CH4);
 
                 if (i == FIN_OK)
@@ -5865,10 +5854,6 @@ void Session_Channel_4 (void)
         PWM_CH4_TiempoSubida(0);
         PWM_CH4_TiempoMantenimiento(0);
         PWM_CH4_TiempoBajada(0);
-
-        LED1_ON;
-        LED2_OFF;
-        //LED3_OFF;
         //Stop timer interrupt.
     }
 }

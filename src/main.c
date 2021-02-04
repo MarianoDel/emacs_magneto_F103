@@ -53,8 +53,9 @@ volatile unsigned int session_warming_up_channel_1_stage_time = 0;
 
 //--- Externals para el BUZZER
 #ifdef USE_BUZZER_ON_BOARD
-unsigned short buzzer_timeout = 0;
+volatile unsigned short buzzer_timeout = 0;
 #endif
+volatile unsigned short timer_led = 0;
 
 //Estructuras.
 session_typedef session_slot_aux;
@@ -78,12 +79,13 @@ unsigned char channel_4_pause = 0;
 /* Globals --------------------------------------------------------------------*/
 
 
-/* Module Functions -----------------------------------------------------------*/
+// Module Private Functions ----------------------------------------------------
+void CheckLEDs (void);
+
+
+// Module Functions ------------------------------------------------------------
 int main (void)
 {
-    unsigned char i = 0;
-    unsigned short dummy16 = 0;
-
     //Configuracion de clock.
     // SystemInit();    //SystemInit() is called from startup_stm32f10x_hd.s before main()
 
@@ -104,7 +106,7 @@ int main (void)
     //Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
     //de otra forma revisar el cristal elegido
     //pruebo TIM5 100us step
-    for (i = 0; i < 20; i++)
+    for (unsigned char i = 0; i < 20; i++)
     {
         if (LED1)
             LED1_OFF;
@@ -434,12 +436,46 @@ int main (void)
         //Chequeo de errores globales
         CheckforGlobalErrors();
 
+        //Check LED Status
+        CheckLEDs();
+
 #ifdef USE_BUZZER_ON_BOARD
         //Funciones del Buzzer
         UpdateBuzzer();
 #endif
 
     }
+}
+
+unsigned char in_treatment = 1;
+void CheckLEDs (void)
+{
+    if ((session_ch_1.status == 0) &&
+        (session_ch_2.status == 0) &&
+        (session_ch_3.status == 0) &&
+        (session_ch_4.status == 0))
+    {
+        //no treatment ongoing
+        if (in_treatment)
+        {
+            ChangeLed(LED_TREATMENT_STANDBY);
+            in_treatment = 0;
+        }
+    }
+
+    if ((session_ch_1.status != 0) ||
+        (session_ch_2.status != 0) ||
+        (session_ch_3.status != 0) ||
+        (session_ch_4.status != 0))
+    {
+        if (!in_treatment)
+        {
+            ChangeLed(LED_TREATMENT_GENERATING);
+            in_treatment = 1;
+        }
+    }
+
+    UpdateLed();
 }
 
 

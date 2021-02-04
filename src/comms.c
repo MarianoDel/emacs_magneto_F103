@@ -18,6 +18,7 @@
 #include "GTK_Hard.h"
 #include "timer.h"
 #include "antennas.h"
+#include "utils.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -46,11 +47,17 @@ extern unsigned char channel_3_pause;
 extern unsigned char channel_4_pause;
 
 
-/* Globals ------------------------------------------------------------------*/
+// Globals ---------------------------------------------------------------------
 unsigned char localbuff [SIZEOF_RXDATA] = { '\0' };
 
+const char s_buzzer_short [] = {"buzzer short"};
+const char s_buzzer_half [] = {"buzzer half"};
+const char s_buzzer_long [] = {"buzzer long"};
+char s_ok [] = {"OK\r\n"};
+char s_nok [] = {"ERROR\r\n"};
 
-/* Module Private Functions -----------------------------------------------------------*/
+
+// Module Private Functions ----------------------------------------------------
 
 
 
@@ -241,7 +248,7 @@ void UART1_Receive (void)
         //example. signal,100,100,0000,0003,0003,0003,0006,0000,0000,1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"signal,", (sizeof("signal,") - 1)))
         {
-            //signal,%03d,%03d,0%x%x%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n",
+            //"signal,%03d,%03d,0%x%x%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n"
             if (((localbuff[50] - 48) > 0) && ((localbuff[50] - 48) < 4) && (localbuff[49] == ','))
             {
                 signal.initial_power = 		(localbuff[7] - 48) * 100 + (localbuff[8] - 48) * 10 + (localbuff[9] - 48);
@@ -338,6 +345,7 @@ void UART1_Receive (void)
                 channel_2_pause = 1;
                 channel_3_pause = 1;
                 channel_4_pause = 1;
+                ChangeLed(LED_TREATMENT_PAUSED);
             }
             else
             {
@@ -345,6 +353,7 @@ void UART1_Receive (void)
                 channel_2_pause = 0;
                 channel_3_pause = 0;
                 channel_4_pause = 0;
+                ChangeLed(LED_TREATMENT_GENERATING);
             }
 /*			switch(buffUART3rx2[6] - 48)
 			{
@@ -454,6 +463,73 @@ void UART1_Receive (void)
             UART_PC_Send((char *)"OK\r\n");
         }
 
+        else if (!strncmp((const char *)&localbuff[0],
+                          (const char *)"keepalive,",
+                          (sizeof("keepalive,") - 1)))
+        {
+            UART_PC_Send((char *)"OK\r\n");
+        }
+
+    //-- Buzzer Actions
+        else if (strncmp((const char *)localbuff, s_buzzer_short, sizeof(s_buzzer_short) - 1) == 0)
+        {
+            char * msg = (char *) localbuff;
+            unsigned char decimales = 0;
+            unsigned short bips_qtty = 0;
+        
+            msg += sizeof(s_buzzer_short);		//normalizo al payload, hay un espacio
+
+            //lo que viene es un byte de 1 a 9
+            decimales = StringIsANumber(msg, &bips_qtty);
+            if (decimales == 1)
+            {
+                BuzzerCommands(BUZZER_MULTIPLE_SHORT, (unsigned char) bips_qtty);
+                UART_PC_Send(s_ok);
+            }
+            else
+                UART_PC_Send(s_nok);
+        }
+
+        else if (strncmp((const char *)localbuff, s_buzzer_half, sizeof(s_buzzer_half) - 1) == 0)
+        {
+            char * msg = (char *) localbuff;
+            unsigned char decimales = 0;            
+            unsigned short bips_qtty = 0;
+        
+            msg += sizeof(s_buzzer_half);		//normalizo al payload, hay un espacio
+
+            //lo que viene es un byte de 1 a 9
+            decimales = StringIsANumber(msg, &bips_qtty);
+            if (decimales == 1)
+            {
+                BuzzerCommands(BUZZER_MULTIPLE_HALF, (unsigned char) bips_qtty);
+                UART_PC_Send(s_ok);
+            }
+            else
+                UART_PC_Send(s_nok);
+
+        }
+
+        else if (strncmp((const char *)localbuff, s_buzzer_long, sizeof(s_buzzer_long) - 1) == 0)
+        {
+            char * msg = (char *) localbuff;
+            unsigned char decimales = 0;            
+            unsigned short bips_qtty = 0;
+        
+            msg += sizeof(s_buzzer_long);		//normalizo al payload, hay un espacio
+
+            //lo que viene es un byte de 1 a 9
+            decimales = StringIsANumber(msg, &bips_qtty);
+            if (decimales == 1)
+            {
+                BuzzerCommands(BUZZER_MULTIPLE_LONG, (unsigned char) bips_qtty);
+                UART_PC_Send(s_ok);
+            }
+            else
+                UART_PC_Send(s_nok);
+        }
+        
+        
 #ifdef HARDWARE_VERSION_2_1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"finish_ok,", (sizeof("finish_ok,") - 1)))
         {

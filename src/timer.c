@@ -26,8 +26,10 @@ extern volatile unsigned short antenna_info_timer;
 
 extern volatile unsigned char take_current_samples;
 #ifdef USE_BUZZER_ON_BOARD
-extern unsigned short buzzer_timeout;
+extern volatile unsigned short buzzer_timeout;
 #endif
+
+extern volatile unsigned short timer_led;
 
 
 /* Globals ---------------------------------------------------------------------*/
@@ -280,6 +282,10 @@ void TIM7_IRQHandler (void)	//1mS
     if (buzzer_timeout)
         buzzer_timeout--;
 #endif
+
+    if (timer_led)
+        timer_led--;
+    
         
     //bajar flag
     if (TIM7->SR & 0x01)	

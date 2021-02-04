@@ -1,0 +1,1 @@
+../../Projects/Gausstek/Gausstek_Magneto/magneto_paremeters_calculate.py

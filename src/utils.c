@@ -83,4 +83,18 @@ unsigned short GetValue (unsigned char * pn, char delimiter)
 	return new_val;
 }
 
+
+//check if all the chars in string are numbers, answer num qtty
+unsigned char StringCheckNumbers (char * str, unsigned char len)
+{
+    unsigned char qtty;
+
+    for (qtty = 0; qtty < len; qtty++)
+    {
+        if ((*(str + qtty) < '0') || (*(str + qtty) > '9'))
+            break;
+    }
+
+    return qtty;
+}
 //--- end of file ---//

@@ -11,9 +11,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "antennas.h"
+#include "channels_defs.h"
 #include "usart.h"
 #include "GTK_Estructura.h"
-#include "GTK_Hard.h"        //define el nombre de los canales
+#include "answers_defs.h"
+
 
 #include <stdio.h>
 #include <string.h>
@@ -126,15 +128,13 @@
 
 /* Externals ------------------------------------------------------------------*/
 extern volatile unsigned short antenna_timer;
+extern volatile unsigned short antenna_info_timer;
 
 extern session_typedef session_ch_1;
 extern session_typedef session_ch_2;
 extern session_typedef session_ch_3;
 extern session_typedef session_ch_4;
 
-#ifdef SOFTWARE_VERSION_1_3
-extern volatile unsigned short antenna_info_timer;
-#endif
 
 
 /* Globals ----------------------------------------------------------------------------*/
@@ -164,10 +164,8 @@ unsigned char keepalive_name_ch2 = 0;
 unsigned char keepalive_name_ch3 = 0;
 unsigned char keepalive_name_ch4 = 0;
 
-#ifdef SOFTWARE_VERSION_1_3
 unsigned char antenna_info_sended = 0;
 unsigned char antenna_send_info_with_timer = 0;
-#endif
 
 
 /* Module Private Functions -----------------------------------------------------------*/
@@ -184,10 +182,8 @@ void AntennaUpdateStates (void)
     switch (antenna_state)
     {
     case ANTENNA_INIT:
-#ifdef SOFTWARE_VERSION_1_3
         antenna_info_timer = ANTENNA_INFO_TIMER_FIRST_START;
         antenna_info_sended = 0;
-#endif
         antenna_state++;
         break;
 
@@ -348,7 +344,6 @@ void AntennaUpdateStates (void)
             antenna_state++;
         }
 
-#ifdef SOFTWARE_VERSION_1_3
         //si alguna tuvo update doy algo de tiempo y luego envio info a la PC
         if (AntennaCheckNewParamsCh1 || AntennaCheckNewParamsCh2 ||
             AntennaCheckNewParamsCh3 || AntennaCheckNewParamsCh4)
@@ -381,7 +376,6 @@ void AntennaUpdateStates (void)
             antenna_info_sended = 0;
             antenna_send_info_with_timer = 0;
         }            
-#endif
         break;
 
     case ANTENNA_IN_TREATMENT:
@@ -505,7 +499,6 @@ void AntennaUpdateStates (void)
             antenna_state = ANTENNA_IN_STANDBY;
         }
 
-#ifdef SOFTWARE_VERSION_1_3
         //si alguna tuvo update, se desenchufo y enchufo
         if (AntennaCheckNewParamsCh1 && AntennaCheckInTreatmentCh1)
         {
@@ -545,7 +538,6 @@ void AntennaUpdateStates (void)
             AntennaSendKnowParams();            
             antenna_send_info_with_timer = 0;
         }
-#endif        
         break;
 
     case ANTENNA_IN_PAUSE:

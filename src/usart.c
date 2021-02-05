@@ -17,6 +17,27 @@
 #include <string.h>
 
 
+#define RCC_USART1_CLK    (RCC->APB2ENR & 0x00004000)
+#define RCC_USART1_CLKEN    (RCC->APB2ENR |= 0x00004000)
+#define RCC_USART1_CLKDIS    (RCC->APB2ENR &= ~0x00004000)
+
+#define RCC_USART2_CLK    (RCC->APB1ENR & 0x00020000)
+#define RCC_USART2_CLKEN    (RCC->APB1ENR |= 0x00020000)
+#define RCC_USART2_CLKDIS    (RCC->APB1ENR &= ~0x00020000)
+
+#define RCC_USART3_CLK    (RCC->APB1ENR & 0x00040000)
+#define RCC_USART3_CLKEN    (RCC->APB1ENR |= 0x00040000)
+#define RCC_USART3_CLKDIS    (RCC->APB1ENR &= ~0x00040000)
+
+#define RCC_UART4_CLK    (RCC->APB1ENR & 0x00080000)
+#define RCC_UART4_CLKEN    (RCC->APB1ENR |= 0x00080000)
+#define RCC_UART4_CLKDIS    (RCC->APB1ENR &= ~0x00080000)
+
+#define RCC_UART5_CLK    (RCC->APB1ENR & 0x00100000)
+#define RCC_UART5_CLKEN    (RCC->APB1ENR |= 0x00100000)
+#define RCC_UART5_CLKDIS    (RCC->APB1ENR &= ~0x00100000)
+
+
 /* Externals ------------------------------------------------------------------*/
 extern volatile unsigned char usart1_have_data;
 extern volatile unsigned char usart2_have_data;

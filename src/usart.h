@@ -12,7 +12,7 @@
 #define _USART_H_
 
 //---- Includes to help the Defines ----------
-#include "stm32f10x.h"
+// #include "stm32f10x.h"
 
 
 //---- Configurations Defines --------------------
@@ -21,8 +21,7 @@
 
 #define SIZEOF_TXDATA        256
 #define SIZEOF_RXDATA        256
-//se pueden colocar ifdef para cada usart y habilitar o no cada una
-//reduciria el codigo generado por el compilador
+
 
 //---- Exported Macros and Defines --------------------
 #define UART_PC_Init() 		Usart1Config()
@@ -64,25 +63,6 @@
 // #define UART4_9600         USART_RC_PCKL1_9600
 // #define UART5_9600         USART_RC_PCKL1_9600
 
-#define RCC_USART1_CLK (RCC->APB2ENR & 0x00004000)
-#define RCC_USART1_CLKEN RCC->APB2ENR |= 0x00004000
-#define RCC_USART1_CLKDIS RCC->APB2ENR &= ~0x00004000
-
-#define RCC_USART2_CLK (RCC->APB1ENR & 0x00020000)
-#define RCC_USART2_CLKEN RCC->APB1ENR |= 0x00020000
-#define RCC_USART2_CLKDIS RCC->APB1ENR &= ~0x00020000
-
-#define RCC_USART3_CLK (RCC->APB1ENR & 0x00040000)
-#define RCC_USART3_CLKEN RCC->APB1ENR |= 0x00040000
-#define RCC_USART3_CLKDIS RCC->APB1ENR &= ~0x00040000
-
-#define RCC_UART4_CLK (RCC->APB1ENR & 0x00080000)
-#define RCC_UART4_CLKEN RCC->APB1ENR |= 0x00080000
-#define RCC_UART4_CLKDIS RCC->APB1ENR &= ~0x00080000
-
-#define RCC_UART5_CLK (RCC->APB1ENR & 0x00100000)
-#define RCC_UART5_CLKEN RCC->APB1ENR |= 0x00100000
-#define RCC_UART5_CLKDIS RCC->APB1ENR &= ~0x00100000
 
 
 //--- Exported functions ---//

@@ -11,6 +11,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "GTK_Hard.h"
+#include "channels_defs.h"
+#include "answers_defs.h"
 #include "timer.h"
 #include "usart.h"
 #include "stm32f10x.h"

@@ -15,6 +15,8 @@
 #include "flash_program.h"
 #include "GTK_Signal.h"
 #include "GTK_Hard.h"
+#include "channels_defs.h"
+#include "answers_defs.h"
 #include <string.h>
 #include <stdio.h>
 

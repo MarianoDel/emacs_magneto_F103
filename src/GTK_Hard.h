@@ -24,7 +24,7 @@
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
 
-#define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
+// #define ANTENNA_HARDCODED        //para no pedir comunicacion con la placa de antenna
 #define NO_ERRORS_IN_RISING      //en rising edge a veces necesita mucha tension, Param Calc no tira error
 #define USE_CURRENT_SLOT_WITHOUT_LOAD_CMD    //se puede dar start, sin hacer el load previo
 
@@ -149,21 +149,7 @@
 // #define HARDCODE_I_DEC_CH4 0
 //----- End of Use it whithout Antenna Board Configuration ---//
 
-//definicion de canales para todos los modulos
-#define CH0		0
-#define CH1		1
-#define CH2		2
-#define CH3		3
-#define CH4		4
 
-enum resultados
-{
-	NO_INIT = 0,
-	TRABAJANDO,
-	FIN_OK,
-	FIN_ERROR,
-	FIN_TIMEOUT
-};
 
 enum bool
 {

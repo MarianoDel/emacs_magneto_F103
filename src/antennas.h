@@ -69,20 +69,20 @@ enum Session_Channel_4_Verify_Antenna_states
 
 //--- Exported functions ---//
 void AntennaUpdateStates (void);
+
 void AntennaSetCurrentTemp (unsigned char, unsigned char, unsigned char);
-unsigned char AntennaGetConnection (unsigned char);
 unsigned char AntennaGetCurrentTemp (unsigned char);
-void AntennaGetParamsStruct (unsigned char, antenna_typedef *);
+
 void AntennaSetParamsStruct (unsigned char, antenna_typedef *);
+void AntennaGetParamsStruct (unsigned char, antenna_typedef *);
+
 unsigned char AntennaVerifyForTreatment (unsigned char);
+unsigned char AntennaGetConnection (unsigned char);
+
 void AntennaIsAnswering (unsigned char);
 void AntennaEndTreatment (unsigned char);
 void AntennaSendKnowInfoWithTimer (void);
 void AntennaSetName (unsigned char, char *);
-
-// void Session_Set_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
-// void Session_Clear_Antenna (session_typedef * ptr_session, unsigned char stage);
-// void Session_Get_Antenna (session_typedef * ptr_session, unsigned char stage , antenna_typedef * ptr_antenna);
 
 
 #endif    /* _ANTENNAS_H_ */

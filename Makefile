@@ -75,6 +75,7 @@ SRC += ./src/timer.c
 SRC += ./src/flash_program.c
 SRC += ./src/adc.c
 SRC += ./src/comms.c
+SRC += ./src/comms_channels.c
 SRC += ./src/gpio.c
 SRC += ./src/dma.c
 SRC += ./src/antennas.c
@@ -196,5 +197,29 @@ clean:
 	rm -f $(SRC:.c=.lst)
 #   rm $(ASRC:.s=.s.bak)
 	rm -f $(ASRC:.s=.lst)
+	rm -f *.o
+	rm -f *.out
+
+
+
+tests_comms_channels:
+	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	gcc -c src/utils.c -I. $(INCDIR)
+	gcc -c src/comms_channels.c -I. $(INCDIR)
+	gcc src/tests_comms_channels.c comms_channels.o utils.o
+	./a.out
+
+tests_antennas:
+	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	gcc -c src/antennas.c -I. $(INCDIR)
+	gcc src/tests_antennas.c antennas.o
+	./a.out
+
+tests_antennas_simul:
+	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	gcc -c src/antennas.c -I. $(INCDIR)
+	gcc src/tests_antennas_simul.c antennas.o
+	./a.out
+
 
 # *** EOF ***

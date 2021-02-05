@@ -21,6 +21,7 @@
 #include "GTK_Errors.h"
 
 #include "comms.h"
+#include "comms_channels.h"
 // #include "hard.h"
 #include "startup_clocks.h"
 #include "gpio.h"
@@ -38,11 +39,13 @@ volatile unsigned char usart3_have_data = 0;
 volatile unsigned char usart4_have_data = 0;
 volatile unsigned char usart5_have_data = 0;
 
+char s_ok [] = {"OK\r\n"};
+char s_nok [] = {"ERROR\r\n"};
+
 //--- Externals para enviar keepalive por UART (nuevo en modulo antenna)
 volatile unsigned short antenna_timer = 0;
-#ifdef SOFTWARE_VERSION_1_3
 volatile unsigned short antenna_info_timer = 0;
-#endif
+
 
 //--- Externals para muestreos de corriente con el ADC
 volatile unsigned char take_current_samples = 0;

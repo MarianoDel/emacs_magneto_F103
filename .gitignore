@@ -3,6 +3,7 @@
 *.hex
 *.map
 *.o
+*.out
 *.o.d
 *.lst
 *.zip

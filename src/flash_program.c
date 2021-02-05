@@ -18,6 +18,7 @@
 // #include "stm32f10x_flash.h"
 #include "stm32f10x.h"
 #include "GTK_Hard.h"
+#include "answers_defs.h"
 
 //New buffer.
 //es un sizeof(session_slot_aux) * 5 >> 2 (porque es un int)

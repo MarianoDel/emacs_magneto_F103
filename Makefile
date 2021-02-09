@@ -80,6 +80,7 @@ SRC += ./src/gpio.c
 SRC += ./src/dma.c
 SRC += ./src/antennas.c
 SRC += ./src/utils.c
+SRC += ./src/test_functions.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c

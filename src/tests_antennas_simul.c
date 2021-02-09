@@ -60,15 +60,17 @@ void Usart3Send (char * str);
 void Uart4Send (char * str);
 void Uart5Send (char * str);
 
-// Mock for antennas module
 
+// Functions for Tests
+void Test_Treatment (void);
 void Test_Reconnect (void);
 
 // Module Functions ------------------------------------------------------------
 int main (int argc, char *argv[])
 {
-
-    Test_Reconnect();
+ 
+   // Test_Reconnect();
+    Test_Treatment();
     return 0;
 }
 
@@ -334,6 +336,7 @@ void Test_Treatment (void)
     }
 
     printf(" CH4 antenna connected with name\n");
+    strcpy(antenna_name_ch4, "Tunnel 10 inches");
     channel4_connect = 1;
 
     antenna_typedef antenna_st;    

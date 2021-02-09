@@ -22,6 +22,8 @@
 
 #include "comms.h"
 #include "comms_channels.h"
+#include "test_functions.h"
+
 // #include "hard.h"
 #include "startup_clocks.h"
 #include "gpio.h"
@@ -105,6 +107,10 @@ int main (void)
 
     //Signal timer -- 100us
     TIM5_Init();
+
+    // Test Functions for Hardware
+    // TF_Usart5();
+    // TF_Usart5_timer_antenna();    
 
     //Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
     //de otra forma revisar el cristal elegido

@@ -38,21 +38,8 @@ extern volatile unsigned char usart5_have_data;
 extern char s_ok [];
 extern char s_nok [];
 
-// extern session_typedef session_ch_1;
-// extern session_typedef session_ch_2;
-// extern session_typedef session_ch_3;
-// extern session_typedef session_ch_4;
-
-// extern session_typedef session_slot_aux;
-
-// extern unsigned char channel_1_pause;
-// extern unsigned char channel_2_pause;
-// extern unsigned char channel_3_pause;
-// extern unsigned char channel_4_pause;
-
 
 // Globals ---------------------------------------------------------------------
-
 unsigned char localbuff2 [SIZEOF_RXDATA] = { '\0' };
 
 
@@ -70,9 +57,9 @@ void UART2_Receive (void)
 {
     if (usart2_have_data)
     {        
-        ReadUsart2Buffer(localbuff2, sizeof(localbuff2));
+        ReadUsart2Buffer(localbuff2, SIZEOF_RXDATA);
 
-        comms_ch_answer_e answer = nok_answer;
+        comms_ch_answer_e answer = nok_no_answer;
         answer = ParseCommsWithChannels((char *) localbuff2, CH1);
 
         if (answer == ok_answer)
@@ -91,9 +78,9 @@ void UART3_Receive (void)
 {
     if (usart3_have_data)
     {        
-        ReadUsart3Buffer(localbuff2, sizeof(localbuff2));
+        ReadUsart3Buffer(localbuff2, SIZEOF_RXDATA);
 
-        comms_ch_answer_e answer = nok_answer;
+        comms_ch_answer_e answer = nok_no_answer;
         answer = ParseCommsWithChannels((char *) localbuff2, CH2);
 
         if (answer == ok_answer)
@@ -112,9 +99,9 @@ void UART4_Receive (void)
 {
     if (usart4_have_data)
     {        
-        ReadUart4Buffer(localbuff2, sizeof(localbuff2));
+        ReadUart4Buffer(localbuff2, SIZEOF_RXDATA);
 
-        comms_ch_answer_e answer = nok_answer;
+        comms_ch_answer_e answer = nok_no_answer;
         answer = ParseCommsWithChannels((char *) localbuff2, CH3);
 
         if (answer == ok_answer)
@@ -133,9 +120,14 @@ void UART5_Receive (void)
 {
     if (usart5_have_data)
     {        
-        ReadUart5Buffer(localbuff2, sizeof(localbuff2));
+        ReadUart5Buffer(localbuff2, SIZEOF_RXDATA);
 
-        comms_ch_answer_e answer = nok_answer;
+        // unsigned char len = strlen((const char *)localbuff2);
+        // if (len)
+        //     UART_PC_Send((char *)localbuff2);
+
+
+        comms_ch_answer_e answer = nok_no_answer;
         answer = ParseCommsWithChannels((char *) localbuff2, CH4);
 
         if (answer == ok_answer)
@@ -151,7 +143,7 @@ void UART5_Receive (void)
 
 comms_ch_answer_e ParseCommsWithChannels (char * str, unsigned char channel)
 {
-    comms_ch_answer_e error = nok_answer;
+    comms_ch_answer_e error = nok_no_answer;
     char dummy_str [10] = { 0 };
     
     //temp,055.00\r\n
@@ -179,11 +171,9 @@ comms_ch_answer_e ParseCommsWithChannels (char * str, unsigned char channel)
     //ant0,012.27,087.90,001.80,065.00\r\n.
     else if (!strncmp(str, (const char *)"ant", (sizeof("ant") - 1)))
     {
-#ifndef SOFTWARE_VERSION_1_3
         sprintf(dummy_str, ",%d\r\n", channel);
         strcpy((str + 32), dummy_str);
         UART_PC_Send(str);
-#endif
 
         if ((*(str + 4) == ',') &&
             (*(str + 11) == ',') &&

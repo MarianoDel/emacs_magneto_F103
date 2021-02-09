@@ -16,6 +16,7 @@
 #include "GTK_Estructura.h"
 #include "answers_defs.h"
 
+// #include "GTK_Hard.h"    //solo para tests con LED3
 
 #include <stdio.h>
 #include <string.h>
@@ -321,6 +322,12 @@ void AntennaUpdateStates (void)
             }
             else
                 UART_CH4_Send("get_params\r\n");
+
+            // UART_CH4_Send("get_params\r\n");
+            // if (LED3)
+            //     LED3_OFF;
+            // else
+            //     LED3_ON;
             
             antenna_timer = ANTENNA_KEEP_ALIVE_TIMER;
         }

@@ -285,9 +285,7 @@ unsigned char ReadUsart2Buffer (unsigned char * bout, unsigned short max_len)
 
     if (len < max_len)
     {
-        //el prx2 siempre llega adelantado desde la int, lo corto con un 0
-        *prx2 = '\0';
-        prx2++;
+        //prx2 points to the '\0' end of line                
         len += 1;
         memcpy(bout, (unsigned char *) rx2buff, len);
     }
@@ -425,9 +423,7 @@ unsigned char ReadUsart3Buffer (unsigned char * bout, unsigned short max_len)
 
     if (len < max_len)
     {
-        //el prx3 siempre llega adelantado desde la int, lo corto con un 0
-        *prx3 = '\0';
-        prx3++;
+        //prx3 points to the '\0' end of line        
         len += 1;
         memcpy(bout, (unsigned char *) rx3buff, len);
     }
@@ -568,9 +564,7 @@ unsigned char ReadUart4Buffer (unsigned char * bout, unsigned short max_len)
 
     if (len < max_len)
     {
-        //el prx4 siempre llega adelantado desde la int, lo corto con un 0
-        *prx4 = '\0';
-        prx4++;
+        //prx4 points to the '\0' end of line        
         len += 1;
         memcpy(bout, (unsigned char *) rx4buff, len);
     }
@@ -714,9 +708,7 @@ unsigned char ReadUart5Buffer (unsigned char * bout, unsigned short max_len)
 
     if (len < max_len)
     {
-        //el prx5 siempre llega adelantado desde la int, lo corto con un 0
-        *prx5 = '\0';
-        prx5++;
+        //prx5 points to the '\0' end of line
         len += 1;
         memcpy(bout, (unsigned char *) rx5buff, len);
     }
@@ -726,7 +718,7 @@ unsigned char ReadUart5Buffer (unsigned char * bout, unsigned short max_len)
         len = max_len;
     }
 
-    //ajusto punteros de rx luego de la copia
+    // pointer adjust
     prx5 = rx5buff;
 
     return (unsigned char) len;

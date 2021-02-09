@@ -20,9 +20,7 @@
 /* Externals -------------------------------------------------------------------*/
 //para el modulo de antenas
 extern volatile unsigned short antenna_timer;
-#ifdef SOFTWARE_VERSION_1_3
 extern volatile unsigned short antenna_info_timer;
-#endif
 
 extern volatile unsigned char take_current_samples;
 #ifdef USE_BUZZER_ON_BOARD
@@ -269,10 +267,8 @@ void TIM7_IRQHandler (void)	//1mS
     if (antenna_timer)
         antenna_timer--;
 
-#ifdef SOFTWARE_VERSION_1_3
     if (antenna_info_timer)
         antenna_info_timer--;
-#endif
 
     //Wait_ms
     if (timer_wait)

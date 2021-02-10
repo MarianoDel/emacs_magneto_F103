@@ -21,18 +21,21 @@
 #include "antennas.h"
 #include "utils.h"
 
+#include "adc.h"
+
 #include <string.h>
 #include <stdio.h>
+
+
+// Module Private Constants ----------------------------------------------------
+#define K_200V    0.0823    //con diodo z 5.1V
+#define K_48V    0.0156    //con z 5.1V
 
 
 
 // Externals -------------------------------------------------------------------
 //main.c para usart.c
 extern volatile unsigned char usart1_have_data;
-// extern volatile unsigned char usart2_have_data;
-// extern volatile unsigned char usart3_have_data;
-// extern volatile unsigned char usart4_have_data;
-// extern volatile unsigned char usart5_have_data;
 
 //desde main.c
 extern session_typedef session_ch_1;
@@ -62,15 +65,12 @@ const char s_buzzer_long [] = {"buzzer long"};
 
 
 // Module Private Functions ----------------------------------------------------
-// unsigned char ParseCommsWithChannels (char * str, unsigned char channel);
-// static void ParseCurrentTemp (char * str, unsigned char * t_int, unsigned char * t_dec);
-// static void ParseAntennaParams (char * str, antenna_typedef * antenna);
 
 
 
-/* Module Exported Functions -----------------------------------------------------------*/
-//MODIFICADO MAGNETO V2.0 28-02-15 ANTES ERA USART3
-//--- Recepcion de la PC
+// Module Exported Functions ---------------------------------------------------
+
+//-- PC or Rasp reception
 void UART1_Receive (void)
 {
     antenna_typedef 	antenna;
@@ -80,8 +80,6 @@ void UART1_Receive (void)
     if (usart1_have_data)
     {
         ReadUsart1Buffer(localbuff, sizeof(localbuff));
-        //--- Introduce your code here ---//
-        // UART_PC_Send((char *)&localbuff[0]);
 
         if (!strncmp((const char *)&localbuff[0], (const char *)"get_temp,", (sizeof("get_temp,") - 1)))
         {
@@ -113,38 +111,11 @@ void UART1_Receive (void)
             }
         }
 
-        else if (!strncmp((const char *)localbuff,
-                          (const char *)"serial num",
-                          (sizeof("serial num") - 1)))
-        {
-#ifdef USE_DEVICE_ID_4BYTES
-            unsigned int device_id = *((unsigned short*)0x1FFFF7E8);
-            device_id <<= 16;
-            device_id |= *((unsigned short*)(0x1FFFF7E8 + 2));
-            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 4));
-            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 8));
-            sprintf((char *)localbuff, "0x%08x\r\n", device_id);
-            
-            UART_PC_Send((char *)localbuff);            
-#endif
-            // sprintf((char *)localbuff, "mem: %dk\r\n", *((unsigned short*)0x1FFFF7E0));
-            // sprintf((char *)localbuff, "0x%x\r\n", *((unsigned short*)0x1FFFF7E8));            
-#ifdef USE_DEVICE_ID_12BYTES
-            sprintf((char *)localbuff, "0x%04x%04x%08x%08x\r\n",
-                    *((unsigned short*)0x1FFFF7E8),
-                    *((unsigned short*)(0x1FFFF7E8 + 2)),
-                    *((unsigned int*)(0x1FFFF7E8 + 4)),
-                    *((unsigned int*)(0x1FFFF7E8 + 8)));
-
-            UART_PC_Send((char *)localbuff);
-#endif
-        }
         else if (!strncmp((const char *)&localbuff[0],
                           (const char *)"get_antenna,",
                           (sizeof("get_antenna,") - 1)))
         {
             UART_PC_Send((char *)"OK\r\n");
-            //pido envio de info de antenas conocidas hasta ahora
             AntennaSendKnowInfoWithTimer ();            
         }
 
@@ -303,38 +274,6 @@ void UART1_Receive (void)
                 UART_PC_Send((char *)"ERROR\r\n");
         }
 
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"save,", (sizeof("save,") - 1)))
-        {
-            // unsigned char i;
-            // if (((localbuff[5] - 48) < 2) && (localbuff[6] - 48 < 10))
-            // {
-            //     i = FLASH_Program(&session_slot_aux, ((localbuff[5] - 48) * 10 + (localbuff[6] - 48)));
-
-            //     if (i == FIN_OK)
-            //     {
-            //         UART_PC_Send("Guardado OK\r\n");
-            //         Wait_ms(1000);
-            //         //Reset.
-            //         NVIC_SystemReset();
-            //     }
-
-            //     if (i == FIN_ERROR)
-            //     {
-            //         UART_PC_Send("Guardado ERROR\r\n");
-            //         Wait_ms(1000);
-            //         //Reset.
-            //         NVIC_SystemReset();
-            //     }
-
-
-            //     UART_PC_Send((char *)"OK\r\n");
-            // }
-            // else
-            //     UART_PC_Send((char *)"ERROR\r\n");
-
-            UART_PC_Send((char *)"OK\r\n");            
-        }
-
         else if (!strncmp((const char *)&localbuff[0], (const char *)"reset", (sizeof("reset") - 1)))
         {
             UART_PC_Send("Restarting...\r\n");
@@ -362,29 +301,6 @@ void UART1_Receive (void)
             }
         }
 
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"load,", (sizeof("load,") - 1)))
-        {
-            //load,slot[2],destino[1]
-            if (((localbuff[6] - 48) < 10) && ((localbuff[5] - 48) < 2))
-            {
-                Session_Load (&session_slot_aux, (((localbuff[5] - 48) * 10) + localbuff[6] - 48), 0);
-                Session_Load (&session_slot_aux, (((localbuff[5] - 48) * 10) + localbuff[6] - 48), 1);
-                Session_Load (&session_slot_aux, (((localbuff[5] - 48) * 10) + localbuff[6] - 48), 2);
-                Session_Load (&session_slot_aux, (((localbuff[5] - 48) * 10) + localbuff[6] - 48), 3);
-                Session_Load (&session_slot_aux, (((localbuff[5] - 48) * 10) + localbuff[6] - 48), 4);
-                UART_PC_Send((char *)"OK\r\n");
-            }
-            else
-                UART_PC_Send((char *)"ERROR\r\n");
-/*			if (((buffUART3rx2[6] - 48) < 10) && ((buffUART3rx2[5] - 48) < 2) && ((buffUART3rx2[8] - 48) >= 0) && ((buffUART3rx2[8] - 48) < 5))
-			{
-                        Session_Load (&session_slot_aux, (((buffUART3rx2[5] - 48) * 10) + buffUART3rx2[6] - 48), (buffUART3rx2[8] - 48));
-                        UART3Send((char *)"OK\r\n");
-			}
-			else
-                        UART3Send((char *)"ERROR\r\n");
-*/
-        }
         //example. state_of_stage,0,1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"state_of_stage,", (sizeof("state_of_stage,") - 1)))
         {
@@ -445,7 +361,8 @@ void UART1_Receive (void)
             UART_PC_Send((char *)"OK\r\n");
         }
 
-    //-- Buzzer Actions
+        
+        //-- Buzzer Actions
         else if (strncmp((const char *)localbuff, s_buzzer_short, sizeof(s_buzzer_short) - 1) == 0)
         {
             char * msg = (char *) localbuff;
@@ -504,8 +421,6 @@ void UART1_Receive (void)
                 UART_PC_Send(s_nok);
         }
         
-        
-#ifdef HARDWARE_VERSION_2_1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"finish_ok,", (sizeof("finish_ok,") - 1)))
         {
             StopAllChannels();
@@ -513,42 +428,80 @@ void UART1_Receive (void)
             BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
             UART_PC_Send((char *)"OK\r\n");
         }
+        
+
+        //-- Diagnostics
+        else if (!strncmp((const char *)localbuff,
+                          (const char *)"serial num",
+                          (sizeof("serial num") - 1)))
+        {
+#ifdef USE_DEVICE_ID_4BYTES
+            unsigned int device_id = *((unsigned short*)0x1FFFF7E8);
+            device_id <<= 16;
+            device_id |= *((unsigned short*)(0x1FFFF7E8 + 2));
+            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 4));
+            device_id ^= *((unsigned int*)(0x1FFFF7E8 + 8));
+            sprintf((char *)localbuff, "Device Id: 0x%08x\r\n", device_id);
+            
+            UART_PC_Send((char *)localbuff);            
 #endif
+#ifdef USE_DEVICE_ID_12BYTES
+            sprintf((char *), "Device Id: 0x%04x%04x%08x%08x\r\n",            
+                    *((unsigned short*)0x1FFFF7E8),
+                    *((unsigned short*)(0x1FFFF7E8 + 2)),
+                    *((unsigned int*)(0x1FFFF7E8 + 4)),
+                    *((unsigned int*)(0x1FFFF7E8 + 8)));
 
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"read_channel,", (sizeof("read_channel,") - 1)))
+            UART_PC_Send((char *)localbuff);
+#endif
+        }
+        
+        else if (!strncmp((const char *)localbuff, "voltage", sizeof("voltage") - 1))
         {
-            if (((localbuff[13] - 48) < 5) && ((localbuff[13] - 48) > 0))
-            {
-                Channel_Load (&session_slot_aux, (localbuff[13] - 48));
+            char to_send [64];
+            float fcalc = 1.0;
+            short volt_int, volt_dec;
+            unsigned short sample = 0;
 
-                //--- Send slot content ---//
-                SessionSend(&session_slot_aux);
+            ConvertChannel(ADC_Channel_14);
+            while (!ConvertSingleChannelFinishFlag());
+            sample = ADC1->DR;
+            
+            fcalc = sample;
+            fcalc = fcalc * K_200V;
+            volt_int = (short) fcalc;
+            fcalc = fcalc - volt_int;
+            fcalc = fcalc * 10;
+            volt_dec = (short) fcalc;
+            sprintf(to_send, "High Supply: %3d.%01dV\r\n", volt_int, volt_dec);
+            UART_PC_Send(to_send);
 
-                UART_PC_Send((char *)"OK\r\n");
-            }
-            else
-                UART_PC_Send((char *)"ERROR\r\n");
+            ConvertChannel(ADC_Channel_15);
+            while (!ConvertSingleChannelFinishFlag());
+            sample = ADC1->DR;
+
+            fcalc = sample;
+            fcalc = fcalc * K_48V;
+            volt_int = (short) fcalc;
+            fcalc = fcalc - volt_int;
+            fcalc = fcalc * 10;
+            volt_dec = (short) fcalc;        
+            sprintf(to_send, "Low Supply: %3d.%01dV\r\n", volt_int, volt_dec);
+            UART_PC_Send(to_send);
         }
 
-        else if (!strncmp((const char *)&localbuff[0], (const char *)"read_slot,", (sizeof("read_slot,") - 1)))
+        else if (!strncmp((const char *)localbuff, "hard_soft", sizeof("hard_soft") - 1))
         {
-            //load,slot[2],destino[1]
-            if ((((localbuff[11] - 48) + (localbuff[10] - 48) * 10) < 11))
-            {
-                Session_Load (&session_slot_aux, (((localbuff[10] - 48) * 10) + localbuff[11] - 48), 0);
-
-                //--- Send slot content ---//
-                SessionSend(&session_slot_aux);
-
-                UART_PC_Send((char *)"OK\r\n");
-            }
-            else
-                UART_PC_Send((char *)"ERROR\r\n");
+            char to_send [80];
+            // sprintf(to_send, "%s\r\n%s\r\n", HARD, SOFT);
+            sprintf(to_send, "%s%s", HARD, SOFT);            
+            UART_PC_Send(to_send);
         }
 
+        //-- End of know messages 
         else
             UART_PC_Send((char *)"ERROR\r\n");
-        //--- end ---//
+
         usart1_have_data = 0;
     }
 }

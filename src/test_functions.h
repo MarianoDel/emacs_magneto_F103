@@ -21,6 +21,7 @@
 // Exported Functions ----------------------------------------------------------
 void TF_Usart5 (void);
 void TF_Usart5_timer_antenna (void);
+void TF_Pwm_Channels (void);
 // void TF_Buzzer (void);
 // void TF_Buzzer_Functions (void);
 // void TF_lcdE (void);

@@ -70,5 +70,32 @@ void TF_Usart5_timer_antenna (void)
 }
 
 
+void TF_Pwm_Channels (void)
+{
+    TIM_1_Init();        
+    TIM_2_Init();
+    TIM_3_Init();
+    TIM_4_Init();
+
+    while (1)
+    {
+        PWM_CH1_TiempoSubida(DUTY_10_PERCENT);
+        PWM_CH1_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH1_TiempoBajada(DUTY_NONE);
+        Wait_ms(5000);
+        
+        PWM_CH1_TiempoSubida(DUTY_NONE);
+        PWM_CH1_TiempoMantenimiento(DUTY_10_PERCENT);
+        PWM_CH1_TiempoBajada(DUTY_NONE);
+        Wait_ms(5000);
+
+        PWM_CH1_TiempoSubida(DUTY_NONE);
+        PWM_CH1_TiempoMantenimiento(DUTY_NONE);
+        PWM_CH1_TiempoBajada(DUTY_10_PERCENT);
+        Wait_ms(5000);
+    }
+}
+
+
 
 //--- end of file ---//

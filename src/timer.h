@@ -13,6 +13,7 @@
 
 //--- Exported Defines ------------------------------------
 #define DUTY_NONE      0
+#define DUTY_10_PERCENT      100
 #define DUTY_50_PERCENT      500
 #define DUTY_100_PERCENT     1000
 #define DUTY_ALWAYS          (DUTY_100_PERCENT + 1)

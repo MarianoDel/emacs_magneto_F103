@@ -414,6 +414,12 @@ void UART1_Receive (void)
 
         else if (!strncmp((const char *)&localbuff[0], (const char *)"start,", (sizeof("start,") - 1)))
         {
+            // someone was paused?
+            channel_1_pause = 0;
+            channel_2_pause = 0;
+            channel_3_pause = 0;
+            channel_4_pause = 0;
+
             Session_Channel_1_Start();
             Session_Channel_2_Start();
             Session_Channel_3_Start();

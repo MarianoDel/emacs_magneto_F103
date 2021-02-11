@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 
-
+#define NO_SEND_CONN_STRING_TO_PC
 // Externals -------------------------------------------------------------------
 //main.c para usart.c
 // extern volatile unsigned char usart1_have_data;
@@ -171,9 +171,11 @@ comms_ch_answer_e ParseCommsWithChannels (char * str, unsigned char channel)
     //ant0,012.27,087.90,001.80,065.00\r\n.
     else if (!strncmp(str, (const char *)"ant", (sizeof("ant") - 1)))
     {
+#ifndef NO_SEND_CONN_STRING_TO_PC
         sprintf(dummy_str, ",%d\r\n", channel);
         strcpy((str + 32), dummy_str);
         UART_PC_Send(str);
+#endif
 
         if ((*(str + 4) == ',') &&
             (*(str + 11) == ',') &&

@@ -25,7 +25,8 @@
 #include <stdio.h>
 
 
-#define NO_SEND_CONN_STRING_TO_PC
+#define SEND_CONN_STRING_TO_PC    //send a message to PC at first conection
+// #define SEND_ANTENNA_STRING_TO_PC    //send the antenna params string to PC at first conection
 // Externals -------------------------------------------------------------------
 //main.c para usart.c
 // extern volatile unsigned char usart1_have_data;
@@ -144,7 +145,7 @@ void UART5_Receive (void)
 comms_ch_answer_e ParseCommsWithChannels (char * str, unsigned char channel)
 {
     comms_ch_answer_e error = nok_no_answer;
-    char dummy_str [10] = { 0 };
+    char dummy_str [30] = { 0 };
     
     //temp,055.00\r\n
     if (!strncmp(str, (const char *)"temp", (sizeof("temp") - 1)))
@@ -171,12 +172,17 @@ comms_ch_answer_e ParseCommsWithChannels (char * str, unsigned char channel)
     //ant0,012.27,087.90,001.80,065.00\r\n.
     else if (!strncmp(str, (const char *)"ant", (sizeof("ant") - 1)))
     {
-#ifndef NO_SEND_CONN_STRING_TO_PC
+#ifdef SEND_CONN_STRING_TO_PC
+        sprintf(dummy_str, "new antenna ch%d\r\n", channel);
+        UART_PC_Send(dummy_str);
+#endif
+
+#ifdef SEND_ANTENNA_STRING_TO_PC
         sprintf(dummy_str, ",%d\r\n", channel);
         strcpy((str + 32), dummy_str);
         UART_PC_Send(str);
 #endif
-
+        
         if ((*(str + 4) == ',') &&
             (*(str + 11) == ',') &&
             (*(str + 18) == ',') &&

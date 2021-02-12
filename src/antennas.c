@@ -176,11 +176,6 @@ unsigned char keepalive_ch2 = 0;
 unsigned char keepalive_ch3 = 0;
 unsigned char keepalive_ch4 = 0;
 
-unsigned char keepalive_name_ch1 = 0;
-unsigned char keepalive_name_ch2 = 0;
-unsigned char keepalive_name_ch3 = 0;
-unsigned char keepalive_name_ch4 = 0;
-
 unsigned char antenna_info_sended = 0;
 unsigned char antenna_send_info_with_timer = 0;
 
@@ -193,6 +188,9 @@ void AntennaFlushParamsInLock (antenna_typedef *);
 void AntennaFlushParams (unsigned char);
 
 static void AntennaUpdateInStandByCh1_SM (void);
+static void AntennaUpdateInStandByCh2_SM (void);
+static void AntennaUpdateInStandByCh3_SM (void);
+static void AntennaUpdateInStandByCh4_SM (void);
 
 
 // Module Exported Functions ---------------------------------------------------
@@ -299,11 +297,276 @@ static void AntennaUpdateInStandByCh1_SM (void)
 }
 
 
+static void AntennaUpdateInStandByCh2_SM (void)
+{
+    switch (standby_ch2)
+    {
+    case INIT_SEARCH:
+        // get ready for a new antenna search
+        AntennaResetNewParamsCh2;
+        AntennaResetParamsCh2;        
+        AntennaResetNameCh2;
+        AntennaResetConnectionCh2;
+        AntennaSetStableParamsCh2;    //stable in no connect
+        standby_ch2++;
+        break;
+
+    case NO_CONN:
+        // ask for params
+        if ((AntennaCheckParamsCh2) &&
+            (AntennaCheckNewParamsCh2))
+        {
+            keepalive_ch2 = KEEP_ALIVE_NAME_CNTR;
+            standby_ch2++;
+            AntennaResetNewParamsCh2;    //from here if we get params again, its a reconnect
+            
+            UART_CH2_Send("get_name\r\n");
+        }
+        else
+            UART_CH2_Send("get_params\r\n");
+
+        break;
+        
+    case GET_NAME:
+        if (keepalive_ch2)
+        {
+            keepalive_ch2--;
+            if (AntennaCheckNameCh2)
+            {
+                AntennaResetConnectionCh2;
+                AntennaSetStableParamsCh2;    //stable in conn with name                
+                keepalive_ch2 = KEEP_ALIVE_CNTR;
+                standby_ch2++;
+                UART_CH2_Send("keepalive\r\n");                
+            }
+            else
+                UART_CH2_Send("get_name\r\n");
+
+        }
+        else
+        {
+            //no name sended
+            AntennaResetConnectionCh2;
+            AntennaSetStableParamsCh2;    //stable in conn without name
+            keepalive_ch2 = KEEP_ALIVE_CNTR;
+            standby_ch2++;
+            UART_CH2_Send("keepalive\r\n");                
+        }
+
+        if (AntennaCheckNewParamsCh2)    //new antenna connected
+            standby_ch2 = INIT_SEARCH;
+        
+        break;
+
+    case IN_STANDBY:
+        if (keepalive_ch2)
+        {
+            if (AntennaCheckConnectionCh2)
+            {
+                AntennaResetConnectionCh2;
+                keepalive_ch2 = KEEP_ALIVE_CNTR;
+            }
+
+            keepalive_ch2--;
+            UART_CH2_Send("keepalive\r\n");
+        }
+        else
+        {
+            // connection lost
+            standby_ch2 = INIT_SEARCH;
+        }
+
+        if (AntennaCheckNewParamsCh2)    //new antenna connected
+            standby_ch2 = INIT_SEARCH;
+        
+        break;
+
+    }
+}
+
+
+static void AntennaUpdateInStandByCh3_SM (void)
+{
+    switch (standby_ch3)
+    {
+    case INIT_SEARCH:
+        // get ready for a new antenna search
+        AntennaResetNewParamsCh3;
+        AntennaResetParamsCh3;        
+        AntennaResetNameCh3;
+        AntennaResetConnectionCh3;
+        AntennaSetStableParamsCh3;    //stable in no connect
+        standby_ch3++;
+        break;
+
+    case NO_CONN:
+        // ask for params
+        if ((AntennaCheckParamsCh3) &&
+            (AntennaCheckNewParamsCh3))
+        {
+            keepalive_ch3 = KEEP_ALIVE_NAME_CNTR;
+            standby_ch3++;
+            AntennaResetNewParamsCh3;    //from here if we get params again, its a reconnect
+            
+            UART_CH3_Send("get_name\r\n");
+        }
+        else
+            UART_CH3_Send("get_params\r\n");
+
+        break;
+        
+    case GET_NAME:
+        if (keepalive_ch3)
+        {
+            keepalive_ch3--;
+            if (AntennaCheckNameCh3)
+            {
+                AntennaResetConnectionCh3;
+                AntennaSetStableParamsCh3;    //stable in conn with name                
+                keepalive_ch3 = KEEP_ALIVE_CNTR;
+                standby_ch3++;
+                UART_CH3_Send("keepalive\r\n");                
+            }
+            else
+                UART_CH3_Send("get_name\r\n");
+
+        }
+        else
+        {
+            //no name sended
+            AntennaResetConnectionCh3;
+            AntennaSetStableParamsCh3;    //stable in conn without name
+            keepalive_ch3 = KEEP_ALIVE_CNTR;
+            standby_ch3++;
+            UART_CH3_Send("keepalive\r\n");                
+        }
+
+        if (AntennaCheckNewParamsCh3)    //new antenna connected
+            standby_ch3 = INIT_SEARCH;
+        
+        break;
+
+    case IN_STANDBY:
+        if (keepalive_ch3)
+        {
+            if (AntennaCheckConnectionCh3)
+            {
+                AntennaResetConnectionCh3;
+                keepalive_ch3 = KEEP_ALIVE_CNTR;
+            }
+
+            keepalive_ch3--;
+            UART_CH3_Send("keepalive\r\n");
+        }
+        else
+        {
+            // connection lost
+            standby_ch3 = INIT_SEARCH;
+        }
+
+        if (AntennaCheckNewParamsCh3)    //new antenna connected
+            standby_ch3 = INIT_SEARCH;
+        
+        break;
+
+    }
+}
+
+
+static void AntennaUpdateInStandByCh4_SM (void)
+{
+    switch (standby_ch4)
+    {
+    case INIT_SEARCH:
+        // get ready for a new antenna search
+        AntennaResetNewParamsCh4;
+        AntennaResetParamsCh4;        
+        AntennaResetNameCh4;
+        AntennaResetConnectionCh4;
+        AntennaSetStableParamsCh4;    //stable in no connect
+        standby_ch4++;
+        break;
+
+    case NO_CONN:
+        // ask for params
+        if ((AntennaCheckParamsCh4) &&
+            (AntennaCheckNewParamsCh4))
+        {
+            keepalive_ch4 = KEEP_ALIVE_NAME_CNTR;
+            standby_ch4++;
+            AntennaResetNewParamsCh4;    //from here if we get params again, its a reconnect
+            
+            UART_CH4_Send("get_name\r\n");
+        }
+        else
+            UART_CH4_Send("get_params\r\n");
+
+        break;
+        
+    case GET_NAME:
+        if (keepalive_ch4)
+        {
+            keepalive_ch4--;
+            if (AntennaCheckNameCh4)
+            {
+                AntennaResetConnectionCh4;
+                AntennaSetStableParamsCh4;    //stable in conn with name                
+                keepalive_ch4 = KEEP_ALIVE_CNTR;
+                standby_ch4++;
+                UART_CH4_Send("keepalive\r\n");                
+            }
+            else
+                UART_CH4_Send("get_name\r\n");
+
+        }
+        else
+        {
+            //no name sended
+            AntennaResetConnectionCh4;
+            AntennaSetStableParamsCh4;    //stable in conn without name
+            keepalive_ch4 = KEEP_ALIVE_CNTR;
+            standby_ch4++;
+            UART_CH4_Send("keepalive\r\n");                
+        }
+
+        if (AntennaCheckNewParamsCh4)    //new antenna connected
+            standby_ch4 = INIT_SEARCH;
+        
+        break;
+
+    case IN_STANDBY:
+        if (keepalive_ch4)
+        {
+            if (AntennaCheckConnectionCh4)
+            {
+                AntennaResetConnectionCh4;
+                keepalive_ch4 = KEEP_ALIVE_CNTR;
+            }
+
+            keepalive_ch4--;
+            UART_CH4_Send("keepalive\r\n");
+        }
+        else
+        {
+            // connection lost
+            standby_ch4 = INIT_SEARCH;
+        }
+
+        if (AntennaCheckNewParamsCh4)    //new antenna connected
+            standby_ch4 = INIT_SEARCH;
+        
+        break;
+
+    }
+}
+
+
 void AntennaUpdateStates (void)
 {
     switch (antenna_state)
     {
     case ANTENNA_INIT:
+        // when the device is power on, force the first info update
         antenna_info_timer = ANTENNA_INFO_TIMER_FIRST_START;
         antenna_info_sended = 0;
         antenna_state++;
@@ -313,150 +576,15 @@ void AntennaUpdateStates (void)
         if (!antenna_timer)
         {
             AntennaUpdateInStandByCh1_SM();
-
-            // if (AntennaCheckParamsCh1)
-            // {
-            //     if (AntennaCheckConnectionCh1)    //tengo parametros y contesta
-            //     {
-            //         if ((!AntennaCheckNameCh1) && (keepalive_name_ch1))
-            //         {
-            //             keepalive_name_ch1--;
-            //             UART_CH1_Send("get_name\r\n");
-            //         }
-            //         else    //tengo el nombre o me canse de preguntar
-            //             UART_CH1_Send("keepalive\r\n");
-
-            //         keepalive_ch1 = KEEP_ALIVE_COUNTER;
-            //         AntennaResetConnectionCh1;
-            //     }
-            //     else 
-            //     {
-            //         if (keepalive_ch1)
-            //         {
-            //             keepalive_ch1--;
-            //             UART_CH1_Send("keepalive\r\n");
-            //         }
-            //         else    //tenia parametros y los perdio
-            //         {
-            //             AntennaNewParamsCh1;
-            //             AntennaResetParamsCh1;
-            //             AntennaResetNameCh1;
-            //         }
-            //     }
-            // }
-            // else
-            //     UART_CH1_Send("get_params\r\n");
-
-            // if (AntennaCheckParamsCh2)
-            // {
-            //     if (AntennaCheckConnectionCh2)    //tengo parametros y contesta
-            //     {
-            //         if ((!AntennaCheckNameCh2) && (keepalive_name_ch2))
-            //         {
-            //             keepalive_name_ch2--;
-            //             UART_CH2_Send("get_name\r\n");
-            //         }
-            //         else    //tengo el nombre o me canse de preguntar
-            //             UART_CH2_Send("keepalive\r\n");
-
-            //         keepalive_ch2 = KEEP_ALIVE_COUNTER;                    
-            //         AntennaResetConnectionCh2;                    
-            //     }
-            //     else 
-            //     {
-            //         if (keepalive_ch2)
-            //         {
-            //             keepalive_ch2--;
-            //             UART_CH2_Send("keepalive\r\n");
-            //         }
-            //         else    //tenia parametros y los perdio
-            //         {
-            //             AntennaNewParamsCh2;
-            //             AntennaResetParamsCh2;
-            //             AntennaResetNameCh2;
-            //         }
-            //     }
-            // }
-            // else
-            //     UART_CH2_Send("get_params\r\n");
-
-            // if (AntennaCheckParamsCh3)
-            // {
-            //     if (AntennaCheckConnectionCh3)    //tengo parametros y contesta
-            //     {
-            //         if ((!AntennaCheckNameCh3) && (keepalive_name_ch3))
-            //         {
-            //             keepalive_name_ch3--;
-            //             UART_CH3_Send("get_name\r\n");
-            //         }
-            //         else    //tengo el nombre o me canse de preguntar
-            //             UART_CH3_Send("keepalive\r\n");
-
-            //         keepalive_ch3 = KEEP_ALIVE_COUNTER;                    
-            //         AntennaResetConnectionCh3;                    
-            //     }
-            //     else 
-            //     {
-            //         if (keepalive_ch3)
-            //         {
-            //             keepalive_ch3--;
-            //             UART_CH3_Send("keepalive\r\n");
-            //         }
-            //         else    //tenia parametros y los perdio
-            //         {
-            //             AntennaNewParamsCh3;
-            //             AntennaResetParamsCh3;
-            //             AntennaResetNameCh3;
-            //         }
-            //     }
-            // }
-            // else
-            //     UART_CH3_Send("get_params\r\n");
-
-            // if (AntennaCheckParamsCh4)
-            // {
-            //     if (AntennaCheckConnectionCh4)    //tengo parametros y contesta
-            //     {
-            //         if ((!AntennaCheckNameCh4) && (keepalive_name_ch4))
-            //         {
-            //             keepalive_name_ch4--;
-            //             UART_CH4_Send("get_name\r\n");
-            //         }
-            //         else    //tengo el nombre o me canse de preguntar
-            //             UART_CH4_Send("keepalive\r\n");
-
-            //         keepalive_ch4 = KEEP_ALIVE_COUNTER;                    
-            //         AntennaResetConnectionCh4;                    
-            //     }
-            //     else 
-            //     {
-            //         if (keepalive_ch4)
-            //         {
-            //             keepalive_ch4--;
-            //             UART_CH4_Send("keepalive\r\n");
-            //         }
-            //         else    //tenia parametros y los perdio
-            //         {
-            //             AntennaNewParamsCh4;
-            //             AntennaResetParamsCh4;
-            //             AntennaResetNameCh4;
-            //         }
-            //     }
-            // }
-            // else
-            //     UART_CH4_Send("get_params\r\n");
-
-            // UART_CH4_Send("get_params\r\n");
-            // if (LED3)
-            //     LED3_OFF;
-            // else
-            //     LED3_ON;
+            AntennaUpdateInStandByCh2_SM();
+            AntennaUpdateInStandByCh3_SM();
+            AntennaUpdateInStandByCh4_SM();            
             
             antenna_timer = ANTENNA_KEEP_ALIVE_TIMER;
         }
 
-        //si tengo todos los canales en lock voy a tratamiento
-        //y aviso cuales antenas esta presentes
+        //check if we have all channels locked for treatment
+        //save the effective channels in the treatment
         if (AntennaCheckLockCh1 && AntennaCheckLockCh2 && AntennaCheckLockCh3 && AntennaCheckLockCh4)
         {
             if (AntennaGetConnection(CH1))
@@ -474,31 +602,31 @@ void AntennaUpdateStates (void)
             antenna_state++;
         }
 
-        //si alguna tuvo update doy algo de tiempo y luego envio info a la PC
-        // if (AntennaCheckNewParamsCh1 ||
-        //     AntennaCheckNewParamsCh2 ||
-        //     AntennaCheckNewParamsCh3 ||
-        //     AntennaCheckNewParamsCh4)
-        // {
-        //     AntennaResetNewParamsCh1;
-        //     AntennaResetNewParamsCh2;
-        //     AntennaResetNewParamsCh3;
-        //     AntennaResetNewParamsCh4;
-        //     if (!antenna_info_timer)
-        //         antenna_info_timer = ANTENNA_INFO_TIMER_UPDATE;
-            
-        //     antenna_info_sended = 0;
-        // }
-        if (AntennaCheckStableParamsCh1)
+        // if some antenna has stable params (conection or disconnection), send it with timer
+        if ((AntennaCheckStableParamsCh1) ||
+            (AntennaCheckStableParamsCh2) ||
+            (AntennaCheckStableParamsCh3) ||
+            (AntennaCheckStableParamsCh4))
         {
-            AntennaResetStableParamsCh1;
+            if (AntennaCheckStableParamsCh1)
+                AntennaResetStableParamsCh1;
+
+            if (AntennaCheckStableParamsCh2)
+                AntennaResetStableParamsCh2;
+
+            if (AntennaCheckStableParamsCh3)
+                AntennaResetStableParamsCh3;
+
+            if (AntennaCheckStableParamsCh4)
+                AntennaResetStableParamsCh4;
+            
             if (!antenna_info_timer)
                 antenna_info_timer = ANTENNA_INFO_TIMER_UPDATE;
             
             antenna_info_sended = 0;
         }
 
-        //si paso este timer envio la info de las antenas que conozco a la PC
+        //timer exhausted, send knowed antennas info
         if (!antenna_info_timer)
         {
             if (!antenna_info_sended)
@@ -508,7 +636,7 @@ void AntennaUpdateStates (void)
             }
         }
 
-        // if the comms (PC) ask for know antennas
+        // if the comms (PC) ask for knowed antennas
         if (antenna_send_info_with_timer)
         {
             if (!antenna_info_timer)
@@ -799,28 +927,27 @@ void AntennaSetParamsStruct (unsigned char ch, antenna_typedef *ant)
             AntennaParamsCh1;
             AntennaSetNewParamsCh1;
             AntennaConnectionCh1;
-            // keepalive_name_ch1 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;
         }
+        
         if (ch == CH2)
         {
             AntennaParamsCh2;
             AntennaSetNewParamsCh2;
             AntennaConnectionCh2;
-            keepalive_name_ch2 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
+        
         if (ch == CH3)
         {
             AntennaParamsCh3;
             AntennaSetNewParamsCh3;
             AntennaConnectionCh3;
-            keepalive_name_ch3 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
+        
         if (ch == CH4)
         {
             AntennaParamsCh4;
             AntennaSetNewParamsCh4;
             AntennaConnectionCh4;
-            keepalive_name_ch4 = KEEP_ALIVE_ANTENNA_NAME_COUNTER;            
         }
     }    
 }

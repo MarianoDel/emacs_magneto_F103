@@ -19,7 +19,8 @@
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio SIN BUZZER
-#define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
+#define SOFTWARE_VERSION_1_4        //new graphics interface and first pulses for ants to detect disconnect
+// #define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
 // #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas
 //#define SOFTWARE_VERSION_1_0
@@ -33,6 +34,12 @@
 #define USE_BUZZER_ON_BOARD
 #endif
 
+#ifdef SOFTWARE_VERSION_1_4
+#define USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
+#define USE_ADC_SAMPLE_BY_SAMPLE
+#define USE_DEVICE_ID_4BYTES
+// #define USE_DEVICE_ID_12BYTES
+#endif
 #ifdef SOFTWARE_VERSION_1_3
 #define USE_ADC_SAMPLE_BY_SAMPLE
 #define USE_DEVICE_ID_4BYTES
@@ -50,6 +57,9 @@
 #endif
 
 //--- Software ------------------//
+#ifdef SOFTWARE_VERSION_1_4
+#define SOFT "Software Version: 1.4\r\n"
+#endif
 #ifdef SOFTWARE_VERSION_1_3
 #define SOFT "Software Version: 1.3\r\n"
 #endif

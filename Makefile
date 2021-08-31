@@ -81,6 +81,7 @@ SRC += ./src/dma.c
 SRC += ./src/antennas.c
 SRC += ./src/utils.c
 SRC += ./src/test_functions.c
+SRC += ./src/errors.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c
@@ -204,23 +205,42 @@ clean:
 
 
 tests_comms_channels:
-	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	# first compile common modules (modules to test and dependencies)
 	gcc -c src/utils.c -I. $(INCDIR)
 	gcc -c src/comms_channels.c -I. $(INCDIR)
 	gcc src/tests_comms_channels.c comms_channels.o utils.o
 	./a.out
 
 tests_antennas:
-	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	# first compile common modules (modules to test and dependencies)
 	gcc -c src/antennas.c -I. $(INCDIR)
 	gcc src/tests_antennas.c antennas.o
 	./a.out
 
 tests_antennas_simul:
-	# primero objetos de los modulos a testear, solo si son tipo HAL sin dependencia del hard
+	# first compile common modules (modules to test and dependencies)
 	gcc -c src/antennas.c -I. $(INCDIR)
 	gcc src/tests_antennas_simul.c antennas.o
 	./a.out
+
+tests_errors_str:
+	# first compile common modules (modules to test and dependencies)
+	gcc -c src/errors.c -I. $(INCDIR)
+	# second auxiliary helper modules
+	gcc -c src/tests_ok.c -I $(INCDIR)
+	gcc -c src/tests_errors_str.c -I $(INCDIR)
+	gcc src/tests_errors_str.c errors.o tests_ok.o
+	./a.out
+
+tests_signals_parameters:
+	# first compile common modules (modules to test and dependencies)
+	gcc -c src/GTK_Signal.c -I. $(INCDIR) $(DDEFS)
+	# second auxiliary helper modules
+	gcc -c src/tests_ok.c -I $(INCDIR)
+	gcc -c src/tests_signals_parameters.c -I $(INCDIR)
+	gcc src/tests_signals_parameters.c GTK_Signal.o tests_ok.o -lm
+	./a.out
+
 
 
 # *** EOF ***

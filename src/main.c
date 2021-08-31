@@ -18,7 +18,7 @@
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
 #include "flash_program.h"
-#include "GTK_Errors.h"
+// #include "GTK_Errors.h"
 
 #include "comms.h"
 #include "comms_channels.h"

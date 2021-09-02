@@ -1711,1124 +1711,1149 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 unsigned char Session_Warming_Up_Channels (unsigned char channel)
 {
 
-	unsigned char i;
-	unsigned short time_aux = 0;
-	unsigned char * p_session_state;
-	unsigned char * p_session_channel_step;
-	session_typedef * p_session_ch;
-	unsigned short * p_session_burst_cnt;
-	warmingup_coolingdown_typedef * p_table;
-	float * p_pwm_slope;
-	float * p_pwm_ch;
-	volatile unsigned int * p_stage_time;
-	unsigned short * p_session_time;
-	unsigned short * p_session_time_2;
-	unsigned char * p_fall_type;
+    unsigned char i;
+    unsigned short time_aux = 0;
+    unsigned char * p_session_state;
+    unsigned char * p_session_channel_step;
+    session_typedef * p_session_ch;
+    unsigned short * p_session_burst_cnt;
+    warmingup_coolingdown_typedef * p_table;
+    float * p_pwm_slope;
+    float * p_pwm_ch;
+    volatile unsigned int * p_stage_time;
+    unsigned short * p_session_time;
+    unsigned short * p_session_time_2;
+    unsigned char * p_fall_type;
 
-	//primero acomodo los punteros
-	switch (channel)
-	{
-		case CH1:
-			p_session_state = &session_warming_up_channel_1_state;
-			p_session_channel_step = &session_warming_up_channel_1_step;
-			p_session_ch = &session_ch_1;
-			p_session_burst_cnt = &session_warming_up_channel_1_burst_cnt;
-			p_table = &table_warming_up_channel_1[0];
-			p_pwm_slope = &pwm_slope_channel_1;
-			p_stage_time = &session_warming_up_channel_1_stage_time;	//lo actualiza cada 100us TIM5 (decrementa)
-			p_session_time = &session_warming_up_channel_1_time;		//lo actualiza cada 100us TIM5 (incrementa)
-			p_session_time_2 = &session_warming_up_channel_1_time_2;
-			p_pwm_ch = &pwm_channel_1;
-			p_fall_type = &fall_type_step_ch1;
-			break;
+    //primero acomodo los punteros
+    switch (channel)
+    {
+    case CH1:
+        p_session_state = &session_warming_up_channel_1_state;
+        p_session_channel_step = &session_warming_up_channel_1_step;
+        p_session_ch = &session_ch_1;
+        p_session_burst_cnt = &session_warming_up_channel_1_burst_cnt;
+        p_table = &table_warming_up_channel_1[0];
+        p_pwm_slope = &pwm_slope_channel_1;
+        p_stage_time = &session_warming_up_channel_1_stage_time;	//lo actualiza cada 100us TIM5 (decrementa)
+        p_session_time = &session_warming_up_channel_1_time;		//lo actualiza cada 100us TIM5 (incrementa)
+        p_session_time_2 = &session_warming_up_channel_1_time_2;
+        p_pwm_ch = &pwm_channel_1;
+        p_fall_type = &fall_type_step_ch1;
+        break;
 
-		case CH2:
-			p_session_state = &session_warming_up_channel_2_state;
-			p_session_channel_step = &session_warming_up_channel_2_step;
-			p_session_ch = &session_ch_2;
-			p_session_burst_cnt = &session_warming_up_channel_2_burst_cnt;
-			p_table = &table_warming_up_channel_2[0];
-			p_pwm_slope = &pwm_slope_channel_2;
-			p_stage_time = &session_warming_up_channel_2_stage_time;
-			p_session_time = &session_warming_up_channel_2_time;
-			p_session_time_2 = &session_warming_up_channel_2_time_2;
-			p_pwm_ch = &pwm_channel_2;
-			p_fall_type = &fall_type_step_ch2;
-			break;
+    case CH2:
+        p_session_state = &session_warming_up_channel_2_state;
+        p_session_channel_step = &session_warming_up_channel_2_step;
+        p_session_ch = &session_ch_2;
+        p_session_burst_cnt = &session_warming_up_channel_2_burst_cnt;
+        p_table = &table_warming_up_channel_2[0];
+        p_pwm_slope = &pwm_slope_channel_2;
+        p_stage_time = &session_warming_up_channel_2_stage_time;
+        p_session_time = &session_warming_up_channel_2_time;
+        p_session_time_2 = &session_warming_up_channel_2_time_2;
+        p_pwm_ch = &pwm_channel_2;
+        p_fall_type = &fall_type_step_ch2;
+        break;
 
-		case CH3:
-			p_session_state = &session_warming_up_channel_3_state;
-			p_session_channel_step = &session_warming_up_channel_3_step;
-			p_session_ch = &session_ch_3;
-			p_session_burst_cnt = &session_warming_up_channel_3_burst_cnt;
-			p_table = &table_warming_up_channel_3[0];
-			p_pwm_slope = &pwm_slope_channel_3;
-			p_stage_time = &session_warming_up_channel_3_stage_time;
-			p_session_time = &session_warming_up_channel_3_time;
-			p_session_time_2 = &session_warming_up_channel_3_time_2;
-			p_pwm_ch = &pwm_channel_3;
-			p_fall_type = &fall_type_step_ch3;
-			break;
+    case CH3:
+        p_session_state = &session_warming_up_channel_3_state;
+        p_session_channel_step = &session_warming_up_channel_3_step;
+        p_session_ch = &session_ch_3;
+        p_session_burst_cnt = &session_warming_up_channel_3_burst_cnt;
+        p_table = &table_warming_up_channel_3[0];
+        p_pwm_slope = &pwm_slope_channel_3;
+        p_stage_time = &session_warming_up_channel_3_stage_time;
+        p_session_time = &session_warming_up_channel_3_time;
+        p_session_time_2 = &session_warming_up_channel_3_time_2;
+        p_pwm_ch = &pwm_channel_3;
+        p_fall_type = &fall_type_step_ch3;
+        break;
 
-		case CH4:
-			p_session_state = &session_warming_up_channel_4_state;
-			p_session_channel_step = &session_warming_up_channel_4_step;
-			p_session_ch = &session_ch_4;
-			p_session_burst_cnt = &session_warming_up_channel_4_burst_cnt;
-			p_table = &table_warming_up_channel_4[0];
-			p_pwm_slope = &pwm_slope_channel_4;
-			p_stage_time = &session_warming_up_channel_4_stage_time;
-			p_session_time = &session_warming_up_channel_4_time;
-			p_session_time_2 = &session_warming_up_channel_4_time_2;
-			p_pwm_ch = &pwm_channel_4;
-			p_fall_type = &fall_type_step_ch4;
-			break;
+    case CH4:
+        p_session_state = &session_warming_up_channel_4_state;
+        p_session_channel_step = &session_warming_up_channel_4_step;
+        p_session_ch = &session_ch_4;
+        p_session_burst_cnt = &session_warming_up_channel_4_burst_cnt;
+        p_table = &table_warming_up_channel_4[0];
+        p_pwm_slope = &pwm_slope_channel_4;
+        p_stage_time = &session_warming_up_channel_4_stage_time;
+        p_session_time = &session_warming_up_channel_4_time;
+        p_session_time_2 = &session_warming_up_channel_4_time_2;
+        p_pwm_ch = &pwm_channel_4;
+        p_fall_type = &fall_type_step_ch4;
+        break;
 
-		default:
-			return FIN_ERROR;
-			break;
-	}
+    default:
+        return FIN_ERROR;
+        break;
+    }
 
-	switch (*p_session_state)
-	{
-		case SESSION_WARMING_UP_CHANNEL_INIT:
+    switch (*p_session_state)
+    {
+    case SESSION_WARMING_UP_CHANNEL_INIT:
 
-			*p_session_channel_step = 0;
+        *p_session_channel_step = 0;
 
-			if (p_session_ch->stage_1_status)
-			{
+        if (p_session_ch->stage_1_status)
+        {
 #ifdef WITH_SYNC
-				//reviso si tengo que utilizar SYNC
-				if (p_session_ch->sync_on)
-				{
-					//debo tener canal 1 presente
-					if (channel == CH1)
-					{
-						ch1_sync_state |= SYNC_REQUIRED;
-						*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
-					}
-					else
-					{                                            
-                                            //debo tener CH1 presente y me llaman desde otro canal
-                                            if (AntennaGetConnection(CH1))
-                                            {
-                                                if (ch1_sync_state & SYNC_REQUIRED)
-                                                {
-                                                    //CH1 presente
-                                                    *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
-                                                    sync_in_waiting = 0;
-                                                }
-                                                else
-                                                {
-                                                    if (sync_in_waiting)
-                                                    {
-                                                        sprintf(&buffSendErr[0], "\r\nCH%d waiting for sync", channel);	//TODO espero SYNC y no aparece CH1 salgo por timeout??
-                                                        UART_PC_Send(&buffSendErr[0]);
-                                                        sync_in_waiting = 1;
-                                                    }
-                                                }
-                                            }
-                                            else
-                                            {
-                                                //tengo timeout de CH1
-                                                *p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
+            //reviso si tengo que utilizar SYNC
+            if (p_session_ch->sync_on)
+            {
+                //debo tener canal 1 presente
+                if (channel == CH1)
+                {
+                    ch1_sync_state |= SYNC_REQUIRED;
+                    *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
+                }
+                else
+                {                                            
+                    //debo tener CH1 presente y me llaman desde otro canal
+                    if (AntennaGetConnection(CH1))
+                    {
+                        if (ch1_sync_state & SYNC_REQUIRED)
+                        {
+                            //CH1 presente
+                            *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
+                            sync_in_waiting = 0;
+                        }
+                        else
+                        {
+                            if (sync_in_waiting)
+                            {
+                                sprintf(&buffSendErr[0], "\r\nCH%d waiting for sync", channel);	//TODO espero SYNC y no aparece CH1 salgo por timeout??
+                                UART_PC_Send(&buffSendErr[0]);
+                                sync_in_waiting = 1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //tengo timeout de CH1
+                        *p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
 
-                                                sprintf(&buffSendErr[0],"ERROR in CH%d: not CH1 detected and sync is needed\r\n", channel);
-                                                UART_PC_Send(&buffSendErr[0]);
-                                                sync_in_waiting = 0;
-                                                return FIN_ERROR;
-                                            }
-					}
-				}
-				else
-				{
-					sprintf(&buffSendErr[0], "CH%d no sync needed\r\n", channel);
-                                    // sprintf(&buffSendErr[0], "CH%d no sync needed %d\r\n",
-                                    //         channel,
-                                    //         p_session_ch->ant_temp_max_int);
+                        sprintf(&buffSendErr[0],"ERROR in CH%d: not CH1 detected and sync is needed\r\n", channel);
+                        UART_PC_Send(&buffSendErr[0]);
+                        sync_in_waiting = 0;
+                        return FIN_ERROR;
+                    }
+                }
+            }
+            else
+            {
+                sprintf(&buffSendErr[0], "CH%d no sync needed\r\n", channel);
+                // sprintf(&buffSendErr[0], "CH%d no sync needed %d\r\n",
+                //         channel,
+                //         p_session_ch->ant_temp_max_int);
                                     
-					UART_PC_Send(&buffSendErr[0]);
-					ch1_sync_state &= NO_SYNC_REQUIRED_MASK;
-					*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
-				}
+                UART_PC_Send(&buffSendErr[0]);
+                ch1_sync_state &= NO_SYNC_REQUIRED_MASK;
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
+            }
 #else
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE;
 #endif
-			}
-			else
-				return FIN_OK;
-			break;
+        }
+        else
+            return FIN_OK;
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE:
+    case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE:
 
-			i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);	//retorna FIN_OK o FIN_ERROR rutina nueva 19-03-15
+        i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);	//retorna FIN_OK o FIN_ERROR rutina nueva 19-03-15
 //			i = Session_Channels_Fixed_Parameters(channel, WARMING_UP);
 
-			if (i == FIN_OK)
-			{
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END;
-				SetBitGlobalErrors (channel, BIT_ERROR_PARAMS_FINISH);
-			}
+        if (i == FIN_OK)
+        {
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END;
+            SetBitGlobalErrors (channel, BIT_ERROR_PARAMS_FINISH);
+        }
 
-			else if (i == FIN_ERROR)
-			{
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
-                                Error_SetString(buffSendErr, ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(channel));
-				UART_PC_Send(buffSendErr);
-			}
-			break;
+        else if (i == FIN_ERROR)
+        {
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
+            Error_SetString(buffSendErr, ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(channel));
+            UART_PC_Send(buffSendErr);
+        }
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:
-			//si todos los canales estan listos empiezo con las seniales
+    case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:
+        //si todos los canales estan listos empiezo con las seniales
 
-			if (((global_error_ch1 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch1 & BIT_ERROR_CHECK_MASK)) &&
-					((global_error_ch2 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch2 & BIT_ERROR_CHECK_MASK)) &&
-					((global_error_ch3 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch3 & BIT_ERROR_CHECK_MASK)) &&
-					((global_error_ch4 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch4 & BIT_ERROR_CHECK_MASK)))
-			{
+        if (((global_error_ch1 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch1 & BIT_ERROR_CHECK_MASK)) &&
+            ((global_error_ch2 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch2 & BIT_ERROR_CHECK_MASK)) &&
+            ((global_error_ch3 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch3 & BIT_ERROR_CHECK_MASK)) &&
+            ((global_error_ch4 & BIT_ERROR_PARAMS_FINISH) || (global_error_ch4 & BIT_ERROR_CHECK_MASK)))
+        {
 
-				*p_session_burst_cnt = 0;
+            *p_session_burst_cnt = 0;
 
-				//--- Slope ---//		//slope del primer rising edge
-				*p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
-				*p_pwm_slope /= (float)10;
-				*p_pwm_slope /= p_session_ch->stage_1_rising_time;
+            //--- Slope ---//		//slope del primer rising edge
+            *p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
+            *p_pwm_slope /= (float)10;
+            *p_pwm_slope /= p_session_ch->stage_1_rising_time;
 
-				//--- Next state ---//
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
+            //--- Next state ---//
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
 
-				//--- Time of the next step ---//
-				*p_stage_time = p_session_ch->stage_1_time_per_step;
+            //--- Time of the next step ---//
+            *p_stage_time = p_session_ch->stage_1_time_per_step;
 
-				*p_session_time = 0;
-				*p_session_time_2 = 0;
+            *p_session_time = 0;
+            *p_session_time_2 = 0;
 
-				//--- Next step ---//
-				*p_session_channel_step = 0;
+            //--- Next step ---//
+            *p_session_channel_step = 0;
 
-				//--- PWM initial values ---//
-				switch (channel)
-				{
-					case CH1:
-						if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
-						{
-							PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH1_TiempoSubida(0); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento(0);
-							PWM_CH1_TiempoBajada(0);
-						}
-						break;
+            //--- PWM initial values ---//
+            switch (channel)
+            {
+            case CH1:
+                if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
+                {
+                    PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
+                }
+                break;
 
-					case CH2:
-						if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
-						{
-							PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH2_TiempoSubida(0); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento(0);
-							PWM_CH2_TiempoBajada(0);
-						}
-						break;
+            case CH2:
+                if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
+                {
+                    PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+                }
+                break;
 
-					case CH3:
-						if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
-						{
-							PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH3_TiempoSubida(0); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento(0);
-							PWM_CH3_TiempoBajada(0);
-						}
-						break;
+            case CH3:
+                if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
+                {
+                    PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
+                }
+                break;
 
-					case CH4:
-						if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
-						{
-							PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH4_TiempoSubida(0); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento(0);
-							PWM_CH4_TiempoBajada(0);
-						}
-						break;
-				}
-			}
-			break;
+            case CH4:
+                if (*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on)
+                {
+                    PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+                }
+                break;
+            }
+        }
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL:
+    case SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL:
 
-			if (*p_stage_time == 0)		//reviso el timer del stage despues de haber terminado la señal completa
-			{									//avanzo en la tabla si tengo mas posiciones
-				if (*p_session_channel_step < (SESSION_WUP_CH1_BUFF_DIM - 1))
-				{
-					//--- Time per step ---//
-					*p_stage_time = p_session_ch->stage_1_time_per_step;
+        if (*p_stage_time == 0)		//reviso el timer del stage despues de haber terminado la señal completa
+        {									//avanzo en la tabla si tengo mas posiciones
+            if (*p_session_channel_step < (SESSION_WUP_CH1_BUFF_DIM - 1))
+            {
+                //--- Time per step ---//
+                *p_stage_time = p_session_ch->stage_1_time_per_step;
 
-					//--- Next state ---//
-					*p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
+                //--- Next state ---//
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
 
-					//--- Next step ---//
-					*p_session_channel_step += 1;
+                //--- Next step ---//
+                *p_session_channel_step += 1;
 
-					//--- Slope ---//
-					*p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
-					*p_pwm_slope /= (float)10;
-					*p_pwm_slope /= p_session_ch->stage_1_rising_time;
+                //--- Slope ---//
+                *p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
+                *p_pwm_slope /= (float)10;
+                *p_pwm_slope /= p_session_ch->stage_1_rising_time;
 
-					switch (channel)
-					{
-						case CH1:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-								PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-							}
-							else
-							{
-								PWM_CH1_TiempoSubida(0); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento(0);
-								PWM_CH1_TiempoBajada(0);
-							}
-							break;
+                switch (channel)
+                {
+                case CH1:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                        PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                        PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                    }
+                    else
+                    {
+                        PWM_CH1_TiempoSubida(0); //pwm 200V.
+                        PWM_CH1_TiempoMantenimiento(0);
+                        PWM_CH1_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH2:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-								PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-							}
-							else
-							{
-								PWM_CH2_TiempoSubida(0); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento(0);
-								PWM_CH2_TiempoBajada(0);
-							}
-							break;
+                case CH2:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                        PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                        PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                    }
+                    else
+                    {
+                        PWM_CH2_TiempoSubida(0); //pwm 200V.
+                        PWM_CH2_TiempoMantenimiento(0);
+                        PWM_CH2_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH3:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-								PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-							}
-							else
-							{
-								PWM_CH3_TiempoSubida(0); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento(0);
-								PWM_CH3_TiempoBajada(0);
-							}
-							break;
+                case CH3:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                        PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                        PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                    }
+                    else
+                    {
+                        PWM_CH3_TiempoSubida(0); //pwm 200V.
+                        PWM_CH3_TiempoMantenimiento(0);
+                        PWM_CH3_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH4:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-								PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-							}
-							else
-							{
-								PWM_CH4_TiempoSubida(0); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento(0);
-								PWM_CH4_TiempoBajada(0);
-							}
-							break;
-					}
+                case CH4:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                        PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                        PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                    }
+                    else
+                    {
+                        PWM_CH4_TiempoSubida(0); //pwm 200V.
+                        PWM_CH4_TiempoMantenimiento(0);
+                        PWM_CH4_TiempoBajada(0);
+                    }
+                    break;
+                }
 
-					*p_session_time = 0;
-					*p_session_time_2 = 0;
+                *p_session_time = 0;
+                *p_session_time_2 = 0;
 
-				}
-				else
-				{
-					//termino el stage, aviso a los canales
-					if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
-					{
-						ch1_sync_state &= SYNC_REQUIRED;
-						ch1_sync_state |= SYNC_FINISH_WARMING_UP;
-					}
-					return FIN_OK;
-				}
-			}
-			else
-			{
-				//--- Next state ---//
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
+            }
+            else
+            {
+                //termino el stage, aviso a los canales
+                if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
+                {
+                    ch1_sync_state &= SYNC_REQUIRED;
+                    ch1_sync_state |= SYNC_FINISH_WARMING_UP;
+                }
+                return FIN_OK;
+            }
+        }
+        else
+        {
+            //--- Next state ---//
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_RISING_EDGE;
 
-				*p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final + (p_table + (*p_session_channel_step))->rising_pwm_40_final - (p_table + (*p_session_channel_step))->rising_pwm_200_initial - (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
-				*p_pwm_slope /= (float)10;
-				*p_pwm_slope /= p_session_ch->stage_1_rising_time;
+            *p_pwm_slope = (p_table + (*p_session_channel_step))->rising_pwm_200_final +
+                (p_table + (*p_session_channel_step))->rising_pwm_40_final -
+                (p_table + (*p_session_channel_step))->rising_pwm_200_initial -
+                (p_table + (*p_session_channel_step))->rising_pwm_40_initial;
+            *p_pwm_slope /= (float)10;
+            *p_pwm_slope /= p_session_ch->stage_1_rising_time;
 
-				switch (channel)
-				{
-					case CH1:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH1_TiempoSubida(0); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento(0);
-							PWM_CH1_TiempoBajada(0);
-						}
-						break;
+            switch (channel)
+            {
+            case CH1:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
+                }
+                break;
 
-					case CH2:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH2_TiempoSubida(0); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento(0);
-							PWM_CH2_TiempoBajada(0);
-						}
-						break;
+            case CH2:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+                }
+                break;
 
-					case CH3:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH3_TiempoSubida(0); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento(0);
-							PWM_CH3_TiempoBajada(0);
-						}
-						break;
+            case CH3:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
+                }
+                break;
 
-					case CH4:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
-							PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH4_TiempoSubida(0); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento(0);
-							PWM_CH4_TiempoBajada(0);
-						}
-						break;
-				}
+            case CH4:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->rising_pwm_200_initial); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->rising_pwm_40_initial);
+                    PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->rising_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+                }
+                break;
+            }
 
-				*p_session_time = 0;
-				*p_session_time_2 = 0;
+            *p_session_time = 0;
+            *p_session_time_2 = 0;
 
-			}
+        }
 
-			break;
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_RISING_EDGE:
+    case SESSION_WARMING_UP_CHANNEL_RISING_EDGE:
 #ifdef WITH_SYNC
-			if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))  //modificacion no arranca sin CH1 5-9-16
-			{
-				ch1_sync_state &= ~SYNC_ACT_MASK;
-				ch1_sync_state |= SYNC_IN_RISING;
-			}
+        if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))  //modificacion no arranca sin CH1 5-9-16
+        {
+            ch1_sync_state &= ~SYNC_ACT_MASK;
+            ch1_sync_state |= SYNC_IN_RISING;
+        }
 #endif
 
-			if (*p_session_time <= (p_table + (*p_session_channel_step))->rising_step_number)
-			{
-				if (*p_session_time_2 != *p_session_time)		//para no ejecutar demasiado seguido
-				{
-					*p_session_time_2 = *p_session_time;
+        if (*p_session_time <= (p_table + (*p_session_channel_step))->rising_step_number)
+        {
+            if (*p_session_time_2 != *p_session_time)		//para no ejecutar demasiado seguido
+            {
+                *p_session_time_2 = *p_session_time;
 
-					*p_pwm_ch = (p_table + (*p_session_channel_step))->rising_pwm_200_initial + (p_table + (*p_session_channel_step))->rising_pwm_40_initial + *p_pwm_slope * *p_session_time;
+                *p_pwm_ch = (p_table + (*p_session_channel_step))->rising_pwm_200_initial +
+                    (p_table + (*p_session_channel_step))->rising_pwm_40_initial +
+                    *p_pwm_slope * *p_session_time;
 
-					switch (channel)
-					{
-						case CH1:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial + (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
-									PWM_CH1_TiempoSubida(*p_pwm_ch); //pwm 200V.
-								else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial + (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
-									PWM_CH1_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-							}
-							else
-							{
-								PWM_CH1_TiempoSubida(0); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento(0);
-								PWM_CH1_TiempoBajada(0);
-							}
-							break;
+                switch (channel)
+                {
+                case CH1:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                         ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial +
+                             (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
+                            PWM_CH1_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                        else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial +
+                                  (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
+                            PWM_CH1_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                    }
+                    else
+                    {
+                        PWM_CH1_TiempoSubida(0); //pwm 200V.
+                        PWM_CH1_TiempoMantenimiento(0);
+                        PWM_CH1_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH2:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial + (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
-									PWM_CH2_TiempoSubida(*p_pwm_ch); //pwm 200V.
-								else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial + (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
-									PWM_CH2_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-							}
-							else
-							{
-								PWM_CH2_TiempoSubida(0); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento(0);
-								PWM_CH2_TiempoBajada(0);
-							}
-							break;
+                case CH2:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                         ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial +
+                             (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
+                            PWM_CH2_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                        else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial +
+                                  (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
+                            PWM_CH2_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                    }
+                    else
+                    {
+                        PWM_CH2_TiempoSubida(0); //pwm 200V.
+                        PWM_CH2_TiempoMantenimiento(0);
+                        PWM_CH2_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH3:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial + (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
-									PWM_CH3_TiempoSubida(*p_pwm_ch); //pwm 200V.
-								else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial + (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
-									PWM_CH3_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-							}
-							else
-							{
-								PWM_CH3_TiempoSubida(0); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento(0);
-								PWM_CH3_TiempoBajada(0);
-							}
-							break;
+                case CH3:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                         ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial +
+                             (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
+                            PWM_CH3_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                        else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial +
+                                  (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
+                            PWM_CH3_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                    }
+                    else
+                    {
+                        PWM_CH3_TiempoSubida(0); //pwm 200V.
+                        PWM_CH3_TiempoMantenimiento(0);
+                        PWM_CH3_TiempoBajada(0);
+                    }
+                    break;
 
-						case CH4:
-							if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-									(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-							{
-								if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial + (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
-									PWM_CH4_TiempoSubida(*p_pwm_ch); //pwm 200V.
-								else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial + (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
-									PWM_CH4_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-							}
-							else
-							{
-								PWM_CH4_TiempoSubida(0); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento(0);
-								PWM_CH4_TiempoBajada(0);
-							}
-							break;
-					}
-				}
-			}
-			else
-			{
-				//--- Next state ---//
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_MAINTENANCE;
-				*p_session_time = 0;
-				*p_session_time_2 = 0;
+                case CH4:
+                    if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                        (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                         ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                    {
+                        if (((p_table + (*p_session_channel_step))->rising_pwm_200_initial +
+                             (p_table + (*p_session_channel_step))->rising_pwm_200_final) != 0)
+                            PWM_CH4_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                        else if (((p_table + (*p_session_channel_step))->rising_pwm_40_initial +
+                                  (p_table + (*p_session_channel_step))->rising_pwm_40_final) != 0)
+                            PWM_CH4_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                    }
+                    else
+                    {
+                        PWM_CH4_TiempoSubida(0); //pwm 200V.
+                        PWM_CH4_TiempoMantenimiento(0);
+                        PWM_CH4_TiempoBajada(0);
+                    }
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //--- Next state ---//
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_MAINTENANCE;
+            *p_session_time = 0;
+            *p_session_time_2 = 0;
 
-				//--- PWM initial values ---//
-				switch (channel)
-				{
-					case CH1:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
-							PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
-						}
-						else
-						{
-							PWM_CH1_TiempoSubida(0); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento(0);
-							PWM_CH1_TiempoBajada(0);
-						}
-						break;
+            //--- PWM initial values ---//
+            switch (channel)
+            {
+            case CH1:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
+                    PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
+                }
+                else
+                {
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
+                }
+                break;
 
-					case CH2:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
-							PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
-						}
-						else
-						{
-							PWM_CH2_TiempoSubida(0); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento(0);
-							PWM_CH2_TiempoBajada(0);
-						}
-						break;
+            case CH2:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
+                    PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
+                }
+                else
+                {
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+                }
+                break;
 
-					case CH3:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
-							PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
-						}
-						else
-						{
-							PWM_CH3_TiempoSubida(0); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento(0);
-							PWM_CH3_TiempoBajada(0);
-						}
-						break;
+            case CH3:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
+                    PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
+                }
+                else
+                {
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
+                }
+                break;
 
-					case CH4:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
-							PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
-						}
-						else
-						{
-							PWM_CH4_TiempoSubida(0); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento(0);
-							PWM_CH4_TiempoBajada(0);
-						}
-						break;
-				}
-			}
-			break;
+            case CH4:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (((p_table + (*p_session_channel_step))->burst_mode_on == 0) &&
+                     ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->maintenance_pwm_200); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->maintenance_pwm_40); //pwm 40V.
+                    PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->maintenance_pwm_n);
+                }
+                else
+                {
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+                }
+                break;
+            }
+        }
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_MAINTENANCE:
+    case SESSION_WARMING_UP_CHANNEL_MAINTENANCE:
 #ifdef WITH_SYNC
-			if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
-			{
-				ch1_sync_state &= ~SYNC_ACT_MASK;
-				ch1_sync_state |= SYNC_IN_MAINTENANCE;
-			}
+        if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
+        {
+            ch1_sync_state &= ~SYNC_ACT_MASK;
+            ch1_sync_state |= SYNC_IN_MAINTENANCE;
+        }
 #endif
 
-			if (*p_session_time >= (p_table + (*p_session_channel_step))->maintenance_step_number)
-			{
-				//--- Next state ---//
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_FALLING_EDGE;
+        if (*p_session_time >= (p_table + (*p_session_channel_step))->maintenance_step_number)
+        {
+            //--- Next state ---//
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_FALLING_EDGE;
 
-				//--- Slope ---//
-				*p_pwm_slope = (p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_initial - (p_table + (*p_session_channel_step))->falling_pwm_200_final - (p_table + (*p_session_channel_step))->falling_pwm_40_final;
-				*p_pwm_slope /= (float)10;
-				*p_pwm_slope /= p_session_ch->stage_1_falling_time;
+            //--- Slope ---//
+            *p_pwm_slope = (p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_initial - (p_table + (*p_session_channel_step))->falling_pwm_200_final - (p_table + (*p_session_channel_step))->falling_pwm_40_final;
+            *p_pwm_slope /= (float)10;
+            *p_pwm_slope /= p_session_ch->stage_1_falling_time;
 
-				*p_session_time = 0;
-				*p_session_time_2 = 0;
+            *p_session_time = 0;
+            *p_session_time_2 = 0;
 
-				//--- PWM initial values ---//
-				switch (channel)
-				{
-					case CH1:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
-							PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH1_TiempoSubida(0); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento(0);
-							PWM_CH1_TiempoBajada(0);
-						}
-						break;
+            //--- PWM initial values ---//
+            switch (channel)
+            {
+            case CH1:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH1_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
+                    PWM_CH1_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(0);
+                }
+                break;
 
-					case CH2:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
-							PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH2_TiempoSubida(0); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento(0);
-							PWM_CH2_TiempoBajada(0);
-						}
-						break;
+            case CH2:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH2_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
+                    PWM_CH2_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(0);
+                }
+                break;
 
-					case CH3:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
-							PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH3_TiempoSubida(0); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento(0);
-							PWM_CH3_TiempoBajada(0);
-						}
-						break;
+            case CH3:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH3_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
+                    PWM_CH3_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(0);
+                }
+                break;
 
-					case CH4:
-						if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-								(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-						{
-							PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
-							PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
-						}
-						else
-						{
-							PWM_CH4_TiempoSubida(0); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento(0);
-							PWM_CH4_TiempoBajada(0);
-						}
-						break;
-				}
-			}
-			break;
+            case CH4:
+                if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                    (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                {
+                    PWM_CH4_TiempoSubida((p_table + (*p_session_channel_step))->falling_pwm_200_initial); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento((p_table + (*p_session_channel_step))->falling_pwm_40_initial); //pwm 40V.
+                    PWM_CH4_TiempoBajada((p_table + (*p_session_channel_step))->falling_pwm_n_initial);
+                }
+                else
+                {
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(0);
+                }
+                break;
+            }
+        }
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_FALLING_EDGE:
+    case SESSION_WARMING_UP_CHANNEL_FALLING_EDGE:
 #ifdef WITH_SYNC
-			if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
-			{
-				ch1_sync_state &= ~SYNC_ACT_MASK;
-				ch1_sync_state |= SYNC_IN_FALLING;
-			}
+        if ((channel == CH1) && (ch1_sync_state & SYNC_REQUIRED))
+        {
+            ch1_sync_state &= ~SYNC_ACT_MASK;
+            ch1_sync_state |= SYNC_IN_FALLING;
+        }
 #endif
-			//primero reviso en que tipo de bajada estoy
-			//BAJADA FALLING_LR; en falling_time recibo lo elgido y en step_number la descarga rapida
-			if ((p_table + (*p_session_channel_step))->falling_type == FALLING_LR)
-			{
-				switch(*p_fall_type)
-				{
-					case FALL_START:
-						//time_aux = (p_table + (*p_session_channel_step))->falling_step_number;
-						time_aux = (p_table + (*p_session_channel_step))->falling_time;
-						time_aux *= 10;
-						time_aux -= (p_table + (*p_session_channel_step))->falling_step_number;	//le resto la parte de descarga rapida
-						//if (*p_session_time > ((p_table + (*p_session_channel_step))->falling_step_number - time_aux))
-						if (*p_session_time > time_aux)
-						{
-							switch(channel)
-							{
-								case CH1:
-									PWM_CH1_TiempoBajada(1000);
-									break;
+        //primero reviso en que tipo de bajada estoy
+        //BAJADA FALLING_LR; en falling_time recibo lo elgido y en step_number la descarga rapida
+        if ((p_table + (*p_session_channel_step))->falling_type == FALLING_LR)
+        {
+            switch(*p_fall_type)
+            {
+            case FALL_START:
+                //time_aux = (p_table + (*p_session_channel_step))->falling_step_number;
+                time_aux = (p_table + (*p_session_channel_step))->falling_time;
+                time_aux *= 10;
+                time_aux -= (p_table + (*p_session_channel_step))->falling_step_number;	//le resto la parte de descarga rapida
+                //if (*p_session_time > ((p_table + (*p_session_channel_step))->falling_step_number - time_aux))
+                if (*p_session_time > time_aux)
+                {
+                    switch(channel)
+                    {
+                    case CH1:
+                        PWM_CH1_TiempoBajada(1000);
+                        break;
 
-								case CH2:
-									PWM_CH2_TiempoBajada(1000);
-									break;
+                    case CH2:
+                        PWM_CH2_TiempoBajada(1000);
+                        break;
 
-								case CH3:
-									PWM_CH3_TiempoBajada(1000);
-									break;
+                    case CH3:
+                        PWM_CH3_TiempoBajada(1000);
+                        break;
 
-								case CH4:
-									PWM_CH4_TiempoBajada(1000);
-									break;
-							}
-							*p_fall_type = FALL_MED;
-						}
-						break;
+                    case CH4:
+                        PWM_CH4_TiempoBajada(1000);
+                        break;
+                    }
+                    *p_fall_type = FALL_MED;
+                }
+                break;
 
-					case FALL_MED:
-						//if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
-						time_aux = (p_table + (*p_session_channel_step))->falling_time;
-						time_aux *= 10;
-						if (*p_session_time >= time_aux)
-							*p_fall_type = FALL_FAST;
-						break;
+            case FALL_MED:
+                //if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
+                time_aux = (p_table + (*p_session_channel_step))->falling_time;
+                time_aux *= 10;
+                if (*p_session_time >= time_aux)
+                    *p_fall_type = FALL_FAST;
+                break;
 
-					case FALL_FAST:
-						*p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
+            case FALL_FAST:
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
 
-						switch(channel)
-						{
-							case CH1:
-								PWM_CH1_TiempoSubida(0); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento(0);
-								PWM_CH1_TiempoBajada(1000);
-								break;
+                switch(channel)
+                {
+                case CH1:
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(1000);
+                    break;
 
-							case CH2:
-								PWM_CH2_TiempoSubida(0); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento(0);
-								PWM_CH2_TiempoBajada(1000);
-								break;
+                case CH2:
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(1000);
+                    break;
 
-							case CH3:
-								PWM_CH3_TiempoSubida(0); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento(0);
-								PWM_CH3_TiempoBajada(1000);
-								break;
+                case CH3:
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(1000);
+                    break;
 
-							case CH4:
-								PWM_CH4_TiempoSubida(0); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento(0);
-								PWM_CH4_TiempoBajada(1000);
-								break;
-						}
+                case CH4:
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(1000);
+                    break;
+                }
 
-						*p_session_time = 0;
-						*p_session_time_2 = 0;
-						*p_fall_type = FALL_START;
-						break;
+                *p_session_time = 0;
+                *p_session_time_2 = 0;
+                *p_fall_type = FALL_START;
+                break;
 
-					default:
-						*p_fall_type = FALL_START;
-						break;
-				}
-			}
+            default:
+                *p_fall_type = FALL_START;
+                break;
+            }
+        }
 
-			//BAJADA FALLING_FAST_DISCHARGE
-			if ((p_table + (*p_session_channel_step))->falling_type == FALLING_FAST_DISCHARGE)
-			{
-				switch(*p_fall_type)
-				{
-					case FALL_START:
+        //BAJADA FALLING_FAST_DISCHARGE
+        if ((p_table + (*p_session_channel_step))->falling_type == FALLING_FAST_DISCHARGE)
+        {
+            switch(*p_fall_type)
+            {
+            case FALL_START:
 
-						switch(channel)
-						{
-							case CH1:
-								PWM_CH1_TiempoSubida(0); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento(0);
-								PWM_CH1_TiempoBajada(1000);
-								break;
+                switch(channel)
+                {
+                case CH1:
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(1000);
+                    break;
 
-							case CH2:
-								PWM_CH2_TiempoSubida(0); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento(0);
-								PWM_CH2_TiempoBajada(1000);
-								break;
+                case CH2:
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(1000);
+                    break;
 
-							case CH3:
-								PWM_CH3_TiempoSubida(0); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento(0);
-								PWM_CH3_TiempoBajada(1000);
-								break;
+                case CH3:
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(1000);
+                    break;
 
-							case CH4:
-								PWM_CH4_TiempoSubida(0); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento(0);
-								PWM_CH4_TiempoBajada(1000);
-								break;
-						}
-						*p_fall_type = FALL_MED;
-						break;
+                case CH4:
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(1000);
+                    break;
+                }
+                *p_fall_type = FALL_MED;
+                break;
 
-					case FALL_MED:
-						if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
-							*p_fall_type = FALL_FAST;
-						break;
+            case FALL_MED:
+                if (*p_session_time >= (p_table + (*p_session_channel_step))->falling_step_number)
+                    *p_fall_type = FALL_FAST;
+                break;
 
-					case FALL_FAST:
-						*p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
+            case FALL_FAST:
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
 
-						switch(channel)
-						{
-							case CH1:
-								PWM_CH1_TiempoSubida(0); //pwm 200V.
-								PWM_CH1_TiempoMantenimiento(0);
-								PWM_CH1_TiempoBajada(1000);
-								break;
+                switch(channel)
+                {
+                case CH1:
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(1000);
+                    break;
 
-							case CH2:
-								PWM_CH2_TiempoSubida(0); //pwm 200V.
-								PWM_CH2_TiempoMantenimiento(0);
-								PWM_CH2_TiempoBajada(1000);
-								break;
+                case CH2:
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(1000);
+                    break;
 
-							case CH3:
-								PWM_CH3_TiempoSubida(0); //pwm 200V.
-								PWM_CH3_TiempoMantenimiento(0);
-								PWM_CH3_TiempoBajada(1000);
-								break;
+                case CH3:
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(1000);
+                    break;
 
-							case CH4:
-								PWM_CH4_TiempoSubida(0); //pwm 200V.
-								PWM_CH4_TiempoMantenimiento(0);
-								PWM_CH4_TiempoBajada(1000);
-								break;
-						}
+                case CH4:
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(1000);
+                    break;
+                }
 
-						*p_session_time = 0;
-						*p_session_time_2 = 0;
+                *p_session_time = 0;
+                *p_session_time_2 = 0;
 
-						*p_fall_type = FALL_START;
-						break;
+                *p_fall_type = FALL_START;
+                break;
 
-					default:
-						*p_fall_type = FALL_START;
-						break;
-				}
-			}
+            default:
+                *p_fall_type = FALL_START;
+                break;
+            }
+        }
 
-			//BAJADA FALLING_SLOW_DISCHARGE
-			if ((p_table + (*p_session_channel_step))->falling_type == FALLING_SLOW_DISCHARGE)
-			{
-				if (*p_session_time <= (p_table + (*p_session_channel_step))->falling_step_number)
-				{
-					if (*p_session_time_2 >= (*p_session_time - 5))
-					{
-						*p_session_time_2 = *p_session_time;
+        //BAJADA FALLING_SLOW_DISCHARGE
+        if ((p_table + (*p_session_channel_step))->falling_type == FALLING_SLOW_DISCHARGE)
+        {
+            if (*p_session_time <= (p_table + (*p_session_channel_step))->falling_step_number)
+            {
+                if (*p_session_time_2 >= (*p_session_time - 5))
+                {
+                    *p_session_time_2 = *p_session_time;
 
-						//esta es el pwm de este instante el slope lo calculo antes
-						*p_pwm_ch = (p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_initial - *p_pwm_slope * *p_session_time;
+                    //esta es el pwm de este instante el slope lo calculo antes
+                    *p_pwm_ch = (p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_initial - *p_pwm_slope * *p_session_time;
 
-						//modificacion bajada LR
-						if ((*p_pwm_ch < 10) && ((p_table + (*p_session_channel_step))->falling_type != FALLING_LR))
-						{
-							*p_pwm_ch = 0;
-							switch(channel)
-							{
-								case CH1:
-									PWM_CH1_TiempoBajada(1000);
-									break;
+                    //modificacion bajada LR
+                    if ((*p_pwm_ch < 10) && ((p_table + (*p_session_channel_step))->falling_type != FALLING_LR))
+                    {
+                        *p_pwm_ch = 0;
+                        switch(channel)
+                        {
+                        case CH1:
+                            PWM_CH1_TiempoBajada(1000);
+                            break;
 
-								case CH2:
-									PWM_CH2_TiempoBajada(1000);
-									break;
+                        case CH2:
+                            PWM_CH2_TiempoBajada(1000);
+                            break;
 
-								case CH3:
-									PWM_CH3_TiempoBajada(1000);
-									break;
+                        case CH3:
+                            PWM_CH3_TiempoBajada(1000);
+                            break;
 
-								case CH4:
-									PWM_CH4_TiempoBajada(1000);
-									break;
-							}
-						}
+                        case CH4:
+                            PWM_CH4_TiempoBajada(1000);
+                            break;
+                        }
+                    }
 
-						//esto representa la funcion lineal de bajada lento
-						switch (channel)
-						{
-							case CH1:
-								if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-										(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-								{
-									if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
-										PWM_CH1_TiempoSubida(*p_pwm_ch); //pwm 200V.
-									else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
-										PWM_CH1_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-								}
-								else
-								{
-									PWM_CH1_TiempoSubida(0); //pwm 200V.
-									PWM_CH1_TiempoMantenimiento(0);
-									PWM_CH1_TiempoBajada(0);
-								}
-								break;
+                    //esto representa la funcion lineal de bajada lento
+                    switch (channel)
+                    {
+                    case CH1:
+                        if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                            (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                        {
+                            if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
+                                PWM_CH1_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                            else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
+                                PWM_CH1_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                        }
+                        else
+                        {
+                            PWM_CH1_TiempoSubida(0); //pwm 200V.
+                            PWM_CH1_TiempoMantenimiento(0);
+                            PWM_CH1_TiempoBajada(0);
+                        }
+                        break;
 
-							case CH2:
-								if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-										(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-								{
-									if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
-										PWM_CH2_TiempoSubida(*p_pwm_ch); //pwm 200V.
-									else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
-										PWM_CH2_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-								}
-								else
-								{
-									PWM_CH2_TiempoSubida(0); //pwm 200V.
-									PWM_CH2_TiempoMantenimiento(0);
-									PWM_CH2_TiempoBajada(0);
-								}
-								break;
+                    case CH2:
+                        if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                            (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                        {
+                            if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
+                                PWM_CH2_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                            else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
+                                PWM_CH2_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                        }
+                        else
+                        {
+                            PWM_CH2_TiempoSubida(0); //pwm 200V.
+                            PWM_CH2_TiempoMantenimiento(0);
+                            PWM_CH2_TiempoBajada(0);
+                        }
+                        break;
 
-							case CH3:
-								if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-										(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-								{
-									if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
-										PWM_CH3_TiempoSubida(*p_pwm_ch); //pwm 200V.
-									else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
-										PWM_CH3_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-								}
-								else
-								{
-									PWM_CH3_TiempoSubida(0); //pwm 200V.
-									PWM_CH3_TiempoMantenimiento(0);
-									PWM_CH3_TiempoBajada(0);
-								}
-								break;
+                    case CH3:
+                        if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                            (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                        {
+                            if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
+                                PWM_CH3_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                            else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
+                                PWM_CH3_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                        }
+                        else
+                        {
+                            PWM_CH3_TiempoSubida(0); //pwm 200V.
+                            PWM_CH3_TiempoMantenimiento(0);
+                            PWM_CH3_TiempoBajada(0);
+                        }
+                        break;
 
-							case CH4:
-								if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
-										(	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
-								{
-									if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
-										PWM_CH4_TiempoSubida(*p_pwm_ch); //pwm 200V.
-									else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
-										PWM_CH4_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
-								}
-								else
-								{
-									PWM_CH4_TiempoSubida(0); //pwm 200V.
-									PWM_CH4_TiempoMantenimiento(0);
-									PWM_CH4_TiempoBajada(0);
-								}
-								break;
-						}
-					}
-				}
-				else
-				{
-					*p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
+                    case CH4:
+                        if ((*p_session_burst_cnt < (p_table + (*p_session_channel_step))->burst_mode_on) ||
+                            (	((p_table + (*p_session_channel_step))->burst_mode_on == 0) && ((p_table + (*p_session_channel_step))->burst_mode_off == 0)))
+                        {
+                            if (((p_table + (*p_session_channel_step))->falling_pwm_200_initial + (p_table + (*p_session_channel_step))->falling_pwm_200_final) != 0)
+                                PWM_CH4_TiempoSubida(*p_pwm_ch); //pwm 200V.
+                            else if (((p_table + (*p_session_channel_step))->falling_pwm_40_initial + (p_table + (*p_session_channel_step))->falling_pwm_40_final) != 0)
+                                PWM_CH4_TiempoMantenimiento(*p_pwm_ch); //pwm 40V.
+                        }
+                        else
+                        {
+                            PWM_CH4_TiempoSubida(0); //pwm 200V.
+                            PWM_CH4_TiempoMantenimiento(0);
+                            PWM_CH4_TiempoBajada(0);
+                        }
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_LOW;
 
 
-					switch(channel)
-					{
-						case CH1:
-							PWM_CH1_TiempoSubida(0); //pwm 200V.
-							PWM_CH1_TiempoMantenimiento(0);
-							PWM_CH1_TiempoBajada(1000);
-							break;
+                switch(channel)
+                {
+                case CH1:
+                    PWM_CH1_TiempoSubida(0); //pwm 200V.
+                    PWM_CH1_TiempoMantenimiento(0);
+                    PWM_CH1_TiempoBajada(1000);
+                    break;
 
-						case CH2:
-							PWM_CH2_TiempoSubida(0); //pwm 200V.
-							PWM_CH2_TiempoMantenimiento(0);
-							PWM_CH2_TiempoBajada(1000);
-							break;
+                case CH2:
+                    PWM_CH2_TiempoSubida(0); //pwm 200V.
+                    PWM_CH2_TiempoMantenimiento(0);
+                    PWM_CH2_TiempoBajada(1000);
+                    break;
 
-						case CH3:
-							PWM_CH3_TiempoSubida(0); //pwm 200V.
-							PWM_CH3_TiempoMantenimiento(0);
-							PWM_CH3_TiempoBajada(1000);
-							break;
+                case CH3:
+                    PWM_CH3_TiempoSubida(0); //pwm 200V.
+                    PWM_CH3_TiempoMantenimiento(0);
+                    PWM_CH3_TiempoBajada(1000);
+                    break;
 
-						case CH4:
-							PWM_CH4_TiempoSubida(0); //pwm 200V.
-							PWM_CH4_TiempoMantenimiento(0);
-							PWM_CH4_TiempoBajada(1000);
-							break;
-					}
-					*p_session_time = 0;
-					*p_session_time_2 = 0;
-				}
-			}
-			break;
+                case CH4:
+                    PWM_CH4_TiempoSubida(0); //pwm 200V.
+                    PWM_CH4_TiempoMantenimiento(0);
+                    PWM_CH4_TiempoBajada(1000);
+                    break;
+                }
+                *p_session_time = 0;
+                *p_session_time_2 = 0;
+            }
+        }
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_LOW:
+    case SESSION_WARMING_UP_CHANNEL_LOW:
 #ifdef WITH_SYNC
-			if (ch1_sync_state & SYNC_REQUIRED)
-			{
-				if (channel == CH1)
-				{
-					ch1_sync_state &= ~SYNC_ACT_MASK;
-					ch1_sync_state |= SYNC_IN_DOWN;
+        if (ch1_sync_state & SYNC_REQUIRED)
+        {
+            if (channel == CH1)
+            {
+                ch1_sync_state &= ~SYNC_ACT_MASK;
+                ch1_sync_state |= SYNC_IN_DOWN;
 
-					if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
-					{
-						//*p_session_burst_cnt++;
-						*p_session_burst_cnt = *p_session_burst_cnt + 1;
+                if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
+                {
+                    //*p_session_burst_cnt++;
+                    *p_session_burst_cnt = *p_session_burst_cnt + 1;
 
-						if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
-							*p_session_burst_cnt = 0;
+                    if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
+                        *p_session_burst_cnt = 0;
 
-						*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-					}
-				}
-				else
-				{
-					switch (channel)
-					{
-						case CH2:
-							if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
-								return FIN_OK;
+                    *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+                }
+            }
+            else
+            {
+                switch (channel)
+                {
+                case CH2:
+                    if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
+                        return FIN_OK;
 
-							//me quedo en LOW hasta que CH1 este en LOW
-							if (ch1_sync_state & SYNC_IN_DOWN)
-								*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-							break;
+                    //me quedo en LOW hasta que CH1 este en LOW
+                    if (ch1_sync_state & SYNC_IN_DOWN)
+                        *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+                    break;
 
-						case CH3:
-							if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
-								return FIN_OK;
+                case CH3:
+                    if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
+                        return FIN_OK;
 
-							//me quedo en LOW mientras CH1 este en LOW, lo atraso un poquito para evitar dobles pulsos
-							//if (!(ch1_sync_state & SYNC_IN_DOWN))
-							if (ch1_sync_state & SYNC_IN_RISING)
-								*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-							break;
+                    //me quedo en LOW mientras CH1 este en LOW, lo atraso un poquito para evitar dobles pulsos
+                    //if (!(ch1_sync_state & SYNC_IN_DOWN))
+                    if (ch1_sync_state & SYNC_IN_RISING)
+                        *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+                    break;
 
-						case CH4:
-							if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
-								return FIN_OK;
+                case CH4:
+                    if (ch1_sync_state & SYNC_FINISH_WARMING_UP)
+                        return FIN_OK;
 
-							//me quedo en LOW hasta que CH1 este en LOW
-							if (ch1_sync_state & SYNC_IN_DOWN)
-								*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-							break;
-					}
-				}
-			}
-			else
-			{
-				if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
-				{
-					//*p_session_burst_cnt++;
+                    //me quedo en LOW hasta que CH1 este en LOW
+                    if (ch1_sync_state & SYNC_IN_DOWN)
+                        *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
+            {
+                //*p_session_burst_cnt++;
 
-					*p_session_burst_cnt = *p_session_burst_cnt + 1;
+                *p_session_burst_cnt = *p_session_burst_cnt + 1;
 
-					if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
-						*p_session_burst_cnt = 0;
+                if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
+                    *p_session_burst_cnt = 0;
 
-					*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-				}
-			}
+                *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+            }
+        }
 #else
-			if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
-			{
-				*p_session_burst_cnt++;
+        if (*p_session_time >= (p_table + (*p_session_channel_step))->low_step_number)
+        {
+            *p_session_burst_cnt++;
 
-				if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
-					*p_session_burst_cnt = 0;
+            if (*p_session_burst_cnt == ((p_table + (*p_session_channel_step))->burst_mode_on + (p_table + (*p_session_channel_step))->burst_mode_off))
+                *p_session_burst_cnt = 0;
 
-				*p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
-			}
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_CHANGE_LEVEL;
+        }
 #endif
-			break;
+        break;
 
-		case SESSION_WARMING_UP_CHANNEL_END_ERROR:
-			*p_session_state = SESSION_WARMING_UP_CHANNEL_INIT;
-			return FIN_ERROR;
-			break;
+    case SESSION_WARMING_UP_CHANNEL_END_ERROR:
+        *p_session_state = SESSION_WARMING_UP_CHANNEL_INIT;
+        return FIN_ERROR;
+        break;
 
-		default:
-			*p_session_state = SESSION_WARMING_UP_CHANNEL_INIT;
-			break;
+    default:
+        *p_session_state = SESSION_WARMING_UP_CHANNEL_INIT;
+        break;
 
-	}
-	return TRABAJANDO;
+    }
+    return TRABAJANDO;
 }
 
 //------------ NUEVA FUNCION PARAMETERS CALCULATE 18-03-15 ----------------//

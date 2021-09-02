@@ -82,6 +82,7 @@ SRC += ./src/antennas.c
 SRC += ./src/utils.c
 SRC += ./src/test_functions.c
 SRC += ./src/errors.c
+SRC += ./src/first_pulse.c
 
 ## Core Support
 SRC += ./startup_src/syscalls.c
@@ -237,8 +238,15 @@ tests_signals_parameters:
 	gcc -c src/GTK_Signal.c -I. $(INCDIR) $(DDEFS)
 	# second auxiliary helper modules
 	gcc -c src/tests_ok.c -I $(INCDIR)
-	gcc -c src/tests_signals_parameters.c -I $(INCDIR)
 	gcc src/tests_signals_parameters.c GTK_Signal.o tests_ok.o -lm
+	./a.out
+
+tests_first_pulse:
+	# first compile common modules (modules to test and dependencies)
+	gcc -c src/first_pulse.c -I. $(INCDIR)
+	# second auxiliary helper modules
+	gcc -c src/tests_ok.c -I $(INCDIR)
+	gcc src/tests_first_pulse.c first_pulse.o tests_ok.o
 	./a.out
 
 

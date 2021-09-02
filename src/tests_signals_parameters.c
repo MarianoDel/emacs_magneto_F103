@@ -4,7 +4,7 @@
 // ## @TAGS:   Global
 // ## @CPU:    TEST PLATFORM FOR FIRMWARE
 // ##
-// #### TESTS_ERRORS_STR.C ####################
+// #### TESTS_SIGNALS_PARAMETERS.C ############
 //---------------------------------------------
 
 // Includes Modules for tests --------------------------------------------------

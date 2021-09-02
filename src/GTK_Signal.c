@@ -1344,15 +1344,15 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 		switch(session_stage)
 		{
 			case WARMING_UP:
-				(p_table + i)->maintenance_step_number = (float) p_session->stage_1_maintenance_time * 10;
+				(p_table + i)->maintenance_step_number = p_session->stage_1_maintenance_time * 10;
 				break;
 
 			case PLATEAU:
-				(p_table + i)->maintenance_step_number = (float) p_session->stage_2_maintenance_time * 10;
+				(p_table + i)->maintenance_step_number = p_session->stage_2_maintenance_time * 10;
 				break;
 
 			case COOLING_DOWN:
-				(p_table + i)->maintenance_step_number = (float) p_session->stage_3_maintenance_time * 10;
+				(p_table + i)->maintenance_step_number = p_session->stage_3_maintenance_time * 10;
 				break;
 		}
 

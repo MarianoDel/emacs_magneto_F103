@@ -103,7 +103,7 @@ void AntennaGetParamsStruct (unsigned char ch, antenna_typedef *ant);
 int main (int argc, char *argv[])
 {
     // Tests_First_Pulse_Sequence ();
-    // Tests_First_Pulse_Sequence_Out ();
+    Tests_First_Pulse_Sequence_Out ();
     
     // Tests_First_Pulse_Channel_1_Sequence ();
     // Tests_First_Pulse_Channel_2_Sequence ();
@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
     // Tests_First_Pulse_Channel_4_Sequence ();
 
     // Tests_First_Pulse_Shuffle_Channels_Sequence ();
-    Tests_First_Pulse_Shuffle_Channels_Sequence_Out ();    
+    // Tests_First_Pulse_Shuffle_Channels_Sequence_Out ();    
         
     return 0;
 }
@@ -145,6 +145,8 @@ void Tests_First_Pulse_Sequence (void)
         session_warming_up_channel_2_time++;
         session_warming_up_channel_3_time++;
         session_warming_up_channel_4_time++;
+
+        new_current_sample_ch1 = 1;
     }
 
     printf("channel%d time is: %d sequence ended with: ",
@@ -184,6 +186,7 @@ void Tests_First_Pulse_Sequence_Out (void)
 
 
     unsigned char channel = 1;
+    actual_current[1] = 100;    //base current 100
     while (answer == TRABAJANDO)
     {
         answer = FirstPulseCheck (channel);
@@ -193,10 +196,13 @@ void Tests_First_Pulse_Sequence_Out (void)
         session_warming_up_channel_3_time++;
         session_warming_up_channel_4_time++;
 
+        new_current_sample_ch1 = 1;
         if (session_warming_up_channel_1_time == 100)
         {
-            new_current_sample_ch1 = 1;
-            actual_current[1] = 1;
+            // actual_current[1] = 670;    //err, base current 0
+            // actual_current[1] = 671;    //ok, base current 0
+            actual_current[1] = 770;    //err, base current 100
+            // actual_current[1] = 771;    //ok, base current 100            
         }
     }
 
@@ -704,7 +710,10 @@ void Tests_First_Pulse_Shuffle_Channels_Sequence_Out (void)
            five_tau_ch_4,
            ch_4_time_steps
         );
-    
+
+    int print_loop_seq = 0;
+    int print_loop_seq_cnt = 0;
+    int print_loop_seq_event = 0;
     unsigned char channel = 1;
     unsigned char end_channels = 0;
     while (answer == TRABAJANDO)
@@ -713,48 +722,65 @@ void Tests_First_Pulse_Shuffle_Channels_Sequence_Out (void)
 
         if (answer == FIN_ERROR)
         {
-            printf("FIN_ERROR on channel: %d ", channel);
-            switch (channel)
+            if (!print_loop_seq)
             {
-            case 1:
-                printf("sequence ended with %d\n", session_warming_up_channel_1_time);
-                break;
-            case 2:
-                printf("sequence ended with %d\n", session_warming_up_channel_2_time);
-                break;
-            case 3:
-                printf("sequence ended with %d\n", session_warming_up_channel_3_time);                
-                break;
-            case 4:
-                printf("sequence ended with %d\n", session_warming_up_channel_4_time);
-                break;
+                printf("FIN_ERROR on channel: %d ", channel);
+                switch (channel)
+                {
+                case 1:
+                    printf("sequence ended with %d\n", session_warming_up_channel_1_time);
+                    break;
+                case 2:
+                    printf("sequence ended with %d\n", session_warming_up_channel_2_time);
+                    break;
+                case 3:
+                    printf("sequence ended with %d\n", session_warming_up_channel_3_time);                
+                    break;
+                case 4:
+                    printf("sequence ended with %d\n", session_warming_up_channel_4_time);
+                    break;
+                }
             }
 
             end_channels |= (1 << channel);            
             answer = TRABAJANDO;
+
+            if (print_loop_seq)
+                print_loop_seq_event = channel;
+            else
+                print_loop_seq_event = 0;
         }
 
         if (answer == FIN_OK)
         {
-            printf("FIN_OK on channel: %d ", channel);
-            switch (channel)
+            if (!print_loop_seq)
             {
-            case 1:
-                printf("sequence ended with %d\n", session_warming_up_channel_1_time);
-                break;
-            case 2:
-                printf("sequence ended with %d\n", session_warming_up_channel_2_time);
-                break;
-            case 3:
-                printf("sequence ended with %d\n", session_warming_up_channel_3_time);                
-                break;
-            case 4:
-                printf("sequence ended with %d\n", session_warming_up_channel_4_time);
-                break;
+                printf("FIN_OK on channel: %d ", channel);
+                switch (channel)
+                {
+                case 1:
+                    printf("sequence ended with %d\n", session_warming_up_channel_1_time);
+                    break;
+                case 2:
+                    printf("sequence ended with %d\n", session_warming_up_channel_2_time);
+                    break;
+                case 3:
+                    printf("sequence ended with %d\n", session_warming_up_channel_3_time);                
+                    break;
+                case 4:
+                    printf("sequence ended with %d\n", session_warming_up_channel_4_time);
+                    break;
+                }
             }
             
             end_channels |= (1 << channel);
             answer = TRABAJANDO;
+
+            if (print_loop_seq)
+                print_loop_seq_event = channel;
+            else
+                print_loop_seq_event = 0;
+            
         }
 
         if (end_channels == 0x1e)
@@ -801,7 +827,36 @@ void Tests_First_Pulse_Shuffle_Channels_Sequence_Out (void)
             new_current_sample_ch4 = 1;
             actual_current[4] = 1;
         }
+
+        if (print_loop_seq)
+        {
+            if (((print_loop_seq_cnt + 1) % 50) != 0)
+            {
+                if (print_loop_seq_event)
+                {
+                    printf("%d", print_loop_seq_event);
+                    print_loop_seq_event = 0;
+                }
+                else
+                    printf(".");
+            }
+            else
+            {
+                if (print_loop_seq_event)
+                {
+                    printf("%d\t(%d)\n", print_loop_seq_event);
+                    print_loop_seq_event = 0;
+                }
+                else
+                    printf(".\t(%d)\n", print_loop_seq_cnt + 1);
+            }
+            
+            print_loop_seq_cnt++;
+        }
     }
+
+    printf("\n");
+    
 }
 
 

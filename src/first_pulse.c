@@ -34,6 +34,7 @@
 
 typedef enum {
     FP_INIT = 0,
+    FP_GET_BASE_CURRENT,
     FP_ANTENNA_PARAMS,
     FP_5_TAU_PULSE_CHECK_CURRENT,
     FP_TAU_ENDING
@@ -69,6 +70,20 @@ fp_state_e fp_state_ch4 = FP_INIT;
 
 // for current meas
 unsigned short current_threshold [5];    //dummy on pos 0
+// for detect the current base in channels
+unsigned short current_samples_ch1 [8];
+unsigned short current_samples_ch2 [8];
+unsigned short current_samples_ch3 [8];
+unsigned short current_samples_ch4 [8];
+unsigned char current_samples_cnt_ch1 = 0;
+unsigned char current_samples_cnt_ch2 = 0;
+unsigned char current_samples_cnt_ch3 = 0;
+unsigned char current_samples_cnt_ch4 = 0;
+unsigned short current_base_ch1 = 0;
+unsigned short current_base_ch2 = 0;
+unsigned short current_base_ch3 = 0;
+unsigned short current_base_ch4 = 0;
+
 
 
 // Module Private Functions ----------------------------------------------------
@@ -86,15 +101,20 @@ unsigned char FirstPulseCheck (unsigned char ch)
     unsigned short * p_current;
     unsigned short * p_current_threshold;
     unsigned char * p_current_flag;
+    unsigned short * p_current_samples;
+    unsigned char * p_current_samples_cnt;
+    unsigned short * p_current_base;
+
 
     //Antenna parameters.
     antenna_typedef ant_params;
     float resistance = 0.0;
     float inductance = 0.0;
-    float current = 0.0;
+    float current = 0.0;    
     
     float LR_tau = 0.0;
     float voltage = 0.0;
+    float c_threshold = 0.0;    
 
     // the pwm to apply
     unsigned short applied_pwm = 0;
@@ -110,6 +130,9 @@ unsigned char FirstPulseCheck (unsigned char ch)
         p_current = &actual_current[CH1];
         p_current_threshold = &current_threshold[CH1];
         p_current_flag = &new_current_sample_ch1;
+        p_current_samples = current_samples_ch1;
+        p_current_samples_cnt = &current_samples_cnt_ch1;
+        p_current_base = &current_base_ch1;
         break;
 
     case CH2:
@@ -118,7 +141,10 @@ unsigned char FirstPulseCheck (unsigned char ch)
         p_pulse_time_end = &session_warming_up_channel_2_time_2;
         p_current = &actual_current[CH2];
         p_current_threshold = &current_threshold[CH2];
-        p_current_flag = &new_current_sample_ch2;        
+        p_current_flag = &new_current_sample_ch2;
+        p_current_samples = current_samples_ch2;
+        p_current_samples_cnt = &current_samples_cnt_ch2;
+        p_current_base = &current_base_ch2;        
         break;
 
     case CH3:
@@ -127,7 +153,10 @@ unsigned char FirstPulseCheck (unsigned char ch)
         p_pulse_time_end = &session_warming_up_channel_3_time_2;
         p_current = &actual_current[CH3];
         p_current_threshold = &current_threshold[CH3];
-        p_current_flag = &new_current_sample_ch3;        
+        p_current_flag = &new_current_sample_ch3;
+        p_current_samples = current_samples_ch3;
+        p_current_samples_cnt = &current_samples_cnt_ch3;
+        p_current_base = &current_base_ch3;        
         break;
 
     case CH4:
@@ -136,7 +165,10 @@ unsigned char FirstPulseCheck (unsigned char ch)
         p_pulse_time_end = &session_warming_up_channel_4_time_2;
         p_current = &actual_current[CH4];
         p_current_threshold = &current_threshold[CH4];        
-        p_current_flag = &new_current_sample_ch4;        
+        p_current_flag = &new_current_sample_ch4;
+        p_current_samples = current_samples_ch4;
+        p_current_samples_cnt = &current_samples_cnt_ch4;
+        p_current_base = &current_base_ch4;        
         break;
     }
 
@@ -144,7 +176,36 @@ unsigned char FirstPulseCheck (unsigned char ch)
     {
     case FP_INIT:
         FP_Reset_PWM_CH (ch);
-        *p_state = FP_ANTENNA_PARAMS;
+
+        for (unsigned char i = 0; i < 8; i++)
+            *(p_current_samples + i) = 0;
+
+        *p_current_samples_cnt = 0;
+        
+        *p_state = FP_GET_BASE_CURRENT;
+        break;
+
+    case FP_GET_BASE_CURRENT:
+        if (*p_current_samples_cnt < 8)
+        {
+            //new current sample arrived
+            if (*p_current_flag)
+            {
+                *(p_current_samples + *p_current_samples_cnt) = *p_current;
+                *p_current_samples_cnt += 1;
+                *p_current_flag = 0;
+            }
+        }
+        else
+        {
+            unsigned short current_base = 0;
+            for (unsigned char i = 0; i < 8; i++)
+                current_base += *(p_current_samples + i);
+
+            current_base >>= 3;
+            *p_current_base = current_base;
+            *p_state = FP_ANTENNA_PARAMS;
+        }
         break;
 
     case FP_ANTENNA_PARAMS:
@@ -184,10 +245,20 @@ unsigned char FirstPulseCheck (unsigned char ch)
         *p_pulse_time_end = (unsigned short) LR_tau;
         *p_pulse_time = 0;
 
-        // printf("5 Tau step: %d (100us / step) voltage: %f V pwm: %d\n",
+        c_threshold = current * 0.6;    //600mV / A
+        c_threshold = c_threshold * 0.303;    //divided by 3.3V
+        c_threshold = c_threshold * 4095;    //convert to adc samples
+        c_threshold = c_threshold / 2.0;    //50% of current for threshold
+        
+        *p_current_threshold = (unsigned short) c_threshold;
+        *p_current_threshold = *p_current_threshold + *p_current_base;
+
+        // printf("5 Tau step: %d (100us / step) voltage: %f V pwm: %d I: %f thres: %d\n",
         //        *p_pulse_time_end,
         //        (resistance * current),
-        //        applied_pwm
+        //        applied_pwm,
+        //        current,
+        //        *p_current_threshold
         //     );
 
         *p_state = FP_5_TAU_PULSE_CHECK_CURRENT;

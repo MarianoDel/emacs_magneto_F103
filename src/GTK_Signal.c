@@ -22,6 +22,7 @@
 #include "flash_program.h"
 #include "errors.h"
 #include "antennas.h"
+#include "first_pulse.h"
 
 #include <float.h>
 #include <math.h>
@@ -553,31 +554,20 @@ void Session_Channel_1 (void)
         case SESSION_CHANNEL_1_ANTENNA_EMISSION_DETECT:
 
             // the current errors are only for not pulses detected
-            i = Session_Warming_Up_Channels(CH1);
+            i = FirstPulseCheck(CH1);
 
             if (i == FIN_OK)
             {
                 session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
                 UART_PC_Send("Emissions detect ended ok,1\r\n");
-                
-                PWM_CH1_TiempoSubida(0); //pwm 200V.
-                PWM_CH1_TiempoMantenimiento(0);
-                PWM_CH1_TiempoBajada(0);
-
-            }
-
-            if ((i == TRABAJANDO) &&
-                (session_warming_up_channel_1_state > SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE))
-            {
-                Current_Limit_CheckCh1();
             }
 
             if (i == FIN_ERROR)
             {
-                SetBitGlobalErrors (CH1, BIT_ERROR_WARMING_UP);
-                Error_SetString(buffSendErr, ERR_CHANNEL_WARMING_UP(1));
-                UART_PC_Send(&buffSendErr[0]);
                 session_channel_1_state = SESSION_CHANNEL_1_END;
+                SetBitGlobalErrors (CH1, BIT_ERROR_ANTENNA);
+                Error_SetString(buffSendErr, ERR_CHANNEL_ANTENNA_NOT_EMITTING(1));
+                UART_PC_Send(&buffSendErr[0]);
             }
             break;
             

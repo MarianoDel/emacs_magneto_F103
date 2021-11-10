@@ -80,6 +80,7 @@ enum states_channel_2 {
 
 	SESSION_CHANNEL_2_INIT = 0,
 	SESSION_CHANNEL_2_VERIFY_ANTENNA,
+	SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_2_WARMING_UP,
 	SESSION_CHANNEL_2_PLATEAU,
 	SESSION_CHANNEL_2_COOLING_DOWN,
@@ -90,6 +91,7 @@ enum states_channel_3 {
 
 	SESSION_CHANNEL_3_INIT = 0,
 	SESSION_CHANNEL_3_VERIFY_ANTENNA,
+	SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_3_WARMING_UP,
 	SESSION_CHANNEL_3_PLATEAU,
 	SESSION_CHANNEL_3_COOLING_DOWN,
@@ -100,6 +102,7 @@ enum states_channel_4 {
 
 	SESSION_CHANNEL_4_INIT = 0,
 	SESSION_CHANNEL_4_VERIFY_ANTENNA,
+	SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_4_WARMING_UP,
 	SESSION_CHANNEL_4_PLATEAU,
 	SESSION_CHANNEL_4_COOLING_DOWN,
@@ -1403,7 +1406,12 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 
 		//ajusto Vsnubber para calcular descarga rapida lo corrijo en Ipeak * Rserie
 		Vsnubber += final_current * resistance;
-		Td = (-LR_tau) * log(1 - (current_limit * resistance) / Vsnubber);
+                // modificacion 10-11-2021 reviso no tener logaritmos negativos
+                auxiliar_duty = (final_current * resistance) / Vsnubber;
+                if (auxiliar_duty > 0.99)
+                    Td = 0.0;
+                else
+                    Td = (-LR_tau) * log(1 - (final_current * resistance) / Vsnubber);
 		// sprintf(&buffSendErr[0], "\r\ndescarga rapida: %dms", (int) (Td * 1000));		//TODO:debug 9-7-17
 		// UART_PC_Send(&buffSendErr[0]);
 		// Wait_ms(30);
@@ -1493,7 +1501,6 @@ unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsig
 					(p_table + i)->falling_type = FALLING_FAST_DISCHARGE;
 
 					(p_table + i)->falling_time = p_session->stage_1_falling_time;	//aca le paso el valor elegido
-
 					if (Td < p_session->stage_1_falling_time)
 					{
 						auxiliar_duty = p_session->stage_1_falling_time;
@@ -5178,8 +5185,14 @@ void Session_Channel_2 (void)
             i = AntennaVerifyForTreatment(CH2);
 
             if (i == FIN_OK)
+            {
+#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
+                session_channel_2_state = SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT;                
+#else
                 session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
-
+#endif
+            }
+            
             else if (i == FIN_ERROR)
             {
                 SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
@@ -5189,6 +5202,26 @@ void Session_Channel_2 (void)
             }
 #endif
             break;
+            
+        case SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT:
+
+            // the current errors are only for not pulses detected
+            i = FirstPulseCheck(CH2);
+
+            if (i == FIN_OK)
+            {
+                session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
+                UART_PC_Send("Emissions detect ended ok,2\r\n");
+            }
+
+            if (i == FIN_ERROR)
+            {
+                session_channel_2_state = SESSION_CHANNEL_2_END;
+                SetBitGlobalErrors (CH2, BIT_ERROR_ANTENNA);
+                Error_SetString(buffSendErr, ERR_CHANNEL_ANTENNA_NOT_EMITTING(2));
+                UART_PC_Send(&buffSendErr[0]);
+            }
+            break;            
 
         case SESSION_CHANNEL_2_WARMING_UP:
             //warming up.
@@ -5449,7 +5482,13 @@ void Session_Channel_3 (void)
             i = AntennaVerifyForTreatment(CH3);
 
             if (i == FIN_OK)
+            {
+#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
+                session_channel_3_state = SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT;
+#else
                 session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
+#endif
+            }
 
             else if (i == FIN_ERROR)
             {
@@ -5459,6 +5498,26 @@ void Session_Channel_3 (void)
                 UART_PC_Send(&buffSendErr[0]);
             }
 #endif
+            break;
+
+        case SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT:
+
+            // the current errors are only for not pulses detected
+            i = FirstPulseCheck(CH3);
+
+            if (i == FIN_OK)
+            {
+                session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
+                UART_PC_Send("Emissions detect ended ok,3\r\n");
+            }
+
+            if (i == FIN_ERROR)
+            {
+                session_channel_3_state = SESSION_CHANNEL_3_END;
+                SetBitGlobalErrors (CH3, BIT_ERROR_ANTENNA);
+                Error_SetString(buffSendErr, ERR_CHANNEL_ANTENNA_NOT_EMITTING(3));
+                UART_PC_Send(&buffSendErr[0]);
+            }
             break;
 
         case SESSION_CHANNEL_3_WARMING_UP:
@@ -5723,7 +5782,13 @@ void Session_Channel_4 (void)
             i = AntennaVerifyForTreatment(CH4);
 
             if (i == FIN_OK)
+            {
+#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
+                session_channel_4_state = SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT;
+#else
                 session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
+#endif
+            }
 
             else if (i == FIN_ERROR)
             {
@@ -5733,6 +5798,26 @@ void Session_Channel_4 (void)
                 UART_PC_Send(&buffSendErr[0]);
             }
 #endif
+            break;
+
+        case SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT:
+
+            // the current errors are only for not pulses detected
+            i = FirstPulseCheck(CH4);
+
+            if (i == FIN_OK)
+            {
+                session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
+                UART_PC_Send("Emissions detect ended ok,4\r\n");
+            }
+
+            if (i == FIN_ERROR)
+            {
+                session_channel_4_state = SESSION_CHANNEL_4_END;
+                SetBitGlobalErrors (CH4, BIT_ERROR_ANTENNA);
+                Error_SetString(buffSendErr, ERR_CHANNEL_ANTENNA_NOT_EMITTING(4));
+                UART_PC_Send(&buffSendErr[0]);
+            }
             break;
 
         case SESSION_CHANNEL_4_WARMING_UP:

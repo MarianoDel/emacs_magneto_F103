@@ -55,6 +55,10 @@ void CalcParamsForSignal (int show_parcial_results);
 
 void Tests_Compare_Parameters (void);
 
+int Compare_Two_Params_With_Tolerance (unsigned short param1,
+                                       unsigned short param2,
+                                       unsigned short tolerance);
+
 // Module Mocked Functions -----------------------------------------------------
 void Update_TIM1_CH1 (unsigned short a);
 void Update_TIM1_CH4 (unsigned short a);
@@ -91,9 +95,9 @@ int main (int argc, char *argv[])
 {
     // Tests_Parameters_Sequence ();
     // Tests_Show_Parameters ();
-    Tests_Local_Calc_Parameters ();
-    // Tests_Compare_Parameters ();
-        
+    // Tests_Local_Calc_Parameters ();
+    Tests_Compare_Parameters ();
+
     return 0;
 }
 
@@ -130,28 +134,37 @@ void Tests_Show_Parameters (void)
 
     printf("Fixing antenna params...\n");
 // const char s_antena [] = { "ant0,012.27,087.90,001.80,065.00\r\n" };        
-    session_ch_1.ant_resistance_int = 12;
-    session_ch_1.ant_resistance_dec = 27;
-    session_ch_1.ant_inductance_int = 87;
-    session_ch_1.ant_inductance_dec = 90;
+    session_ch_1.ant_resistance_int = 24;
+    session_ch_1.ant_resistance_dec = 0;
+    session_ch_1.ant_inductance_int = 141;
+    session_ch_1.ant_inductance_dec = 0;
     session_ch_1.ant_current_limit_int = 1;
     session_ch_1.ant_current_limit_dec = 80;
     session_ch_1.ant_temp_max_int = 65;
     session_ch_1.ant_temp_max_dec = 0;
 
+    // session_ch_1.ant_resistance_int = 12;
+    // session_ch_1.ant_resistance_dec = 27;
+    // session_ch_1.ant_inductance_int = 87;
+    // session_ch_1.ant_inductance_dec = 90;
+    // session_ch_1.ant_current_limit_int = 1;
+    // session_ch_1.ant_current_limit_dec = 80;
+    // session_ch_1.ant_temp_max_int = 65;
+    // session_ch_1.ant_temp_max_dec = 0;
+    
     printf("Fixing stage params...\n");
     session_ch_1.stage_1_time_hours = 1;
     session_ch_1.stage_1_time_minutes = 0;
     session_ch_1.stage_1_time_seconds = 0;
 
-    session_ch_1.stage_1_initial_power = 100;
-    session_ch_1.stage_1_final_power = 100;
+    session_ch_1.stage_1_initial_power = 90;
+    session_ch_1.stage_1_final_power = 90;
     session_ch_1.stage_1_time_per_step = 0;
 
-    session_ch_1.stage_1_rising_time = 10;
-    session_ch_1.stage_1_maintenance_time = 10;
-    session_ch_1.stage_1_falling_time = 10;
-    session_ch_1.stage_1_low_time = 30;
+    session_ch_1.stage_1_rising_time = 1;
+    session_ch_1.stage_1_maintenance_time = 61;
+    session_ch_1.stage_1_falling_time = 1;
+    session_ch_1.stage_1_low_time = 64;
     
 
     unsigned char i = 0;
@@ -361,10 +374,10 @@ void Tests_Local_Calc_Parameters (void)
 
     printf("Fixing antenna params...\n");
 // const char s_antena [] = { "ant0,012.27,087.90,001.80,065.00\r\n" };            
-    session_ch_1.ant_resistance_int = 12;
-    session_ch_1.ant_resistance_dec = 27;
-    session_ch_1.ant_inductance_int = 87;
-    session_ch_1.ant_inductance_dec = 90;
+    session_ch_1.ant_resistance_int = 24;
+    session_ch_1.ant_resistance_dec = 0;
+    session_ch_1.ant_inductance_int = 141;
+    session_ch_1.ant_inductance_dec = 0;
     session_ch_1.ant_current_limit_int = 1;
     session_ch_1.ant_current_limit_dec = 80;
     session_ch_1.ant_temp_max_int = 65;
@@ -375,14 +388,14 @@ void Tests_Local_Calc_Parameters (void)
     session_ch_1.stage_1_time_minutes = 0;
     session_ch_1.stage_1_time_seconds = 0;
 
-    session_ch_1.stage_1_initial_power = 100;
-    session_ch_1.stage_1_final_power = 100;
+    session_ch_1.stage_1_initial_power = 90;
+    session_ch_1.stage_1_final_power = 90;
     session_ch_1.stage_1_time_per_step = 0;
 
-    session_ch_1.stage_1_rising_time = 10;
-    session_ch_1.stage_1_maintenance_time = 10;
-    session_ch_1.stage_1_falling_time = 10;
-    session_ch_1.stage_1_low_time = 30;
+    session_ch_1.stage_1_rising_time = 1;
+    session_ch_1.stage_1_maintenance_time = 61;
+    session_ch_1.stage_1_falling_time = 1;
+    session_ch_1.stage_1_low_time = 64;
 
     CalcParamsForSignal (1);
     
@@ -396,10 +409,10 @@ void Tests_Compare_Parameters (void)
 
     printf("Fixing antenna params...\n");
 // const char s_antena [] = { "ant0,012.27,087.90,001.80,065.00\r\n" };    
-    session_ch_1.ant_resistance_int = 12;
-    session_ch_1.ant_resistance_dec = 27;
-    session_ch_1.ant_inductance_int = 87;
-    session_ch_1.ant_inductance_dec = 90;
+    session_ch_1.ant_resistance_int = 24;
+    session_ch_1.ant_resistance_dec = 0;
+    session_ch_1.ant_inductance_int = 141;
+    session_ch_1.ant_inductance_dec = 0;
     session_ch_1.ant_current_limit_int = 1;
     session_ch_1.ant_current_limit_dec = 80;
     session_ch_1.ant_temp_max_int = 65;
@@ -414,10 +427,23 @@ void Tests_Compare_Parameters (void)
     session_ch_1.stage_1_final_power = 100;
     session_ch_1.stage_1_time_per_step = 0;
 
-    session_ch_1.stage_1_rising_time = 10;
-    session_ch_1.stage_1_maintenance_time = 10;
-    session_ch_1.stage_1_falling_time = 10;
-    session_ch_1.stage_1_low_time = 30;
+    // times for square signal 7.83Hz
+    session_ch_1.stage_1_rising_time = 1;
+    session_ch_1.stage_1_maintenance_time = 61;
+    session_ch_1.stage_1_falling_time = 1;
+    session_ch_1.stage_1_low_time = 64;
+    
+    // times for triangular signal 7.83Hz
+    // session_ch_1.stage_1_rising_time = 61;
+    // session_ch_1.stage_1_maintenance_time = 1;
+    // session_ch_1.stage_1_falling_time = 1;
+    // session_ch_1.stage_1_low_time = 64;
+
+    // times for sinusoidal signal 7.83Hz
+    // session_ch_1.stage_1_rising_time = 21;
+    // session_ch_1.stage_1_maintenance_time = 21;
+    // session_ch_1.stage_1_falling_time = 21;
+    // session_ch_1.stage_1_low_time = 64;
     
 
     unsigned char i = 0;
@@ -432,48 +458,143 @@ void Tests_Compare_Parameters (void)
         errors = 1;
     }
 
-    CalcParamsForSignal (0);
+    CalcParamsForSignal (1);
 
     printf("Comparing local and embedded results: ");
     warmingup_coolingdown_typedef * pt = &table_warming_up_channel_1[0];
     
-    if ((pt->rising_pwm_200_initial != pwm_outputs.rising_pwm_200_initial) ||
-        (pt->rising_pwm_200_final != pwm_outputs.rising_pwm_200_final) ||
-        (pt->rising_pwm_40_initial != pwm_outputs.rising_pwm_40_initial) ||
-        (pt->rising_pwm_40_final != pwm_outputs.rising_pwm_40_final) ||
-        (pt->rising_pwm_n_initial != pwm_outputs.rising_pwm_n_initial) ||
-        (pt->rising_pwm_n_final != pwm_outputs.rising_pwm_n_final) ||
-        (pt->rising_step_number != pwm_outputs.rising_step_number))
+    if ((!Compare_Two_Params_With_Tolerance(pt->rising_pwm_200_initial, pwm_outputs.rising_pwm_200_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_pwm_200_final, pwm_outputs.rising_pwm_200_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_pwm_40_initial, pwm_outputs.rising_pwm_40_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_pwm_40_final, pwm_outputs.rising_pwm_40_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_pwm_n_initial, pwm_outputs.rising_pwm_n_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_pwm_n_final, pwm_outputs.rising_pwm_n_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->rising_step_number, pwm_outputs.rising_step_number, 1)))
     {
         PrintERR();
-        printf("Errors on rising parameters\n");
+        printf(" Errors on rising parameters\n");
+
+        printf("  rising pwm 200 initial: %d %d\n",
+               pt->rising_pwm_200_initial,
+               pwm_outputs.rising_pwm_200_initial);
+
+        printf("  rising pwm 200 final: %d %d\n",
+               pt->rising_pwm_200_final,
+               pwm_outputs.rising_pwm_200_final);
+        
+        printf("  rising pwm 40 initial: %d %d\n",
+               pt->rising_pwm_40_initial,
+               pwm_outputs.rising_pwm_40_initial);
+
+        printf("  rising pwm 40 final: %d %d\n",
+               pt->rising_pwm_40_final,
+               pwm_outputs.rising_pwm_40_final);
+        
+        printf("  rising pwm n initial: %d %d\n",
+               pt->rising_pwm_n_initial,
+               pwm_outputs.rising_pwm_n_initial);
+
+        printf("  rising pwm n final: %d %d\n",
+               pt->rising_pwm_n_final,
+               pwm_outputs.rising_pwm_n_final);
+        
+        printf("  rising step number: %d %d\n",
+               pt->rising_step_number,
+               pwm_outputs.rising_step_number);        
+
         errors = 1;
     }
 
 
-    if ((pt->maintenance_pwm_200 != pwm_outputs.maintenance_pwm_200) ||
-        (pt->maintenance_pwm_40 != pwm_outputs.maintenance_pwm_40) ||
-        (pt->maintenance_pwm_n != pwm_outputs.maintenance_pwm_n) ||
-        (pt->maintenance_step_number != pwm_outputs.maintenance_step_number))
+    if ((!Compare_Two_Params_With_Tolerance(pt->maintenance_pwm_200, pwm_outputs.maintenance_pwm_200, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->maintenance_pwm_40, pwm_outputs.maintenance_pwm_40, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->maintenance_pwm_n, pwm_outputs.maintenance_pwm_n, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->maintenance_step_number, pwm_outputs.maintenance_step_number, 1)))
     {
         PrintERR();
-        printf("Errors on maintenance parameters\n");
+        printf(" Errors on maintenance parameters\n");
+
+        printf("  maintenance pwm 200: %d %d\n",
+               pt->maintenance_pwm_200,
+               pwm_outputs.maintenance_pwm_200);
+        
+        printf("  maintenance pwm 40: %d %d\n",
+               pt->maintenance_pwm_40,
+               pwm_outputs.maintenance_pwm_40);
+        
+        printf("  maintenance pwm n: %d %d\n",
+               pt->maintenance_pwm_n,
+               pwm_outputs.maintenance_pwm_n);
+        
+        printf("  maintenance step number: %d %d\n",
+               pt->maintenance_step_number,
+               pwm_outputs.maintenance_step_number);        
+
         errors = 1;        
     }
 
     
-    if ((pt->falling_pwm_200_initial != pwm_outputs.falling_pwm_200_initial) ||
-        (pt->falling_pwm_200_final != pwm_outputs.falling_pwm_200_final) ||
-        (pt->falling_pwm_40_initial != pwm_outputs.falling_pwm_40_initial) ||
-        (pt->falling_pwm_40_final != pwm_outputs.falling_pwm_40_final) ||
-        (pt->falling_pwm_n_initial != pwm_outputs.falling_pwm_n_initial) ||
-        (pt->falling_pwm_n_final != pwm_outputs.falling_pwm_n_final) ||
-        (pt->falling_time != pwm_outputs.falling_time) ||
-        (pt->falling_step_number != pwm_outputs.falling_step_number) ||
-        (pt->falling_type != pwm_outputs.falling_type))
+    if ((!Compare_Two_Params_With_Tolerance(pt->falling_pwm_200_initial, pwm_outputs.falling_pwm_200_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_pwm_200_final, pwm_outputs.falling_pwm_200_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_pwm_40_initial, pwm_outputs.falling_pwm_40_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_pwm_40_final, pwm_outputs.falling_pwm_40_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_pwm_n_initial, pwm_outputs.falling_pwm_n_initial, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_pwm_n_final, pwm_outputs.falling_pwm_n_final, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_time, pwm_outputs.falling_time, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_step_number, pwm_outputs.falling_step_number, 1)) ||
+        (!Compare_Two_Params_With_Tolerance(pt->falling_type, pwm_outputs.falling_type, 1)))
     {
         PrintERR();
-        printf("Errors on falling parameters\n");
+        printf(" Errors on falling parameters\n");
+
+        printf("  falling pwm 200 initial: %d %d\n",
+               pt->falling_pwm_200_initial,
+               pwm_outputs.falling_pwm_200_initial);
+
+        printf("  falling pwm 200 final: %d %d\n",
+               pt->falling_pwm_200_final,
+               pwm_outputs.falling_pwm_200_final);
+        
+        printf("  falling pwm 40 initial: %d %d\n",
+               pt->falling_pwm_40_initial,
+               pwm_outputs.falling_pwm_40_initial);
+
+        printf("  falling pwm 40 final: %d %d\n",
+               pt->falling_pwm_40_final,
+               pwm_outputs.falling_pwm_40_final);
+        
+        printf("  falling pwm n initial: %d %d\n",
+               pt->falling_pwm_n_initial,
+               pwm_outputs.falling_pwm_n_initial);
+
+        printf("  falling pwm n final: %d %d\n",
+               pt->falling_pwm_n_final,
+               pwm_outputs.falling_pwm_n_final);
+        
+        printf("  falling time: %d %d\n",
+               pt->falling_time,
+               pwm_outputs.falling_time);
+
+        printf("  falling step number: %d %d\n",
+               pt->falling_step_number,
+               pwm_outputs.falling_step_number);        
+
+        printf("  falling type: %d %d\n",
+               pt->falling_type,
+               pwm_outputs.falling_type);        
+        
+        errors = 1;
+    }
+
+    if (pt->low_step_number != pwm_outputs.low_step_number)
+    {
+        PrintERR();
+        printf(" Errors on low steps parameter\n");
+
+        printf("  low step number: %d %d\n",
+               pt->low_step_number,
+               pwm_outputs.low_step_number);        
+        
         errors = 1;
     }
 
@@ -499,6 +620,7 @@ void CalcParamsForSignal (int show_parcial_results)
     float current = 0.0;
     float inductance = 0.0;
     float resistance = 0.0;
+    float power = 0.0;
 
     if (show_parcial_results)
     {
@@ -517,11 +639,17 @@ void CalcParamsForSignal (int show_parcial_results)
                session_ch_1.stage_1_falling_time,
                session_ch_1.stage_1_low_time
             );
+
+        printf("session power: %d\n",
+               session_ch_1.stage_1_initial_power
+            );
+        
     }
 
     resistance = ant.resistance_int + ant.resistance_dec / 100.0;
     inductance = (ant.inductance_int + ant.inductance_dec / 100.0) / 1000.0;
     current = ant.current_limit_int + ant.current_limit_dec / 100.0;
+    power = session_ch_1.stage_1_initial_power;
     // resistance = ant.resistance_int + ant.resistance_dec / 10.0;
     // inductance = (ant.inductance_int + ant.inductance_dec / 10.0) / 1000.0;
     // current = ant.current_limit_int + ant.current_limit_dec / 10.0;
@@ -533,6 +661,10 @@ void CalcParamsForSignal (int show_parcial_results)
                current
             );
     }
+
+    // Power adjustment
+    current = current * power / 100.0;
+    printf("local current: %f\n", current);
 
     // Rising calcs
     voltage = (current * inductance * 1000.0) / session_ch_1.stage_1_rising_time;    //rising in ms
@@ -666,8 +798,14 @@ void CalcParamsForSignal (int show_parcial_results)
 
     //ajusto Vsnubber para calcular descarga rapida lo corrijo en Ipeak * Rserie
     Vsnubber += current * resistance;
-    Td = (-LR_tau) * log(1 - (current * resistance) / Vsnubber);
 
+    // modificacion 10-11-2021 reviso no tener logaritmos negativos
+    auxiliar_duty = (current * resistance) / Vsnubber;
+    if (auxiliar_duty > 0.99)
+        Td = 0.0;
+    else
+        Td = (-LR_tau) * log(1 - (current * resistance) / Vsnubber);
+    
     //Nuevo programa bajada
     Td *= 1000;		//paso a ms
 
@@ -731,7 +869,8 @@ void CalcParamsForSignal (int show_parcial_results)
         pwm_outputs.falling_type = FALLING_FAST_DISCHARGE;
 
         pwm_outputs.falling_time = session_ch_1.stage_1_falling_time;	//aca le paso el valor elegido
-
+        
+        printf("local Td: %f\n", Td);
         if (Td < session_ch_1.stage_1_falling_time)
         {
             auxiliar_duty = session_ch_1.stage_1_falling_time;
@@ -748,6 +887,14 @@ void CalcParamsForSignal (int show_parcial_results)
     }
     //Fin nuevo programa bajada
 
+    //--- LOW ---//
+    if (pwm_outputs.falling_type == FALLING_FAST_DISCHARGE)
+        pwm_outputs.low_step_number = session_ch_1.stage_1_low_time * 10 - auxiliar_duty;
+    else
+        pwm_outputs.low_step_number = session_ch_1.stage_1_low_time * 10;
+
+    // (p_table + i)->burst_mode_off = p_session->stage_1_burst_mode_off;
+    // (p_table + i)->burst_mode_on = p_session->stage_1_burst_mode_on;
 	// FALLING_SLOW_DISCHARGE = 1,
 	// FALLING_LR,
 	// FALLING_FAST_DISCHARGE
@@ -767,10 +914,40 @@ void CalcParamsForSignal (int show_parcial_results)
                pwm_outputs.falling_step_number
             );
     }
-    
-    
+
+    if (show_parcial_results)
+    {
+        printf("\nLow step 0\n");
+        printf("step\n");
+        printf("%d\n", pwm_outputs.low_step_number);
+    }
 }
 
+
+void FirstPulseCheck (unsigned char ch)
+{
+}
+
+
+int Compare_Two_Params_With_Tolerance (unsigned short param1,
+                                       unsigned short param2,
+                                       unsigned short tolerance)
+{
+    int answer = 0;
+    
+    if (param1 > param2)
+    {
+        if ((param1 - param2) <= tolerance)
+            answer = 1;
+    }
+    else
+    {
+        if ((param2 - param1) <= tolerance)
+            answer = 1;        
+    }
+
+    return answer;
+}
 //--- end of file ---//
 
 

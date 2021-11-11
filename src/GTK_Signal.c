@@ -69,6 +69,7 @@ enum states_channel_1 {
 
 	SESSION_CHANNEL_1_INIT = 0,
 	SESSION_CHANNEL_1_VERIFY_ANTENNA,
+        SESSION_CHANNEL_1_CHECK_NO_OVERCURRENT,
 	SESSION_CHANNEL_1_ANTENNA_EMISSION_DETECT,
 	SESSION_CHANNEL_1_WARMING_UP,        
 	SESSION_CHANNEL_1_PLATEAU,
@@ -80,6 +81,7 @@ enum states_channel_2 {
 
 	SESSION_CHANNEL_2_INIT = 0,
 	SESSION_CHANNEL_2_VERIFY_ANTENNA,
+        SESSION_CHANNEL_2_CHECK_NO_OVERCURRENT,        
 	SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_2_WARMING_UP,
 	SESSION_CHANNEL_2_PLATEAU,
@@ -91,6 +93,7 @@ enum states_channel_3 {
 
 	SESSION_CHANNEL_3_INIT = 0,
 	SESSION_CHANNEL_3_VERIFY_ANTENNA,
+        SESSION_CHANNEL_3_CHECK_NO_OVERCURRENT,        
 	SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_3_WARMING_UP,
 	SESSION_CHANNEL_3_PLATEAU,
@@ -102,6 +105,7 @@ enum states_channel_4 {
 
 	SESSION_CHANNEL_4_INIT = 0,
 	SESSION_CHANNEL_4_VERIFY_ANTENNA,
+        SESSION_CHANNEL_4_CHECK_NO_OVERCURRENT,        
 	SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT,        
 	SESSION_CHANNEL_4_WARMING_UP,
 	SESSION_CHANNEL_4_PLATEAU,
@@ -536,13 +540,8 @@ void Session_Channel_1 (void)
 
             if (i == FIN_OK)
             {
-#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
-                session_channel_1_state = SESSION_CHANNEL_1_ANTENNA_EMISSION_DETECT;
-#else
-                session_channel_1_state = SESSION_CHANNEL_1_WARMING_UP;
-#endif
+                session_channel_1_state = SESSION_CHANNEL_1_CHECK_NO_OVERCURRENT;
             }
-                
 
             else if (i == FIN_ERROR)
             {
@@ -552,6 +551,23 @@ void Session_Channel_1 (void)
                 UART_PC_Send(&buffSendErr[0]);
             }
 #endif
+            break;
+
+        case SESSION_CHANNEL_1_CHECK_NO_OVERCURRENT:
+
+            // check the channel free of current protection
+            if (actual_current[CH1] > 3000)
+            {
+                Session_Channel_1_Stop();
+                SetBitGlobalErrors (CH1, BIT_ERROR_CURRENT);
+                sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH1]);
+                UART_PC_Send(&buffSendErr[0]);
+                session_channel_1_state = SESSION_CHANNEL_1_END;
+            }
+            else
+            {
+                session_channel_1_state = SESSION_CHANNEL_1_ANTENNA_EMISSION_DETECT;
+            }
             break;
 
         case SESSION_CHANNEL_1_ANTENNA_EMISSION_DETECT:
@@ -5186,11 +5202,7 @@ void Session_Channel_2 (void)
 
             if (i == FIN_OK)
             {
-#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
-                session_channel_2_state = SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT;                
-#else
-                session_channel_2_state = SESSION_CHANNEL_2_WARMING_UP;
-#endif
+                session_channel_2_state = SESSION_CHANNEL_2_CHECK_NO_OVERCURRENT;
             }
             
             else if (i == FIN_ERROR)
@@ -5203,6 +5215,23 @@ void Session_Channel_2 (void)
 #endif
             break;
             
+        case SESSION_CHANNEL_2_CHECK_NO_OVERCURRENT:
+
+            // check the channel free of current protection
+            if (actual_current[CH2] > 3000)
+            {
+                Session_Channel_2_Stop();
+                SetBitGlobalErrors (CH2, BIT_ERROR_CURRENT);
+                sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH2]);
+                UART_PC_Send(&buffSendErr[0]);
+                session_channel_2_state = SESSION_CHANNEL_2_END;
+            }
+            else
+            {
+                session_channel_2_state = SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT;
+            }
+            break;
+
         case SESSION_CHANNEL_2_ANTENNA_EMISSION_DETECT:
 
             // the current errors are only for not pulses detected
@@ -5483,11 +5512,7 @@ void Session_Channel_3 (void)
 
             if (i == FIN_OK)
             {
-#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
-                session_channel_3_state = SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT;
-#else
-                session_channel_3_state = SESSION_CHANNEL_3_WARMING_UP;
-#endif
+                session_channel_3_state = SESSION_CHANNEL_3_CHECK_NO_OVERCURRENT;
             }
 
             else if (i == FIN_ERROR)
@@ -5498,6 +5523,23 @@ void Session_Channel_3 (void)
                 UART_PC_Send(&buffSendErr[0]);
             }
 #endif
+            break;
+
+        case SESSION_CHANNEL_3_CHECK_NO_OVERCURRENT:
+
+            // check the channel free of current protection
+            if (actual_current[CH3] > 3000)
+            {
+                Session_Channel_3_Stop();
+                SetBitGlobalErrors (CH3, BIT_ERROR_CURRENT);
+                sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH3]);
+                UART_PC_Send(&buffSendErr[0]);
+                session_channel_3_state = SESSION_CHANNEL_3_END;
+            }
+            else
+            {
+                session_channel_3_state = SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT;
+            }
             break;
 
         case SESSION_CHANNEL_3_ANTENNA_EMISSION_DETECT:
@@ -5783,11 +5825,7 @@ void Session_Channel_4 (void)
 
             if (i == FIN_OK)
             {
-#ifdef USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
-                session_channel_4_state = SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT;
-#else
-                session_channel_4_state = SESSION_CHANNEL_4_WARMING_UP;
-#endif
+                session_channel_4_state = SESSION_CHANNEL_4_CHECK_NO_OVERCURRENT;
             }
 
             else if (i == FIN_ERROR)
@@ -5798,6 +5836,23 @@ void Session_Channel_4 (void)
                 UART_PC_Send(&buffSendErr[0]);
             }
 #endif
+            break;
+
+        case SESSION_CHANNEL_4_CHECK_NO_OVERCURRENT:
+
+            // check the channel free of current protection
+            if (actual_current[CH4] > 3000)
+            {
+                Session_Channel_4_Stop();
+                SetBitGlobalErrors (CH4, BIT_ERROR_CURRENT);
+                sprintf(&buffSendErr[0], (const char *) "current was: %d\r\n", actual_current[CH4]);
+                UART_PC_Send(&buffSendErr[0]);
+                session_channel_4_state = SESSION_CHANNEL_4_END;
+            }
+            else
+            {
+                session_channel_4_state = SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT;
+            }
             break;
 
         case SESSION_CHANNEL_4_ANTENNA_EMISSION_DETECT:

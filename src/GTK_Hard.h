@@ -20,6 +20,7 @@
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap ydisipador color aluminio SIN BUZZER
 #define SOFTWARE_VERSION_1_4        //new graphics interface and first pulses for ants to detect disconnect
+                                    // Rx with pullup for use with new rpihat
 // #define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
 // #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
 // #define SOFTWARE_VERSION_1_1			//Agrega posibilidad de usar antenas harcodeadas

@@ -115,8 +115,10 @@ void Usart1Config(void)
     //----TX:PA9 RX:PA10----//
     temp = GPIOA->CRH;
     temp &= 0xFFFFF00F;
-    temp |= 0x000004B0;
+    // temp |= 0x000004B0;
+    temp |= 0x000008B0;    //PA10 input pullup - pulldwn
     GPIOA->CRH = temp;
+    GPIOA->ODR |= 0x0400;    //PA10 pullup
         
     //---- Habilito Int y prioridad ----
     NVIC_EnableIRQ(USART1_IRQn);

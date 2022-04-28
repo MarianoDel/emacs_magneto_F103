@@ -16,7 +16,7 @@
 // #define HSI_INTERNAL_RC
 #define HSE_CRYSTAL_OSC
 
-
+#define USE_PULLUP_ON_RX_INPUT    //pullup on RX_U1 PA10
 //-------- End Of Defines For Configuration ------
 
 

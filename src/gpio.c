@@ -129,10 +129,12 @@ void GpioInit (void)
     GPIOA->CRH = temp;
 
     //--- GPIOA Pull-Up Pull-Dwn ------------------//
-    // temp = GPIOA->ODR;    //PA0 pull-up PA3 pull-up
-    // temp &= 0xFFF6;
-    // temp |= 0x0009;
-    // GPIOA->ODR = temp;
+#ifdef USE_PULLUP_ON_RX_INPUT
+    temp = GPIOA->ODR;
+    temp &= 0xFBFF;    //PA10 pull-up
+    temp |= 0x0400;
+    GPIOA->ODR = temp;
+#endif
         
     //--- GPIOB Low Side -------------------//
     //PB0 EN_CH1

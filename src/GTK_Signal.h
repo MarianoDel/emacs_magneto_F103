@@ -51,6 +51,9 @@ void TIM5_IRQ_Callback (void);
 
 unsigned char Session_Channels_Fixed_Parameters (unsigned char, unsigned char);
 unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage);
+unsigned char Session_Channels_Parameters_Calculate_Generate_Always (
+    unsigned char channel,
+    unsigned char session_stage);
 unsigned char Session_Warming_Up_Channels (unsigned char channel);
 unsigned char Session_Cooling_Down_Channels (unsigned char channel);
 unsigned char Session_Plateau_Channels(unsigned char channel);

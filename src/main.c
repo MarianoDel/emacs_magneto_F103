@@ -18,7 +18,6 @@
 #include "GTK_Estructura.h"
 #include "GTK_Signal.h"
 #include "flash_program.h"
-// #include "GTK_Errors.h"
 
 #include "comms.h"
 #include "comms_channels.h"
@@ -70,12 +69,6 @@ session_typedef session_ch_2;
 session_typedef session_ch_3;
 session_typedef session_ch_4;
 
-//session_typedef session_slot_1;
-//session_typedef session_slot_2;
-//session_typedef session_slot_3;
-//session_typedef session_slot_4;
-//session_typedef session_slot_5;
-
 unsigned char channel_1_pause = 0;
 unsigned char channel_2_pause = 0;
 unsigned char channel_3_pause = 0;
@@ -91,13 +84,17 @@ void CheckLEDs (void);
 // Module Functions ------------------------------------------------------------
 int main (void)
 {
-    //Configuracion de clock.
-    // SystemInit();    //SystemInit() is called from startup_stm32f10x_hd.s before main()
+    // Clock Configuration
+    // SystemInit() is called from startup_stm32f10x_hd.s before main()
 
     //Configure all gpios and alternative functions pins
     GpioInit();
     LED2_OFF;
     LED3_OFF;
+
+    // --- Begin Hardware Tests ----
+    // TF_Hardware_Tests ();    
+    // --- End of Hardware Tests ---
 
     //Timer 1ms -- Wait_ms()
     TIM7_Init();
@@ -108,14 +105,11 @@ int main (void)
     //Signal timer -- 100us
     TIM5_Init();
 
-    // Test Functions for Hardware
-    // TF_Usart5();
-    // TF_Usart5_timer_antenna();
-    // TF_Pwm_Channels();
 
-    //Ajusto frecuencia del clock, debe prender el led Ton = 100ms T = 200ms
-    //de otra forma revisar el cristal elegido
-    //pruebo TIM5 100us step
+    // Verify Hardware Clock (Xtal frequency)
+    // LED1 Ton = 100ms Toff = 100ms T = 200ms
+    // otherwise change hardware xtal or select the correct one
+    // works with TIM5 at 100us
     for (unsigned char i = 0; i < 20; i++)
     {
         if (LED1)
@@ -124,13 +118,11 @@ int main (void)
             LED1_ON;
 
         while (session_warming_up_channel_1_stage_time != 0);
+        
         session_warming_up_channel_1_stage_time = 1000;	//100ms
-        // Wait_ms(100);
     }
 
-    //TODO: luego habilitar sin libST
-    //ADC1.
-    // ADC1_Init();
+    // ADC1 Config
     AdcConfig();
 
 #ifdef USE_ADC_SAMPLE_BY_SAMPLE
@@ -172,196 +164,6 @@ int main (void)
     PWM_CH4_TiempoSubida(DUTY_NONE);
     PWM_CH4_TiempoMantenimiento(DUTY_NONE);
     PWM_CH4_TiempoBajada(DUTY_100_PERCENT);
-
-
-    // while (1)
-    // {
-    //     session_ch_1.status = 1;
-    //     session_ch_2.status = 1;
-    //     session_ch_3.status = 1;
-    //     session_ch_4.status = 1;
-
-    //     Session_Current_Limit_control();
-    // }
-
-
-    //--- Test ADC Single conversion ----------------------------------//
-    // SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
-        
-    // while (1)
-    // {
-    //     UART_PC_Send("before convertion... ");
-    //     do {
-    //         dummy16 = ADC1->DR;
-    //     }
-    //     while (ADC1->SR & ADC_SR_EOC);
-
-    //     UART_PC_Send("no EOC\n");
-            
-    //     ConvertChannel(ADC_Channel_4);
-
-    //     while (!(ADC1->SR & ADC_SR_EOC));
-    //     sprintf(buffSendErr, "DR: %d dummy16: %d\n", (unsigned short) (ADC1->DR), dummy16);
-    //     UART_PC_Send(buffSendErr);            
-            
-    //     Wait_ms(1000);
-    // }
-    //--- End Test ADC Single conversion ----------------------------------//                    
-
-    //--- Test ADC Multiple conversion Scanning Mode ----------------------------------//
-    // SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
-
-    // SetChannelSamplePosition(ADC_Channel_4, 1);
-    // SetChannelSamplePosition(ADC_Channel_5, 2);
-    // SetChannelSamplePosition(ADC_Channel_6, 3);
-    // SetChannelSamplePosition(ADC_Channel_7, 4);
-    // SetChannelSamplePosition(ADC_Channel_14, 5);
-    // SetChannelSamplePosition(ADC_Channel_15, 6);
-
-    // SetChannelsQuantity(ADC_Channels_Qtty_6);
-    // // SetChannelsQuantity(ADC_Channels_Qtty_1);        
-
-    // ADC1->CR1 |= ADC_CR1_SCAN;    //convertir toda la secuencia de canales
-    // // ADC1->CR2 |= ADC_CR2_CONT;    //convertir en forma continua
-        
-    // //activo primera conversion por las dudas        
-    // if (ADC1->CR2 & ADC_CR2_ADON)
-    // {
-    //     UART_PC_Send("Adon is on\n");
-    //     //activo una primera conversion
-    //     ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    // }
-
-    // while (1)
-    // {
-    //     if (ADC1->SR & ADC_SR_EOC)
-    //     {
-    //         LED2_ON;
-    //         dummy16 = (unsigned short) ADC1->DR;
-    //         sprintf(buffSendErr, "last ch: %d\n", dummy16);
-    //         UART_PC_Send(buffSendErr);
-    //         Wait_ms(100);
-                
-    //         //reviso el bit
-    //         if (!(ADC1->SR & ADC_SR_EOC))
-    //         {
-    //             ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    //             LED2_OFF;
-    //         }
-    //     }
-    // }        
-    //--- End Test ADC Multiple conversion Scanning Mode ----------------------------------//
-
-    //--- Test ADC Multiple conversion Scanning Mode and DMA ------------------------------//
-    //-- DMA configuration.
-    // DMAConfig();
-    // DMA1_Channel1->CCR |= DMA_CCR1_EN;
-        
-    // SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
-
-    // SetChannelSamplePosition(ADC_Channel_4, 1);
-    // SetChannelSamplePosition(ADC_Channel_5, 2);
-    // SetChannelSamplePosition(ADC_Channel_6, 3);
-    // SetChannelSamplePosition(ADC_Channel_7, 4);
-    // SetChannelSamplePosition(ADC_Channel_14, 5);
-    // SetChannelSamplePosition(ADC_Channel_15, 6);
-
-    // SetChannelsQuantity(ADC_Channels_Qtty_6);
-
-    // ADC1->CR1 |= ADC_CR1_SCAN;    //convertir toda la secuencia de canales
-    // // ADC1->CR2 |= ADC_CR2_CONT;    //convertir en forma continua
-        
-    // //activo primera conversion por las dudas        
-    // if (ADC1->CR2 & ADC_CR2_ADON)
-    // {
-    //     UART_PC_Send("Adon is on\n");
-    //     //activo una primera conversion
-    //     ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    // }
-
-    // while (1)
-    // {
-    //     if (sequence_ready)
-    //     {
-    //         LED2_ON;
-    //         sprintf(buffSendErr, "IS1: %d, IS2: %d, IS3: %d, IS4: %d\n", IS1, IS2, IS3, IS4);
-    //         UART_PC_Send(buffSendErr);
-    //         Wait_ms(100);
-    //         sprintf(buffSendErr, "V200: %d, V40: %d\n", V200_Sense, V40_Sense);
-    //         UART_PC_Send(buffSendErr);            
-    //         Wait_ms(100);
-                
-    //         ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    //         LED2_OFF;
-    //         sequence_ready_reset;
-    //     }
-    // }
-    //--- End Test ADC Multiple conversion Scanning Mode and DMA --------------------------//        
-
-    //--- Test ADC Multiple conversion Scanning Continuous Mode and DMA -------------------//
-    // //-- DMA configuration.
-    // DMAConfig();
-    // DMA1_Channel1->CCR |= DMA_CCR1_EN;
-        
-    // SetChannelSampleTime(ADC_Channel_4, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_5, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_6, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_7, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_14, ADC_SampleTime_239_5Cycles);
-    // SetChannelSampleTime(ADC_Channel_15, ADC_SampleTime_239_5Cycles);
-
-    // SetChannelSamplePosition(ADC_Channel_4, 1);
-    // SetChannelSamplePosition(ADC_Channel_5, 2);
-    // SetChannelSamplePosition(ADC_Channel_6, 3);
-    // SetChannelSamplePosition(ADC_Channel_7, 4);
-    // SetChannelSamplePosition(ADC_Channel_14, 5);
-    // SetChannelSamplePosition(ADC_Channel_15, 6);
-
-    // SetChannelsQuantity(ADC_Channels_Qtty_6);
-
-    // ADC1->CR1 |= ADC_CR1_SCAN;    //convertir toda la secuencia de canales
-    // ADC1->CR2 |= ADC_CR2_CONT;    //convertir en forma continua
-        
-    // //activo primera conversion por las dudas        
-    // if (ADC1->CR2 & ADC_CR2_ADON)
-    // {
-    //     UART_PC_Send("Adon is on\n");
-    //     //activo una primera conversion
-    //     ADC1->CR2 |= ADC_CR2_SWSTART | ADC_CR2_EXTTRIG;
-    // }
-
-    // while (1)
-    // {
-    //     Wait_ms(1000);
-    //     sprintf(buffSendErr, "IS1: %d, IS2: %d, IS3: %d, IS4: %d\n", IS1, IS2, IS3, IS4);
-    //     UART_PC_Send(buffSendErr);
-    //     Wait_ms(1000);
-    //     sprintf(buffSendErr, "V200: %d, V40: %d\n", V200_Sense, V40_Sense);
-    //     UART_PC_Send(buffSendErr);            
-    // }
-    //--- End Test ADC Multiple conversion Scanning Continuous Mode and DMA ----------------//        
-        
-        
-    // while (1);
-    // PWM1_Init();
-    // PWM2_Init();
-    // PWM3_Init();
-    // PWM4_Init();
 
     //Initialize channels.
     Channel_1_Init();
@@ -450,6 +252,7 @@ int main (void)
 
     }
 }
+
 
 unsigned char in_treatment = 1;
 void CheckLEDs (void)

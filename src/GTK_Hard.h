@@ -19,7 +19,8 @@
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap y disipador color aluminio SIN BUZZER
-#define SOFTWARE_VERSION_1_4        //new graphics interface and first pulses for ants to detect disconnect
+#define SOFTWARE_VERSION_1_5        //posibility to always generate arranging the power
+// #define SOFTWARE_VERSION_1_4        //new graphics interface and first pulses for ants to detect disconnect
                                     // Rx with pullup for use with new rpihat
 // #define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
 // #define SOFTWARE_VERSION_1_2		//Agrega buzzer en la placa, la version 2.0 no lo tiene
@@ -35,7 +36,11 @@
 #define USE_BUZZER_ON_BOARD
 #endif
 
-#ifdef SOFTWARE_VERSION_1_4
+#ifdef SOFTWARE_VERSION_1_5
+#define REDUCE_POWER_TO_GENERATE_ALWAYS
+#endif
+
+#if (defined SOFTWARE_VERSION_1_4) || (defined SOFTWARE_VERSION_1_5)
 #define USE_FIRST_PULSES_TO_ANTENNA_EMISSION_DETECT
 #define USE_ADC_SAMPLE_BY_SAMPLE
 #define USE_DEVICE_ID_4BYTES
@@ -58,6 +63,9 @@
 #endif
 
 //--- Software ------------------//
+#ifdef SOFTWARE_VERSION_1_5
+#define SOFT "Software Version: 1.5\r\n"
+#endif
 #ifdef SOFTWARE_VERSION_1_4
 #define SOFT "Software Version: 1.4\r\n"
 #endif
@@ -218,18 +226,6 @@ enum bool
 #define ENA_CH4_OFF    (GPIOB->BSRR = 0x20000000)
 #endif
 
-
-#define RCC_ADC1_CLK    (RCC->APB2ENR & 0x00000200)
-#define RCC_ADC1_CLKEN    (RCC->APB2ENR |= 0x00000200)
-#define RCC_ADC1_CLKDIS    (RCC->APB2ENR &= ~0x00000200)
-
-#define RCC_ADC2_CLK    (RCC->APB2ENR & 0x00000400)
-#define RCC_ADC2_CLKEN    (RCC->APB2ENR |= 0x00000400)
-#define RCC_ADC2_CLKDIS    (RCC->APB2ENR &= ~0x00000400)
-
-#define RCC_ADC3_CLK    (RCC->APB2ENR & 0x00008000)
-#define RCC_ADC3_CLKEN    (RCC->APB2ENR |= 0x00008000)
-#define RCC_ADC3_CLKDIS    (RCC->APB2ENR &= ~0x00008000)
 
 typedef enum
 {

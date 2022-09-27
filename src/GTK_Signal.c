@@ -955,6 +955,63 @@ unsigned char Session_Channels_Fixed_Parameters (unsigned char channel, unsigned
 	return FIN_OK;
 }
 
+
+unsigned char Session_Channels_Parameters_Calculate_Generate_Always (
+    unsigned char channel,
+    unsigned char session_stage)
+{
+    session_typedef * p_session;
+    unsigned char i = 0;
+
+    // get session instance
+    if (channel == 1)
+        p_session = &session_ch_1;
+    else if (channel == 2)
+        p_session = &session_ch_2;
+    else if (channel == 3)
+        p_session = &session_ch_3;
+    else if (channel == 4)
+        p_session = &session_ch_4;
+    else
+        return FIN_ERROR;
+    
+    // get the setted power
+    unsigned char ini = p_session->stage_1_initial_power;
+    unsigned char fin = p_session->stage_1_final_power;
+    
+    // equal power to max
+    if (ini > fin)
+        fin = ini;
+    else if (ini < fin)
+        ini = fin;
+    
+    for (unsigned char power = ini; power > 10; power -= 10)
+    {
+        p_session->stage_1_initial_power = power;
+        p_session->stage_1_final_power = power;
+        
+        i = Session_Channels_Parameters_Calculate(1, WARMING_UP);
+
+        if (i == FIN_OK)
+        {
+            sprintf(buffSendErr, "ch%d sequence ended with power: %d\n",
+                    channel,
+                    power);
+            UART_PC_Send(buffSendErr);
+            break;
+        }
+
+        // if (i == FIN_ERROR)
+        // {
+        //     // printf("sequence ended with FIN_ERROR, reducing power\n");
+        // }
+    }
+
+    return i;
+    
+}
+
+
 unsigned char Session_Channels_Parameters_Calculate(unsigned char channel, unsigned char session_stage)
 {
 	//Antenna parameters.
@@ -1873,9 +1930,9 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
         break;
 
     case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE:
-
-        i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);	//retorna FIN_OK o FIN_ERROR rutina nueva 19-03-15
-//			i = Session_Channels_Fixed_Parameters(channel, WARMING_UP);
+#ifdef REDUCE_POWER_TO_GENERATE_ALWAYS
+        // Try to always generate the signal, reduce the power 27-09-2022
+        i = Session_Channels_Parameters_Calculate_Generate_Always (channel, WARMING_UP);
 
         if (i == FIN_OK)
         {
@@ -1889,6 +1946,24 @@ unsigned char Session_Warming_Up_Channels (unsigned char channel)
             Error_SetString(buffSendErr, ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(channel));
             UART_PC_Send(buffSendErr);
         }
+#else
+        //retorna FIN_OK o FIN_ERROR rutina nueva 19-03-15
+        i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);
+        // i = Session_Channels_Fixed_Parameters(channel, WARMING_UP);
+
+        if (i == FIN_OK)
+        {
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END;
+            SetBitGlobalErrors (channel, BIT_ERROR_PARAMS_FINISH);
+        }
+
+        else if (i == FIN_ERROR)
+        {
+            *p_session_state = SESSION_WARMING_UP_CHANNEL_END_ERROR;
+            Error_SetString(buffSendErr, ERR_CHANNEL_WARMING_UP_PARAMETERS_CALCULATE(channel));
+            UART_PC_Send(buffSendErr);
+        }        
+#endif    // REDUCE_POWER_TO_GENERATE_ALWAYS
         break;
 
     case SESSION_WARMING_UP_CHANNEL_PARAMETERS_CALCULATE_END:

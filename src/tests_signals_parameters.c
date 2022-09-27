@@ -19,10 +19,28 @@
 #include <math.h>
 
 
-// Module Types Constants and Macros -------------------------------------------
+// Module Private Types Constants and Macros -----------------------------------
+typedef enum {
+    FREQ_7_83_HZ,
+    FREQ_11_79_HZ,
+    FREQ_16_67_HZ,
+    FREQ_23_58_HZ,
+    FREQ_30_80_HZ,
+    FREQ_62_64_HZ
+    
+} freq_value_e;
+
+
+typedef enum {
+    SQUARE_SIGNAL,
+    TRIANGULAR_SIGNAL,
+    SINUSOIDAL_SIGNAL
+    
+} type_of_signal_e;
 
 
 // Externals -------------------------------------------------------------------
+extern warmingup_coolingdown_typedef table_warming_up_channel_1[];    //acceder a la tabla wup en ch1
 
 
 // Globals ---------------------------------------------------------------------
@@ -45,10 +63,18 @@ volatile unsigned int session_warming_up_channel_1_stage_time;
 volatile unsigned char take_current_samples;
 
 
+// Module Private Functions ----------------------------------------------------
+void TSP_Get_Signal_Times_From_Screen (type_of_signal_e signal, freq_value_e freq, session_typedef * psession);
+void TSP_Get_Signal_Times_From_Screen_Square (freq_value_e freq, session_typedef * psession);
+void TSP_Get_Signal_Times_From_Screen_Triangular (freq_value_e freq, session_typedef * psession);
+void TSP_Get_Signal_Times_From_Screen_Sinusoidal (freq_value_e freq, session_typedef * psession);
+void TSP_Show_Table_Parameters (warmingup_coolingdown_typedef * ptable);
+
 
 // Module Tester Functions -----------------------------------------------------
 void Tests_Parameters_Sequence (void);
 void Tests_Show_Parameters (void);
+void Tests_Always_Generate_Parameters_Calculate (void);
 
 void Tests_Local_Calc_Parameters (void);
 void CalcParamsForSignal (int show_parcial_results);
@@ -95,8 +121,9 @@ int main (int argc, char *argv[])
 {
     // Tests_Parameters_Sequence ();
     // Tests_Show_Parameters ();
+    Tests_Always_Generate_Parameters_Calculate ();
     // Tests_Local_Calc_Parameters ();
-    Tests_Compare_Parameters ();
+    // Tests_Compare_Parameters ();
 
     return 0;
 }
@@ -127,7 +154,6 @@ void Tests_Parameters_Sequence (void)
 }
 
 
-extern warmingup_coolingdown_typedef table_warming_up_channel_1[];
 void Tests_Show_Parameters (void)
 {
     printf("Showing Parameters Calculations...\n");
@@ -161,11 +187,7 @@ void Tests_Show_Parameters (void)
     session_ch_1.stage_1_final_power = 90;
     session_ch_1.stage_1_time_per_step = 0;
 
-    session_ch_1.stage_1_rising_time = 1;
-    session_ch_1.stage_1_maintenance_time = 61;
-    session_ch_1.stage_1_falling_time = 1;
-    session_ch_1.stage_1_low_time = 64;
-    
+    TSP_Get_Signal_Times_From_Screen(SQUARE_SIGNAL, FREQ_7_83_HZ, &session_ch_1);    
 
     unsigned char i = 0;
     unsigned char channel = 1;
@@ -178,51 +200,72 @@ void Tests_Show_Parameters (void)
         printf("sequence ended with FIN_ERROR\n");
     }
 
-    printf("\nRising first step 0\n");
-    printf("200_ini\t200_fin\t\t40_ini\t40_fin\t\tn_ini\tn_fin\tstep\n");
-    printf("%d\t%d\t\t%d\t%d\t\t%d\t%d\t%d\n",
-           table_warming_up_channel_1[0].rising_pwm_200_initial,
-           table_warming_up_channel_1[0].rising_pwm_200_final,
-           table_warming_up_channel_1[0].rising_pwm_40_initial,
-           table_warming_up_channel_1[0].rising_pwm_40_final,
-           table_warming_up_channel_1[0].rising_pwm_n_initial,
-           table_warming_up_channel_1[0].rising_pwm_n_final,
-           table_warming_up_channel_1[0].rising_step_number
-        );        
+    TSP_Show_Table_Parameters (&table_warming_up_channel_1[0]);
 
-    printf("\nMaintenance first step 0\n");
-    printf("200_pwm\t\t40_pwm\t\tn_pwm\tstep\n");
-    printf("%d\t\t%d\t\t%d\t%d\n",
-           table_warming_up_channel_1[0].maintenance_pwm_200,
-           table_warming_up_channel_1[0].maintenance_pwm_40,
-           table_warming_up_channel_1[0].maintenance_pwm_n,
-           table_warming_up_channel_1[0].maintenance_step_number
-        );        
-    
-    printf("\nFalling first step 0\n");
-    printf("200_ini\t200_fin\t\t40_ini\t40_fin\t\tn_ini\tn_fin\ttime\tstep\ttype\n");
-    printf("%d\t%d\t\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
-           table_warming_up_channel_1[0].falling_pwm_200_initial,
-           table_warming_up_channel_1[0].falling_pwm_200_final,
-           table_warming_up_channel_1[0].falling_pwm_40_initial,
-           table_warming_up_channel_1[0].falling_pwm_40_final,
-           table_warming_up_channel_1[0].falling_pwm_n_initial,
-           table_warming_up_channel_1[0].falling_pwm_n_final,
-           table_warming_up_channel_1[0].falling_time,
-           table_warming_up_channel_1[0].falling_step_number,
-           table_warming_up_channel_1[0].falling_type
-        );        
+}
 
-    printf("\nLow step 0\n");
-    printf("step\n");
-    printf("%d\n", table_warming_up_channel_1[0].low_step_number);
+
+void Tests_Always_Generate_Parameters_Calculate (void)
+{
+    printf("Parameters Calculations with Power Control...\n");
+
+    printf("Fixing antenna params...\n");
+    session_ch_1.ant_resistance_int = 10;
+    session_ch_1.ant_resistance_dec = 10;
+    session_ch_1.ant_inductance_int = 128;
+    session_ch_1.ant_inductance_dec = 0;
+    session_ch_1.ant_current_limit_int = 3;
+    session_ch_1.ant_current_limit_dec = 50;
+    session_ch_1.ant_temp_max_int = 65;
+    session_ch_1.ant_temp_max_dec = 0;
+
+    printf("Fixing stage params...\n");
+    session_ch_1.stage_1_time_hours = 1;
+    session_ch_1.stage_1_time_minutes = 0;
+    session_ch_1.stage_1_time_seconds = 0;
+
+    session_ch_1.stage_1_initial_power = 100;
+    session_ch_1.stage_1_final_power = 100;
+    session_ch_1.stage_1_time_per_step = 0;
+
+    TSP_Get_Signal_Times_From_Screen(SQUARE_SIGNAL, FREQ_62_64_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(TRIANGULAR_SIGNAL, FREQ_62_64_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_62_64_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_7_83_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_11_79_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_16_67_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_23_58_HZ, &session_ch_1);
+    // TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_30_80_HZ, &session_ch_1);
+
+    unsigned char i = 0;
+
+    // get the setted power
+    unsigned char ini = session_ch_1.stage_1_initial_power;
+    unsigned char fin = session_ch_1.stage_1_final_power;
+
+    i = Session_Channels_Parameters_Calculate_Generate_Always (1, WARMING_UP);
+
+    if (i == FIN_OK)
+    {
+        printf ("sequence ended ok with initial_power: %d final_power: %d\n",
+                session_ch_1.stage_1_initial_power,
+                session_ch_1.stage_1_final_power);
+    }
+
+    TSP_Show_Table_Parameters (&table_warming_up_channel_1[0]);    
+
+    printf ("Test result: ");
+    if (i == FIN_OK)
+        PrintOK();
+    else
+        PrintERR ();
 
 }
 
 
 
 
-// Mocked for module compilation
+// Mocked Functions for module compilation -------------------------------------
 void Update_TIM1_CH1 (unsigned short a)
 {
 }
@@ -365,6 +408,7 @@ void AntennaGetParamsStruct (unsigned char ch, antenna_typedef *ant)
     }        
     
 }
+// End of Module Mocked Functions for module compilation -----------------------
 
 
 warmingup_coolingdown_typedef pwm_outputs;
@@ -374,12 +418,12 @@ void Tests_Local_Calc_Parameters (void)
 
     printf("Fixing antenna params...\n");
 // const char s_antena [] = { "ant0,012.27,087.90,001.80,065.00\r\n" };            
-    session_ch_1.ant_resistance_int = 24;
-    session_ch_1.ant_resistance_dec = 0;
-    session_ch_1.ant_inductance_int = 141;
+    session_ch_1.ant_resistance_int = 10;
+    session_ch_1.ant_resistance_dec = 1;
+    session_ch_1.ant_inductance_int = 128;
     session_ch_1.ant_inductance_dec = 0;
-    session_ch_1.ant_current_limit_int = 1;
-    session_ch_1.ant_current_limit_dec = 80;
+    session_ch_1.ant_current_limit_int = 3;
+    session_ch_1.ant_current_limit_dec = 50;
     session_ch_1.ant_temp_max_int = 65;
     session_ch_1.ant_temp_max_dec = 0;
 
@@ -388,15 +432,12 @@ void Tests_Local_Calc_Parameters (void)
     session_ch_1.stage_1_time_minutes = 0;
     session_ch_1.stage_1_time_seconds = 0;
 
-    session_ch_1.stage_1_initial_power = 90;
-    session_ch_1.stage_1_final_power = 90;
+    session_ch_1.stage_1_initial_power = 100;
+    session_ch_1.stage_1_final_power = 100;
     session_ch_1.stage_1_time_per_step = 0;
 
-    session_ch_1.stage_1_rising_time = 1;
-    session_ch_1.stage_1_maintenance_time = 61;
-    session_ch_1.stage_1_falling_time = 1;
-    session_ch_1.stage_1_low_time = 64;
-
+    TSP_Get_Signal_Times_From_Screen(SINUSOIDAL_SIGNAL, FREQ_30_80_HZ, &session_ch_1);
+    
     CalcParamsForSignal (1);
     
 }
@@ -428,23 +469,7 @@ void Tests_Compare_Parameters (void)
     session_ch_1.stage_1_time_per_step = 0;
 
     // times for square signal 7.83Hz
-    session_ch_1.stage_1_rising_time = 1;
-    session_ch_1.stage_1_maintenance_time = 61;
-    session_ch_1.stage_1_falling_time = 1;
-    session_ch_1.stage_1_low_time = 64;
-    
-    // times for triangular signal 7.83Hz
-    // session_ch_1.stage_1_rising_time = 61;
-    // session_ch_1.stage_1_maintenance_time = 1;
-    // session_ch_1.stage_1_falling_time = 1;
-    // session_ch_1.stage_1_low_time = 64;
-
-    // times for sinusoidal signal 7.83Hz
-    // session_ch_1.stage_1_rising_time = 21;
-    // session_ch_1.stage_1_maintenance_time = 21;
-    // session_ch_1.stage_1_falling_time = 21;
-    // session_ch_1.stage_1_low_time = 64;
-    
+    TSP_Get_Signal_Times_From_Screen (SQUARE_SIGNAL, FREQ_7_83_HZ, &session_ch_1);
 
     unsigned char i = 0;
     unsigned char channel = 1;
@@ -650,9 +675,7 @@ void CalcParamsForSignal (int show_parcial_results)
     inductance = (ant.inductance_int + ant.inductance_dec / 100.0) / 1000.0;
     current = ant.current_limit_int + ant.current_limit_dec / 100.0;
     power = session_ch_1.stage_1_initial_power;
-    // resistance = ant.resistance_int + ant.resistance_dec / 10.0;
-    // inductance = (ant.inductance_int + ant.inductance_dec / 10.0) / 1000.0;
-    // current = ant.current_limit_int + ant.current_limit_dec / 10.0;
+
     if (show_parcial_results)
     {
         printf("float params  R: %f ohms  L: %f Hy  I:%f A\n",
@@ -664,7 +687,9 @@ void CalcParamsForSignal (int show_parcial_results)
 
     // Power adjustment
     current = current * power / 100.0;
-    printf("local current: %f\n", current);
+
+    if (show_parcial_results)
+        printf("local current: %f\n", current);
 
     // Rising calcs
     voltage = (current * inductance * 1000.0) / session_ch_1.stage_1_rising_time;    //rising in ms
@@ -948,6 +973,234 @@ int Compare_Two_Params_With_Tolerance (unsigned short param1,
 
     return answer;
 }
+
+
+void TSP_Get_Signal_Times_From_Screen (type_of_signal_e signal, freq_value_e freq, session_typedef * psession)
+{
+    switch (signal)
+    {
+    case SQUARE_SIGNAL:
+        TSP_Get_Signal_Times_From_Screen_Square (freq, psession);
+        break;
+
+    case TRIANGULAR_SIGNAL:
+        TSP_Get_Signal_Times_From_Screen_Triangular (freq, psession);        
+        break;
+
+    case SINUSOIDAL_SIGNAL:
+        TSP_Get_Signal_Times_From_Screen_Sinusoidal (freq, psession);
+        break;
+
+    default:
+        printf("ERROR on signal select - Get_Signal_Timer_From_Screen -\n");
+        break;
+    }
+}
+
+
+void TSP_Get_Signal_Times_From_Screen_Square (freq_value_e freq, session_typedef * psession)
+{
+    switch (freq)
+    {
+    case FREQ_7_83_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 61;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 64;            
+        break;
+
+    case FREQ_11_79_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 40;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 43;
+        break;
+
+    case FREQ_16_67_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 28;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 30;
+        break;
+
+    case FREQ_23_58_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 19;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 21;
+        break;
+
+    case FREQ_30_80_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 14;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 16;
+        break;
+
+    case FREQ_62_64_HZ:
+        psession->stage_1_rising_time = 1;
+        psession->stage_1_maintenance_time = 6;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 8;
+        break;
+    
+    default:
+        printf("ERROR on frequency select - Get_Signal_Timer_From_Screen_Square -\n");
+        break;
+    }
+}
+
+
+void TSP_Get_Signal_Times_From_Screen_Triangular (freq_value_e freq, session_typedef * psession)
+{
+    switch (freq)
+    {
+    case FREQ_7_83_HZ:
+        psession->stage_1_rising_time = 61;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 64;            
+        break;
+
+    case FREQ_11_79_HZ:
+        psession->stage_1_rising_time = 40;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 43;
+        break;
+
+    case FREQ_16_67_HZ:
+        psession->stage_1_rising_time = 28;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 30;
+        break;
+
+    case FREQ_23_58_HZ:
+        psession->stage_1_rising_time = 19;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 21;
+        break;
+
+    case FREQ_30_80_HZ:
+        psession->stage_1_rising_time = 14;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 16;
+        break;
+
+    case FREQ_62_64_HZ:
+        psession->stage_1_rising_time = 6;
+        psession->stage_1_maintenance_time = 1;
+        psession->stage_1_falling_time = 1;
+        psession->stage_1_low_time = 8;
+        break;
+
+    default:
+        printf("ERROR on frequency select - Get_Signal_Timer_From_Screen_Triangular -\n");
+        break;
+    }
+    
+}
+
+
+void TSP_Get_Signal_Times_From_Screen_Sinusoidal (freq_value_e freq, session_typedef * psession)
+{
+    switch (freq)
+    {
+    case FREQ_7_83_HZ:
+        psession->stage_1_rising_time = 21;
+        psession->stage_1_maintenance_time = 21;
+        psession->stage_1_falling_time = 21;
+        psession->stage_1_low_time = 64;
+        break;
+
+    case FREQ_11_79_HZ:
+        psession->stage_1_rising_time = 14;
+        psession->stage_1_maintenance_time = 14;
+        psession->stage_1_falling_time = 14;
+        psession->stage_1_low_time = 43;
+        break;
+
+    case FREQ_16_67_HZ:
+        psession->stage_1_rising_time = 10;
+        psession->stage_1_maintenance_time = 10;
+        psession->stage_1_falling_time = 10;
+        psession->stage_1_low_time = 30;
+        break;
+
+    case FREQ_23_58_HZ:
+        psession->stage_1_rising_time = 7;
+        psession->stage_1_maintenance_time = 7;
+        psession->stage_1_falling_time = 7;
+        psession->stage_1_low_time = 21;
+        break;
+
+    case FREQ_30_80_HZ:
+        psession->stage_1_rising_time = 5;
+        psession->stage_1_maintenance_time = 6;
+        psession->stage_1_falling_time = 5;
+        psession->stage_1_low_time = 16;
+        break;
+
+    case FREQ_62_64_HZ:
+        psession->stage_1_rising_time = 3;
+        psession->stage_1_maintenance_time = 2;
+        psession->stage_1_falling_time = 3;
+        psession->stage_1_low_time = 8;
+        break;
+
+    default:
+        printf("ERROR on frequency select - Get_Signal_Timer_From_Screen_Sinusoidal -\n");
+        break;
+    }
+    
+}
+
+
+void TSP_Show_Table_Parameters (warmingup_coolingdown_typedef * ptable)
+{
+    printf("\nRising first step 0\n");
+    printf("200_ini\t200_fin\t\t40_ini\t40_fin\t\tn_ini\tn_fin\tstep\n");
+    printf("%d\t%d\t\t%d\t%d\t\t%d\t%d\t%d\n",
+           ptable->rising_pwm_200_initial,
+           ptable->rising_pwm_200_final,
+           ptable->rising_pwm_40_initial,
+           ptable->rising_pwm_40_final,
+           ptable->rising_pwm_n_initial,
+           ptable->rising_pwm_n_final,
+           ptable->rising_step_number
+        );        
+
+    printf("\nMaintenance first step 0\n");
+    printf("200_pwm\t\t40_pwm\t\tn_pwm\tstep\n");
+    printf("%d\t\t%d\t\t%d\t%d\n",
+           ptable->maintenance_pwm_200,
+           ptable->maintenance_pwm_40,
+           ptable->maintenance_pwm_n,
+           ptable->maintenance_step_number
+        );        
+    
+    printf("\nFalling first step 0\n");
+    printf("200_ini\t200_fin\t\t40_ini\t40_fin\t\tn_ini\tn_fin\ttime\tstep\ttype\n");
+    printf("%d\t%d\t\t%d\t%d\t\t%d\t%d\t%d\t%d\t%d\n",
+           ptable->falling_pwm_200_initial,
+           ptable->falling_pwm_200_final,
+           ptable->falling_pwm_40_initial,
+           ptable->falling_pwm_40_final,
+           ptable->falling_pwm_n_initial,
+           ptable->falling_pwm_n_final,
+           ptable->falling_time,
+           ptable->falling_step_number,
+           ptable->falling_type
+        );        
+
+    printf("\nLow step 0\n");
+    printf("step\n");
+    printf("%d\n", ptable->low_step_number);
+}
+
 //--- end of file ---//
 
 

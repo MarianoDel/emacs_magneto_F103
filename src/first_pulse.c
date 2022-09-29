@@ -272,8 +272,10 @@ unsigned char FirstPulseCheck (unsigned char ch)
             {
                 *p_current_flag = 0;
 
+                // current threshold getted, reset PWM and wait for 1 Tau
                 if (*p_current > *p_current_threshold)
                 {
+                    FP_Reset_PWM_CH (ch);
                     *p_pulse_time_end = *p_pulse_time_end / 5;
                     *p_pulse_time = 0;
                     *p_state = FP_TAU_ENDING;
@@ -292,7 +294,6 @@ unsigned char FirstPulseCheck (unsigned char ch)
     case FP_TAU_ENDING:
         if (*p_pulse_time > *p_pulse_time_end)
         {
-            FP_Reset_PWM_CH (ch);
             *p_state = FP_INIT;
             answer = FIN_OK;
         }

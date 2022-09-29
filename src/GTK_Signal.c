@@ -990,7 +990,7 @@ unsigned char Session_Channels_Parameters_Calculate_Generate_Always (
         p_session->stage_1_initial_power = power;
         p_session->stage_1_final_power = power;
         
-        i = Session_Channels_Parameters_Calculate(1, WARMING_UP);
+        i = Session_Channels_Parameters_Calculate(channel, WARMING_UP);
 
         if (i == FIN_OK)
         {

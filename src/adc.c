@@ -89,7 +89,7 @@ void AdcConfig (void)
     ADC1->SQR3 |= ADC_SQR3_SQ2_2 | ADC_SQR3_SQ2_0;    //Channel 5
     ADC1->SQR3 |= ADC_SQR3_SQ3_2 | ADC_SQR3_SQ3_1;    //Channel 6
     ADC1->SQR3 |= ADC_SQR3_SQ4_2 | ADC_SQR3_SQ4_1 | ADC_SQR3_SQ4_0;    //Channel 7
-    ADC1->SQR3 |= ADC_SQR3_SQ5_3 | ADC_SQR3_SQ5_3 | ADC_SQR3_SQ5_1;    //Channel 14
+    ADC1->SQR3 |= ADC_SQR3_SQ5_3 | ADC_SQR3_SQ5_2 | ADC_SQR3_SQ5_1;    //Channel 14
     ADC1->SQR3 |= ADC_SQR3_SQ6_3 | ADC_SQR3_SQ6_2 | ADC_SQR3_SQ6_1 | ADC_SQR3_SQ6_0;    //Channel 15   
 
     //set the quantity of channels to convert

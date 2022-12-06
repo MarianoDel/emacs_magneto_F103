@@ -220,6 +220,7 @@ void UART1_Receive (void)
             else
                 UART_PC_Send((char *)"ERROR\r\n");
         }
+
         //example. signal,100,100,0000,0003,0003,0003,0006,0000,0000,1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"signal,", (sizeof("signal,") - 1)))
         {

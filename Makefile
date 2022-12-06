@@ -196,13 +196,27 @@ clean:
 	rm -f $(FULL_PRJ).map
 	rm -f $(FULL_PRJ).hex
 	rm -f $(FULL_PRJ).bin
-#	rm $(SRC:.c=.c.bak)
 	rm -f $(SRC:.c=.lst)
-#   rm $(ASRC:.s=.s.bak)
 	rm -f $(ASRC:.s=.lst)
 	rm -f *.o
 	rm -f *.out
+	rm -f *.gcov
+	rm -f *.gcda
+	rm -f *.gcno
 
+
+
+tests_comms_str:
+	# first module objects to test
+	gcc -c --coverage src/comms.c -I. $(INCDIR) $(DDEFS)
+	gcc -c src/utils.c -I. $(INCDIR) $(DDEFS)
+	# second auxiliary helper modules
+	gcc -c src/tests_ok.c -I $(INCDIR)
+	gcc --coverage src/tests_comms_str.c comms.o utils.o tests_ok.o -I $(INCDIR) $(DDEFS)
+	# test execution
+	./a.out
+	# process coverage
+	gcov comms.c -m
 
 
 tests_comms_channels:

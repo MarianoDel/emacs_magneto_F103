@@ -11,4 +11,9 @@
 GPATH
 GRTAGS
 GTAGS
+*.pdf
+*.txt
+*.gcov
+*.gcda
+*.gcno
 

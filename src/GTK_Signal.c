@@ -683,7 +683,7 @@ void Session_Channel_1 (void)
 
                     UART_PC_Send("End_Cooling_Down,1\r\n");
                     UART_PC_Send("finish,1\r\n");
-#ifdef USE_BUZZER_ON_BOARD
+#if (defined USE_BUZZER_ON_BOARD) && (defined USE_BUZZER_ON_END_OF_TREATMENT)
                     BuzzerCommands(BUZZER_MULTIPLE_SHORT, 3);
 #endif
                 }

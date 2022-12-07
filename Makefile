@@ -255,6 +255,20 @@ tests_signals_parameters:
 	gcc src/tests_signals_parameters.c GTK_Signal.o tests_ok.o -lm
 	./a.out
 
+
+tests_signals_shuffle:
+	# first compile common modules (modules to test and dependencies)
+	gcc -c --coverage src/GTK_Signal.c -I. $(INCDIR) $(DDEFS)
+	# second auxiliary helper modules
+	gcc -c src/tests_ok.c -I $(INCDIR)
+	gcc --coverage src/tests_signals_shuffle.c GTK_Signal.o tests_ok.o -lm
+	# test execution
+	./a.out
+	# process coverage
+	gcov GTK_Signal.c -m
+
+
+
 tests_first_pulse:
 	# first compile common modules (modules to test and dependencies)
 	gcc -c src/first_pulse.c -I. $(INCDIR)

@@ -100,8 +100,8 @@ int main (int argc, char *argv[])
         PrintERR ();
 
     // test for signal
-    // square 100Hz
-    Usart1FillRxBuffer ("signal,100,100,0000,0001,0003,0001,0005,0000,0000,1\r\n");
+    // square 83.33Hz o 86.22Hz
+    Usart1FillRxBuffer ("signal,100,100,0000,0001,0004,0001,0006,0000,0000,1\r\n");
     UART1_Receive ();
 
     printf("\nTesting signal string: ");
@@ -110,8 +110,8 @@ int main (int argc, char *argv[])
     else
         PrintERR ();
 
-    // triangular 100Hz
-    Usart1FillRxBuffer ("signal,100,100,0000,0003,0001,0001,0005,0000,0000,1\r\n");
+    // triangular 83.33Hz o 86.22Hz
+    Usart1FillRxBuffer ("signal,100,100,0000,0004,0001,0001,0006,0000,0000,1\r\n");
     UART1_Receive ();
 
     printf("\nTesting signal string: ");
@@ -120,8 +120,8 @@ int main (int argc, char *argv[])
     else
         PrintERR ();
 
-    // sinusoidal 100Hz
-    Usart1FillRxBuffer ("signal,100,100,0000,0002,0001,0002,0005,0000,0000,1\r\n");
+    // sinusoidal 83.33Hz o 86.22Hz
+    Usart1FillRxBuffer ("signal,100,100,0000,0002,0002,0002,0006,0000,0000,1\r\n");
     UART1_Receive ();
 
     printf("\nTesting signal string: ");

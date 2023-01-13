@@ -19,7 +19,8 @@
 //--- Hardware ------------------//
 #define HARDWARE_VERSION_2_1
 // #define HARDWARE_VERSION_2_0    //placas viejas con wire-rap y disipador color aluminio SIN BUZZER
-#define SOFTWARE_VERSION_1_5        //posibility to always generate arranging the power
+#define SOFTWARE_VERSION_2_0        //no buzzer on end of treat, 10% min power fixed
+// #define SOFTWARE_VERSION_1_5        //posibility to always generate arranging the power
 // #define SOFTWARE_VERSION_1_4        //new graphics interface and first pulses for ants to detect disconnect
                                     // Rx with pullup for use with new rpihat
 // #define SOFTWARE_VERSION_1_3        //funciona con la nueva interface grafica
@@ -75,6 +76,9 @@
 #endif
 
 //--- Software ------------------//
+#ifdef SOFTWARE_VERSION_2_0
+#define SOFT "Software Version: 2.0\r\n"
+#endif
 #ifdef SOFTWARE_VERSION_1_5
 #define SOFT "Software Version: 1.5\r\n"
 #endif

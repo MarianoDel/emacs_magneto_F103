@@ -224,32 +224,75 @@ void UART1_Receive (void)
         //example. signal,100,100,0000,0003,0003,0003,0006,0000,0000,1
         else if (!strncmp((const char *)&localbuff[0], (const char *)"signal,", (sizeof("signal,") - 1)))
         {
-            //"signal,%03d,%03d,0%x%x%d,%04d,%04d,%04d,%04d,%04d,%04d,1\r\n"
-            if (((localbuff[50] - 48) > 0) && ((localbuff[50] - 48) < 4) && (localbuff[49] == ','))
+            // check the comma separated fields
+            if ((*(localbuff + 10) != ',') ||
+                (*(localbuff + 14) != ',') ||
+                (*(localbuff + 19) != ',') ||
+                (*(localbuff + 24) != ',') ||
+                (*(localbuff + 29) != ',') ||
+                (*(localbuff + 34) != ',') ||
+                (*(localbuff + 39) != ',') ||
+                (*(localbuff + 44) != ',') ||
+                (*(localbuff + 49) != ','))
             {
-                signal.initial_power = 		(localbuff[7] - 48) * 100 + (localbuff[8] - 48) * 10 + (localbuff[9] - 48);
-                signal.final_power = 		(localbuff[11] - 48) * 100 + (localbuff[12] - 48) * 10 + (localbuff[13] - 48);
-                signal.sync_on =  			(localbuff[18] - 48);
-                //signal.step_number = 		(localbuff[15] - 48) * 1000 + (localbuff[16] - 48) * 100 + (localbuff[17] - 48) * 10 + (localbuff[18] - 48);
-                signal.rising_time = 		(localbuff[20] - 48) * 1000 + (localbuff[21] - 48) * 100 + (localbuff[22] - 48) * 10 + (localbuff[23] - 48);
-                signal.maintenance_time = 	(localbuff[25] - 48) * 1000 + (localbuff[26] - 48) * 100 + (localbuff[27] - 48) * 10 + (localbuff[28] - 48);
-                signal.falling_time = 		(localbuff[30] - 48) * 1000 + (localbuff[31] - 48) * 100 + (localbuff[32] - 48) * 10 + (localbuff[33] - 48);
-                signal.low_time = 			(localbuff[35] - 48) * 1000 + (localbuff[36] - 48) * 100 + (localbuff[37] - 48) * 10 + (localbuff[38] - 48);
-                signal.burst_mode_on = 		(localbuff[40] - 48) * 1000 + (localbuff[41] - 48) * 100 + (localbuff[42] - 48) * 10 + (localbuff[43] - 48);
-                signal.burst_mode_off = 	(localbuff[45] - 48) * 1000 + (localbuff[46] - 48) * 100 + (localbuff[47] - 48) * 10 + (localbuff[48] - 48);
-                Session_Set_Signal (&session_slot_aux, (localbuff[50] - 48), &signal);
+                UART_PC_Send((char *)"ERROR\r\n");
+                return;
+            }
+                
+            // check the stage (1 to 3 WM_UP MAINT CL_DW)
+            if (((*(localbuff + 50) - '0') < 1) ||
+                ((*(localbuff + 50) - '0') > 3))
+            {
+                UART_PC_Send((char *)"ERROR\r\n");
+                return;
+            }
+        
+            signal.initial_power = (localbuff[7] - 48) * 100 + (localbuff[8] - 48) * 10 + (localbuff[9] - 48);
+            signal.final_power = (localbuff[11] - 48) * 100 + (localbuff[12] - 48) * 10 + (localbuff[13] - 48);
+            signal.sync_on = (localbuff[18] - 48);
+
+            signal.rising_time = (localbuff[20] - 48) * 1000 +
+                (localbuff[21] - 48) * 100 +
+                (localbuff[22] - 48) * 10 +
+                (localbuff[23] - 48);
+            
+            signal.maintenance_time = (localbuff[25] - 48) * 1000 +
+                (localbuff[26] - 48) * 100 +
+                (localbuff[27] - 48) * 10 +
+                (localbuff[28] - 48);
+            
+            signal.falling_time = (localbuff[30] - 48) * 1000 +
+                (localbuff[31] - 48) * 100 +
+                (localbuff[32] - 48) * 10 +
+                (localbuff[33] - 48);
+            
+            signal.low_time = (localbuff[35] - 48) * 1000 +
+                (localbuff[36] - 48) * 100 +
+                (localbuff[37] - 48) * 10 +
+                (localbuff[38] - 48);
+            
+            signal.burst_mode_on = (localbuff[40] - 48) * 1000 +
+                (localbuff[41] - 48) * 100 +
+                (localbuff[42] - 48) * 10 +
+                (localbuff[43] - 48);
+            
+            signal.burst_mode_off = (localbuff[45] - 48) * 1000 +
+                (localbuff[46] - 48) * 100 +
+                (localbuff[47] - 48) * 10 +
+                (localbuff[48] - 48);
 
 #ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
-                Session_Set_Signal (&session_ch_1, (localbuff[50] - 48), &signal);
-                Session_Set_Signal (&session_ch_2, (localbuff[50] - 48), &signal);
-                Session_Set_Signal (&session_ch_3, (localbuff[50] - 48), &signal);
-                Session_Set_Signal (&session_ch_4, (localbuff[50] - 48), &signal);
-#endif
-                
-                UART_PC_Send((char *)"OK\r\n");
-            }
-            else
-                UART_PC_Send((char *)"ERROR\r\n");
+            // save directly on sessions memory (not requiring load command)
+            Session_Set_Signal (&session_ch_1, (localbuff[50] - 48), &signal);
+            Session_Set_Signal (&session_ch_2, (localbuff[50] - 48), &signal);
+            Session_Set_Signal (&session_ch_3, (localbuff[50] - 48), &signal);
+            Session_Set_Signal (&session_ch_4, (localbuff[50] - 48), &signal);
+#else
+            // save config to auxiliary slot (require a load command before start to gen)
+            Session_Set_Signal (&session_slot_aux, (localbuff[50] - 48), &signal);
+#endif                
+
+            UART_PC_Send((char *)"OK\r\n");
 
         }
         //example.	duration,00,10,00,1
@@ -308,13 +351,15 @@ void UART1_Receive (void)
 
             if (((localbuff[15] - 48) == 0) || ((localbuff[15] - 48) == 1))
             {
-
-                Session_Set_Status (&session_slot_aux, (localbuff[17] - 48),(localbuff[15] - 48));
 #ifdef USE_CURRENT_SLOT_WITHOUT_LOAD_CMD
+                // save directly on sessions memory (not requiring load command)
                 Session_Set_Status (&session_ch_1, (localbuff[17] - 48), (localbuff[15] - 48));
                 Session_Set_Status (&session_ch_2, (localbuff[17] - 48), (localbuff[15] - 48));
                 Session_Set_Status (&session_ch_3, (localbuff[17] - 48), (localbuff[15] - 48));
                 Session_Set_Status (&session_ch_4, (localbuff[17] - 48), (localbuff[15] - 48));
+#else
+                // save config to auxiliary slot (require a load command before start to gen)
+                Session_Set_Status (&session_slot_aux, (localbuff[17] - 48),(localbuff[15] - 48));
 #endif
                 UART_PC_Send((char *)"OK\r\n");
             }

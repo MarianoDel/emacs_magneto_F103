@@ -979,13 +979,13 @@ unsigned char Session_Channels_Parameters_Calculate_Generate_Always (
     unsigned char ini = p_session->stage_1_initial_power;
     unsigned char fin = p_session->stage_1_final_power;
     
-    // equal power to max
+    // equal power to the max of the two
     if (ini > fin)
         fin = ini;
     else if (ini < fin)
         ini = fin;
     
-    for (unsigned char power = ini; power > 10; power -= 10)
+    for (unsigned char power = ini; power >= 10; power -= 10)
     {
         p_session->stage_1_initial_power = power;
         p_session->stage_1_final_power = power;
